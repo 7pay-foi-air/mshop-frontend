@@ -99,7 +99,7 @@ fun RegistrationPage(){
         /*UnderLabelPasswordField(caption = "Default lozinka", value = password, onValueChange = { password = it }, placeholder = "")
         Spacer(modifier = Modifier.height(16.dp)) */
 
-        Row(
+        /*Row(
             modifier = Modifier.padding(top = 8.dp),
             verticalAlignment = Alignment.CenterVertically
             ) {
@@ -111,7 +111,7 @@ fun RegistrationPage(){
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp)) */
 
         StyledButton(
             label = "Registriraj se",
