@@ -1,5 +1,7 @@
 package hr.foi.air.mshop.navigation.components
 
+import android.R.attr.text
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.ui.components.NextArrow
@@ -25,26 +28,27 @@ import hr.foi.air.mshop.ui.components.StyledButton
 import hr.foi.air.mshop.ui.components.UnderLabelTextField
 
 @Composable
-fun LoginUsername(
-    onNext: () -> Unit = {}
-){
-    var username by remember {
+fun LoginPassword(
+    onNext: () -> Unit = {},
+    onForgotPassword: () -> Unit = {}
+) {
+    var password by remember {
         mutableStateOf("")
     }
 
-    Column (
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier
-            .height(24.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             text = "mShop",
             style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold),
+                fontWeight = FontWeight.Bold
+            ),
             modifier = Modifier
                 .padding(top = 16.dp, bottom = 16.dp)
         )
@@ -52,9 +56,9 @@ fun LoginUsername(
         Text(
             text = "Prijava",
             style = MaterialTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.Bold),
-            modifier = Modifier
-                .padding(bottom = 32.dp)
+                fontWeight = FontWeight.Bold
+            ),
+            modifier = Modifier.padding(bottom = 32.dp)
         )
 
         Column(
@@ -65,36 +69,32 @@ fun LoginUsername(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Predstavite nam se",
+                text = "Unesite lozinku",
                 style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold),
-                modifier = Modifier
-                    .padding(bottom = 32.dp)
-            )
-
-            Text(
-                text = "Unesite Vaše korisničko ime",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .padding(bottom = 32.dp)
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier.padding(bottom = 32.dp)
             )
 
             UnderLabelTextField(
-                caption = "Korisničko ime",
-                value = username,
-                onValueChange = { username = it },
+                caption = "Lozinka",
+                value = password,
+                onValueChange = { password = it },
                 placeholder = ""
             )
-        }
 
-        StyledButton(
-            label = "Registrirajte organizaciju",
-            onClick = {
-                // to do
-            },
-            modifier = Modifier
-                .padding(bottom = 16.dp)
-        )
+            Text(
+                text = "Zaboravili ste lozinku?",
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .clickable { onForgotPassword() },
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                    textDecoration = TextDecoration.Underline
+                ),
+                textAlign = TextAlign.Center,
+            )
+        }
 
         NextArrow(
             modifier = Modifier
@@ -108,6 +108,6 @@ fun LoginUsername(
 
 @Preview(showBackground = true)
 @Composable
-fun LoginUsernamePreview(){
-    LoginUsername()
+fun LoginPasswordPreview(){
+    LoginPassword()
 }
