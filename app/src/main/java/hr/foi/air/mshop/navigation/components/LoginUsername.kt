@@ -16,16 +16,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import hr.foi.air.mshop.ui.components.NextArrow
 import hr.foi.air.mshop.ui.components.StyledButton
 import hr.foi.air.mshop.ui.components.UnderLabelTextField
 
 @Composable
 fun LoginUsername(
+    navController: NavController,
     onNext: () -> Unit = {}
 ){
     var username by remember {
@@ -90,7 +93,7 @@ fun LoginUsername(
         StyledButton(
             label = "Registrirajte organizaciju",
             onClick = {
-                // to do
+                navController.navigate("regOrg")
             },
             modifier = Modifier
                 .padding(bottom = 16.dp)
@@ -109,5 +112,5 @@ fun LoginUsername(
 @Preview(showBackground = true)
 @Composable
 fun LoginUsernamePreview(){
-    LoginUsername()
+    LoginUsername(navController = NavController(LocalContext.current))
 }

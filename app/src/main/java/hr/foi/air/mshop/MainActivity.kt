@@ -19,6 +19,8 @@ import hr.foi.air.mshop.navigation.components.RegistrationPage
 import hr.foi.air.mshop.ui.theme.MShopTheme
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import hr.foi.air.mshop.navigation.components.LoginPassword
+import hr.foi.air.mshop.navigation.components.LoginUsername
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +36,7 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = "regOrg"
+                        startDestination = "logUsername"
                     ){
                         composable("regOrg") {
                             RegistrationOrganizationPage(
@@ -43,6 +45,15 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("regAdmin") {
                             RegistrationPage()
+                        }
+                        composable("logUsername") {
+                            LoginUsername(
+                                navController,
+                                onNext = {navController.navigate("logPassword")}
+                            )
+                        }
+                        composable("logPassword") {
+                            LoginPassword()
                         }
                     }
                 }
