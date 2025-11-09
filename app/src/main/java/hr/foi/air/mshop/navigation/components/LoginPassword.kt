@@ -1,6 +1,5 @@
 package hr.foi.air.mshop.navigation.components
 
-import android.R.attr.text
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,8 +24,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.components.DialogMessage
 import hr.foi.air.mshop.ui.components.NextArrow
-import hr.foi.air.mshop.ui.components.StyledButton
 import hr.foi.air.mshop.ui.components.UnderLabelTextField
 
 @Composable
@@ -38,6 +37,7 @@ fun LoginPassword(
         mutableStateOf("")
     }
     val context = LocalContext.current
+    var showForgottenPasswordDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -90,7 +90,7 @@ fun LoginPassword(
                 text = "Zaboravili ste lozinku?",
                 modifier = Modifier
                     .padding(top = 16.dp)
-                    .clickable { onForgotPassword() },
+                    .clickable { showForgottenPasswordDialog = true },
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.primary,
                     textDecoration = TextDecoration.Underline
@@ -117,6 +117,18 @@ fun LoginPassword(
             }
         )
     }
+    DialogMessage(
+        visible = showForgottenPasswordDialog,
+        title = "Zaboravili ste lozinku?",
+        message = "Bez brige! Za oporavak Vam je potreban samo kod za oporavak!",
+        confirmText = "Nastavi",
+        dismissText = "Otkaži",
+        onConfirm = {
+            showForgottenPasswordDialog = false
+            onForgotPassword()
+        },
+        onDismiss = { showForgottenPasswordDialog = false }
+    )
 }
 
 @Preview(showBackground = true)
