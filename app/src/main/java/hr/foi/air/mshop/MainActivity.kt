@@ -19,6 +19,7 @@ import hr.foi.air.mshop.navigation.components.RegistrationPage
 import hr.foi.air.mshop.ui.theme.MShopTheme
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import hr.foi.air.mshop.navigation.components.Homepage
 import hr.foi.air.mshop.navigation.components.LoginPassword
 import hr.foi.air.mshop.navigation.components.LoginUsername
 
@@ -53,7 +54,12 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("logPassword") {
-                            LoginPassword()
+                            LoginPassword(
+                                onNext = { navController.navigate("home") }
+                            )
+                        }
+                        composable("home") {
+                            Homepage()
                         }
                     }
                 }

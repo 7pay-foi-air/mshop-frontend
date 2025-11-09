@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.navigation.components
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import hr.foi.air.mshop.ui.components.NextArrow
 import hr.foi.air.mshop.ui.components.StyledButton
 import hr.foi.air.mshop.ui.components.UnderLabelTextField
@@ -34,6 +36,7 @@ fun LoginUsername(
     var username by remember {
         mutableStateOf("")
     }
+    val context = LocalContext.current
 
     Column (
         modifier = Modifier
@@ -104,7 +107,17 @@ fun LoginUsername(
                 .align(Alignment.End)
                 .padding(bottom = 32.dp),
             size = 64.dp,
-            onClick = onNext
+            onClick = {
+                if(username.isBlank()){
+                    Toast.makeText(
+                        context,
+                        "Unesite korisničko ime!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else{
+                    onNext()
+                }
+            }
         )
     }
 }
@@ -112,5 +125,6 @@ fun LoginUsername(
 @Preview(showBackground = true)
 @Composable
 fun LoginUsernamePreview(){
-    LoginUsername(navController = NavController(LocalContext.current))
+    val navController = rememberNavController()
+    LoginUsername(navController = navController)
 }
