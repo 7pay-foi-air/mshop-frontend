@@ -18,6 +18,9 @@ import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
 import hr.foi.air.mshop.ui.theme.MShopTheme
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import hr.foi.air.mshop.navigation.components.Homepage
+import hr.foi.air.mshop.navigation.components.LoginPassword
+import hr.foi.air.mshop.navigation.components.LoginUsername
 import hr.foi.air.mshop.navigation.components.AddUserPage
 
 class MainActivity : ComponentActivity() {
@@ -34,7 +37,7 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = "manageUsers"
+                        startDestination = "logUsername"
                     ){
                         composable("regOrg") {
                             RegistrationOrganizationPage(
@@ -46,6 +49,20 @@ class MainActivity : ComponentActivity() {
                             hr.foi.air.mshop.navigation.components.ManageUsersPage(
                                 onAddUser = { navController.navigate("addUser") }
                             )
+                        }
+                        composable("logUsername") {
+                            LoginUsername(
+                                navController,
+                                onNext = {navController.navigate("logPassword")}
+                            )
+                        }
+                        composable("logPassword") {
+                            LoginPassword(
+                                onNext = { navController.navigate("home") }
+                            )
+                        }
+                        composable("home") {
+                            Homepage()
                         }
 
                         composable("addUser") {
