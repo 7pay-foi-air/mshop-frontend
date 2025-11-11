@@ -70,16 +70,16 @@ fun UnderLabelTextField(
     singleLine: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
     isError: Boolean = false,
+    errorText: String? = null
 ) {
-    Column(modifier = modifier) {
+    Column {
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             placeholder = { Text(placeholder) },
             singleLine = singleLine,
             keyboardOptions = keyboardOptions,
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
             isError = isError,
             colors = OutlinedTextFieldDefaults.colors(
@@ -90,21 +90,29 @@ fun UnderLabelTextField(
                 cursorColor = MaterialTheme.colorScheme.primary
             ),
             supportingText = {
-                Text(
-                    text = caption,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (isError)
-                        MaterialTheme.colorScheme.error
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                // Prikaži GREŠKU ako postoji, inače samo caption
+                if (errorText != null) {
+                    Text(
+                        text = caption + " - " + errorText,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                } else {
+                    Text(
+                        text = caption,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         )
     }
 }
 
+
 @Composable
 fun UnderLabelPasswordField(
+    modifier: Modifier = Modifier,
     caption: String,
     value: String,
     onValueChange: (String) -> Unit,
