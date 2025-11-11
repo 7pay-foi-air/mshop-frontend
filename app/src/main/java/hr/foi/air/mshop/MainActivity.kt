@@ -15,10 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
-import hr.foi.air.mshop.navigation.components.RegistrationPage
 import hr.foi.air.mshop.ui.theme.MShopTheme
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import hr.foi.air.mshop.navigation.components.AddUserPage
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,15 +34,22 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = "regOrg"
+                        startDestination = "manageUsers"
                     ){
                         composable("regOrg") {
                             RegistrationOrganizationPage(
-                                onNext = { navController.navigate("regAdmin") }
+                                onNext = { navController.navigate("addUser") }
                             )
                         }
-                        composable("regAdmin") {
-                            RegistrationPage()
+
+                        composable("manageUsers") {
+                            hr.foi.air.mshop.navigation.components.ManageUsersPage(
+                                onAddUser = { navController.navigate("addUser") }
+                            )
+                        }
+
+                        composable("addUser") {
+                            AddUserPage()
                         }
                     }
                 }
