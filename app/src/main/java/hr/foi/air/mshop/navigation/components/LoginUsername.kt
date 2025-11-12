@@ -93,14 +93,14 @@ fun LoginUsername(
             )
         }
 
-        StyledButton(
-            label = "Registrirajte organizaciju",
-            onClick = {
-                navController.navigate("regOrg")
-            },
-            modifier = Modifier
-                .padding(bottom = 16.dp)
-        )
+//        StyledButton(
+//            label = "Registrirajte organizaciju",
+//            onClick = {
+//                navController.navigate("regOrg")
+//            },
+//            modifier = Modifier
+//                .padding(bottom = 16.dp)
+//        )
 
         NextArrow(
             modifier = Modifier
