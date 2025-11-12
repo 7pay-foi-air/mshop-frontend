@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("logPassword") {
                             LoginPassword(
-                                onNext = { navController.navigate("home") }
+                                onNext = { navController.navigate("manageUsers") }
                             )
                         }
                         composable("home") {
