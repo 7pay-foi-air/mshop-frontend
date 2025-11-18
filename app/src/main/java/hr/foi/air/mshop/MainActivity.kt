@@ -5,23 +5,25 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.NavHost
-import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
 import hr.foi.air.mshop.ui.theme.MShopTheme
-import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import hr.foi.air.mshop.navigation.components.Homepage
-import hr.foi.air.mshop.navigation.components.LoginPassword
-import hr.foi.air.mshop.navigation.components.LoginUsername
-import hr.foi.air.mshop.navigation.components.AddUserPage
+import hr.foi.air.mshop.navigation.AppNavHost
+import hr.foi.air.mshop.navigation.authRoutes
+import hr.foi.air.mshop.navigation.drawerItems
+import hr.foi.air.mshop.navigation.menuRoutes
+import hr.foi.air.mshop.ui.components.BackArrowButton
+import hr.foi.air.mshop.ui.components.MenuIconButton
+import hr.foi.air.mshop.ui.components.NavigationDrawer
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,45 +35,51 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ){
-                    val navController = rememberNavController()
-
-                    NavHost(
-                        navController = navController,
-                        startDestination = "logUsername"
-                    ){
-                        composable("regOrg") {
-                            RegistrationOrganizationPage(
-                                onNext = { navController.navigate("addUser") }
-                            )
-                        }
-
-                        composable("manageUsers") {
-                            hr.foi.air.mshop.navigation.components.ManageUsersPage(
-                                onAddUser = { navController.navigate("addUser") }
-                            )
-                        }
-                        composable("logUsername") {
-                            LoginUsername(
-                                navController,
-                                onNext = {navController.navigate("logPassword")}
-                            )
-                        }
-                        composable("logPassword") {
-                            LoginPassword(
-                                onNext = { navController.navigate("manageUsers") }
-                            )
-                        }
-                        composable("home") {
-                            Homepage()
-                        }
-
-                        composable("addUser") {
-                            AddUserPage()
-                        }
-                    }
+                    MainScreen()
                 }
-
             }
         }
+    }
+}
+
+@Composable
+fun MainScreen() {
+    val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+
+    val showNavigationUI = currentRoute !in authRoutes
+
+    if(showNavigationUI){
+        val scope = rememberCoroutineScope()
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+        NavigationDrawer(
+            drawerState = drawerState,
+            items = drawerItems,
+            currentRoute = currentRoute,
+            onItemClick = { item ->
+                if (currentRoute != item.route) {
+                    navController.navigate(item.route){
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            },
+            navigationIcon = {
+                when (currentRoute){
+                    in menuRoutes -> {
+                        MenuIconButton { scope.launch { drawerState.open() } }
+                    }
+                    else -> {
+                        BackArrowButton { navController.navigateUp() }
+                    }
+                }
+            }
+        ) { modifier ->
+            AppNavHost(navController = navController, modifier = modifier)
+        }
+    } else {
+        AppNavHost(navController = navController)
     }
 }
