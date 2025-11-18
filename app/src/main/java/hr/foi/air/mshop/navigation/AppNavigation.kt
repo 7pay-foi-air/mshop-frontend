@@ -25,6 +25,7 @@ object AppRoutes {
     const val REGISTER_ORGANIZATION = "regOrg"
 }
 
+// Used for routes where no icons appear in the top left corner
 val authRoutes = setOf(AppRoutes.LOGIN_USERNAME, AppRoutes.LOGIN_PASSWORD)
 
 val drawerItems = listOf(
@@ -39,6 +40,8 @@ val drawerItems = listOf(
         route = AppRoutes.MANAGE_USERS
     )
 )
+//Used for defining routes where the menu icon is displayed; others display the back arrow
+val menuRoutes = drawerItems.map {it.route}.toSet()
 
 @Composable
 fun AppNavHost(

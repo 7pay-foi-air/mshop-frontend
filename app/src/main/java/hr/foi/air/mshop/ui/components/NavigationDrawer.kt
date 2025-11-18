@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +42,7 @@ import hr.foi.air.mshop.navigation.components.LoginPassword
 import hr.foi.air.mshop.navigation.components.LoginUsername
 import hr.foi.air.mshop.navigation.components.ManageUsersPage
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
+import hr.foi.air.mshop.navigation.drawerItems
 import kotlinx.coroutines.launch
 
 data class DrawerItem(
@@ -50,16 +54,18 @@ data class DrawerItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationDrawer(
+    drawerState: DrawerState,
     items: List<DrawerItem>,
     currentRoute: String?,
     onItemClick: (DrawerItem) -> Unit,
+    navigationIcon: @Composable () -> Unit,
     content: @Composable (Modifier) -> Unit
 ) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = currentRoute in drawerItems.map {it.route},
         drawerContent = {
             ModalDrawerSheet {
                 Box(
@@ -90,9 +96,7 @@ fun NavigationDrawer(
                 topBar = {
                     TopAppBar(
                         title = { },
-                        navigationIcon = {
-                            MenuIconButton(onClick = { scope.launch { drawerState.open() } })
-                        }
+                        navigationIcon = navigationIcon
                     )
                 }
             ) { paddingValues ->
@@ -108,6 +112,16 @@ fun MenuIconButton(onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Default.Menu,
             contentDescription = "Izbornik"
+        )
+    }
+}
+
+@Composable
+fun BackArrowButton(onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Natrag"
         )
     }
 }
