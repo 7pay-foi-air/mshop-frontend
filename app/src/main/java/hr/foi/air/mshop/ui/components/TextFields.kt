@@ -70,7 +70,8 @@ fun UnderLabelTextField(
     singleLine: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
     isError: Boolean = false,
-    errorText: String? = null
+    errorText: String? = null,
+    trailingIcon: @Composable (() -> Unit)? = null
 ) {
     Column {
         OutlinedTextField(
@@ -89,6 +90,7 @@ fun UnderLabelTextField(
                 unfocusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
                 cursorColor = MaterialTheme.colorScheme.primary
             ),
+            trailingIcon = trailingIcon,
             supportingText = {
                 // Prikaži GREŠKU ako postoji, inače samo caption
                 if (errorText != null) {

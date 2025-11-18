@@ -1,13 +1,17 @@
 package hr.foi.air.mshop.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import hr.foi.air.mshop.navigation.components.AddArticlePage
 import hr.foi.air.mshop.navigation.components.AddUserPage
 import hr.foi.air.mshop.navigation.components.Homepage
 import hr.foi.air.mshop.navigation.components.LoginPassword
@@ -23,6 +27,7 @@ object AppRoutes {
     const val MANAGE_USERS = "manageUsers"
     const val ADD_USER = "addUser"
     const val REGISTER_ORGANIZATION = "regOrg"
+    const val ADD_ARTICLE = "addArticle"
 }
 
 // Used for routes where no icons appear in the top left corner
@@ -38,6 +43,11 @@ val drawerItems = listOf(
         icon = Icons.Default.Settings,
         title = "Upravljanje korisnicima",
         route = AppRoutes.MANAGE_USERS
+    ),
+    DrawerItem(
+        icon = Icons.Default.List,
+        title = "Upravljanje artiklima",
+        route = AppRoutes.ADD_ARTICLE
     )
 )
 //Used for defining routes where the menu icon is displayed; others display the back arrow
@@ -80,5 +90,9 @@ fun AppNavHost(
         composable(AppRoutes.ADD_USER) {
             AddUserPage()
         }
+        composable(AppRoutes.ADD_ARTICLE) {
+            AddArticlePage()
+        }
+
     }
 }
