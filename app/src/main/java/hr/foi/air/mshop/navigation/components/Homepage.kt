@@ -14,6 +14,8 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,6 +30,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.ui.components.UnderLabelTextField
+import hr.foi.air.mshop.ui.screens.CartScreen
+import hr.foi.air.mshop.ui.screens.SaleScreen
 
 @Composable
 fun Homepage() {
@@ -35,11 +39,13 @@ fun Homepage() {
     val chargeAmountVisited = false
     val chargeAmountEmpty = chargeAmount.isEmpty()
 
+    var selectedTabIndex by remember { mutableStateOf(0) }
+    val tabTitles = listOf("Svi artikli", "Košarica")
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -102,6 +108,26 @@ fun Homepage() {
                     modifier = Modifier.padding(top = 5.dp)
                 )
             }
+        }
+
+        PrimaryTabRow(
+            selectedTabIndex = selectedTabIndex,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 16.dp)
+        ) {
+            tabTitles.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTabIndex == index,
+                    onClick = { selectedTabIndex = index },
+                    text = { Text(title) }
+                )
+            }
+        }
+
+        when (selectedTabIndex) {
+            0 -> SaleScreen()
+            1 -> CartScreen()
         }
     }
 }

@@ -153,6 +153,39 @@ fun UnderLabelPasswordField(
     )
 }
 
+@Composable
+fun SearchField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String = "Search",
+    modifier: Modifier = Modifier,
+    leadingIcon: ImageVector,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { Text(placeholder) },
+        singleLine = true,
+        keyboardOptions = keyboardOptions,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        leadingIcon = {
+            Icon(
+                imageVector = leadingIcon,
+                contentDescription = "Search Icon"
+            )
+        },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
+            focusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f),
+            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
+            cursorColor = MaterialTheme.colorScheme.primary
+        )
+    )
+}
+
 
 
 
