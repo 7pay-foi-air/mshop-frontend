@@ -72,14 +72,14 @@ fun UnderLabelTextField(
     isError: Boolean = false,
     errorText: String? = null
 ) {
-    Column {
+    Column(modifier = modifier) {
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             placeholder = { Text(placeholder) },
             singleLine = singleLine,
             keyboardOptions = keyboardOptions,
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
             isError = isError,
             colors = OutlinedTextFieldDefaults.colors(
