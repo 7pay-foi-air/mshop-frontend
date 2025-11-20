@@ -74,6 +74,13 @@ class HomepageViewModel : ViewModel() {
         }
     }
 
+    fun removeProductCompletely(product: Product){
+        viewModelScope.launch {
+            _selectedProducts.value -= product.id
+            updateChargeAmountFromPrice()
+        }
+    }
+
     fun clearSelection() {
         viewModelScope.launch {
             _selectedProducts.value = emptyMap()
