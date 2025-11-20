@@ -14,7 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import hr.foi.air.mshop.ui.components.ArticleListItem
+import hr.foi.air.mshop.ui.components.ListItems.ProductListItem
 import hr.foi.air.mshop.ui.components.SearchField
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
 
@@ -37,9 +37,12 @@ fun SaleScreen(viewModel: HomepageViewModel) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(filteredArticles) { product ->
-                ArticleListItem(
+                ProductListItem(
                     product = product,
-                    onClick = { viewModel.addProduct(product) }
+                    onClick = {  },
+                    quantity = viewModel.selectedProducts.collectAsState().value[product.id] ?: 0,
+                    onIncrement = { viewModel.addProduct(product) },
+                    onDecrement = { viewModel.removeProduct(product) }
                 )
             }
         }

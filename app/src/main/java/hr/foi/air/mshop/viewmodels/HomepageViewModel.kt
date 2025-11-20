@@ -29,11 +29,11 @@ private val allProducts = listOf(
 )
 
 class HomepageViewModel : ViewModel() {
-    private val _selectedProducts = MutableStateFlow<List<Product>>(emptyList())
+    private val _selectedProducts = MutableStateFlow<Map<Int, Int>>(emptyMap())
     private val _chargeAmountUIState = MutableStateFlow(ChargeAmountUIState())
     private val _searchQuery = MutableStateFlow("")
 
-    val selectedProducts: StateFlow<List<Product>> = _selectedProducts.asStateFlow()
+    val selectedProducts: StateFlow<Map<Int, Int>> = _selectedProducts.asStateFlow()
     val chargeAmountUIState: StateFlow<ChargeAmountUIState> = _chargeAmountUIState.asStateFlow()
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
@@ -56,21 +56,27 @@ class HomepageViewModel : ViewModel() {
 
     fun addProduct(product: Product) {
         viewModelScope.launch {
-            _selectedProducts.value = _selectedProducts.value + product
+            val currentQuantity = _selectedProducts.value[product.id] ?: 0
+            _selectedProducts.value += (product.id to (currentQuantity + 1))
             updateChargeAmountFromPrice()
         }
     }
 
     fun removeProduct(product: Product) {
         viewModelScope.launch {
-            _selectedProducts.value = _selectedProducts.value - product
+            val currentQuantity = _selectedProducts.value[product.id] ?: 0
+            if (currentQuantity > 1) {
+                _selectedProducts.value += (product.id to (currentQuantity - 1))
+            } else {
+                _selectedProducts.value -= product.id
+            }
             updateChargeAmountFromPrice()
         }
     }
 
     fun clearSelection() {
         viewModelScope.launch {
-            _selectedProducts.value = emptyList()
+            _selectedProducts.value = emptyMap()
             updateChargeAmountFromPrice()
         }
     }
@@ -88,7 +94,10 @@ class HomepageViewModel : ViewModel() {
     }
 
     private fun updateChargeAmountFromPrice(){
-        val currentTotalPrice = _selectedProducts.value.sumOf { it.price }
+        val currentTotalPrice = _selectedProducts.value.entries.sumOf { ( productId, quantity) ->
+            val product = allProducts.find { it.id == productId }
+            (product?.price ?: 0.0) * quantity
+        }
         _chargeAmountUIState.value = _chargeAmountUIState.value.copy(
             text = String.format("%.2f€", currentTotalPrice)
         )
