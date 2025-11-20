@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Cancel
@@ -18,6 +16,7 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,15 +28,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import hr.foi.air.mshop.ui.components.UnderLabelTextField
 import hr.foi.air.mshop.ui.screens.CartScreen
 import hr.foi.air.mshop.ui.screens.SaleScreen
+import hr.foi.air.mshop.viewmodels.HomepageViewModel
 
 @Composable
-fun Homepage() {
-    var chargeAmount by remember { mutableStateOf("00,00€") }
-    val chargeAmountVisited = false
-    val chargeAmountEmpty = chargeAmount.isEmpty()
+fun Homepage(homepageViewModel: HomepageViewModel = viewModel()) {
+    val chargeAmountState by homepageViewModel.chargeAmountUIState.collectAsState()
 
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabTitles = listOf("Svi artikli", "Košarica")
@@ -70,30 +69,22 @@ fun Homepage() {
             verticalAlignment = Alignment.Top
         ) {
             UnderLabelTextField(
-                value = chargeAmount,
+                value = chargeAmountState.text,
                 placeholder = "00,00€",
-                onValueChange = { chargeAmount = it},
+                onValueChange = { homepageViewModel.onChargeAmountChange(it) },
                 caption = "Iznos",
                 modifier = Modifier
                     .weight(1f)
-                    .onFocusChanged { f ->
-                        if (f.isFocused) {
-                            if (chargeAmount == "00,00€") {
-                                chargeAmount = ""
-                            }
-                        } else {
-                            if (chargeAmount.isEmpty()) {
-                                chargeAmount = "00,00€"
-                            }
-                        }
+                    .onFocusChanged { focusState ->
+                        homepageViewModel.onChargeAmountFocusChange(focusState.isFocused)
                     },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions.Default,
-                isError = chargeAmountVisited && chargeAmountEmpty,
-                errorText = if (chargeAmountVisited && chargeAmountEmpty) "Potrebna vrijednost transakcije" else null,
+                isError = chargeAmountState.errorMessage != null,
+                errorText = chargeAmountState.errorMessage,
             )
 
-            IconButton(onClick = { /* TODO */ }) {
+            IconButton(onClick = { homepageViewModel.clearSelection() }) {
                 Icon(
                     Icons.Filled.Cancel,
                     contentDescription = "Cancel",
@@ -126,8 +117,8 @@ fun Homepage() {
         }
 
         when (selectedTabIndex) {
-            0 -> SaleScreen()
-            1 -> CartScreen()
+            0 -> SaleScreen( viewModel = homepageViewModel )
+            1 -> CartScreen( viewModel = homepageViewModel )
         }
     }
 }
