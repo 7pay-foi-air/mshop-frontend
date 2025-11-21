@@ -31,6 +31,9 @@ object AppRoutes {
     const val REGISTER_ORGANIZATION = "regOrg"
     const val ADD_ARTICLE = "addArticle"
     const val MANAGE_ARTICLES = "manageArticles"
+
+    const val EDIT_ARTICLE_ROUTE = "editArticle/{id}"
+    fun editArticleRoute(id: Int?) = "editArticle/$id"
 }
 
 // Used for routes where no icons appear in the top left corner
@@ -106,6 +109,30 @@ fun AppNavHost(
         }
         composable(AppRoutes.MANAGE_ARTICLES){
             ManageArticlesPage()
+        }
+        composable(AppRoutes.EDIT_ARTICLE_ROUTE) {
+                backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")?.toInt()
+                ?: return@composable
+
+            // hardcode artikal za test
+            val fakeArticle = Article(
+                id = id,
+                ean = "123456",
+                articleName = "Hardcode artikal",
+                description = "opis...",
+                price = 10.0
+            )
+
+            EditArticlePage(
+                article = fakeArticle,
+                onSave = { updated ->
+                    navController.popBackStack()
+                },
+                onCancel = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
