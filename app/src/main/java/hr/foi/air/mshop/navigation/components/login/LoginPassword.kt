@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.ui.components.DialogMessage
 import hr.foi.air.mshop.ui.components.NextArrow
-import hr.foi.air.mshop.ui.components.UnderLabelPasswordField
+import hr.foi.air.mshop.ui.components.textFields.UnderLabelPasswordField
 
 @Composable
 fun LoginPassword(

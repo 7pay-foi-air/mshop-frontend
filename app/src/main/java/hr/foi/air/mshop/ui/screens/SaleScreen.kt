@@ -14,8 +14,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import hr.foi.air.mshop.ui.components.ListItems.ProductListItem
-import hr.foi.air.mshop.ui.components.SearchField
+import hr.foi.air.mshop.ui.components.listItems.ProductListItem
+import hr.foi.air.mshop.ui.components.textFields.SearchField
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.core.models.Article
-import hr.foi.air.mshop.ui.components.ListItems.ProductListItem
+import hr.foi.air.mshop.ui.components.listItems.ProductListItem
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
 
 private fun findProductById(id: Int, allProducts: List<Article>): Article? {

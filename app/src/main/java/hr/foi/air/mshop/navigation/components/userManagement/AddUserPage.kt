@@ -13,7 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.ui.components.DateFieldUnderLabel
 import hr.foi.air.mshop.ui.components.StyledButton
-import hr.foi.air.mshop.ui.components.UnderLabelTextField
+import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

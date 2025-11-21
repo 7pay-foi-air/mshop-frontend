@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import hr.foi.air.mshop.navigation.AppRoutes
-import hr.foi.air.mshop.ui.components.ListItems.ArticleManagementListItem
-import hr.foi.air.mshop.ui.components.SearchField
+import hr.foi.air.mshop.ui.components.listItems.ArticleManagementListItem
+import hr.foi.air.mshop.ui.components.textFields.SearchField
 import hr.foi.air.mshop.viewmodels.ArticleManagementViewModel
 
 @Composable

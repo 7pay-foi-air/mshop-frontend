@@ -29,7 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import hr.foi.air.mshop.ui.components.UnderLabelTextField
+import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.ui.screens.CartScreen
 import hr.foi.air.mshop.ui.screens.SaleScreen
 import hr.foi.air.mshop.viewmodels.HomepageViewModel

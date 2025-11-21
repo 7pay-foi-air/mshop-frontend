@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.ui.components.StyledButton
-import hr.foi.air.mshop.ui.components.UnderLabelTextField
+import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 
 @Composable
 fun ArticleFormPage(
