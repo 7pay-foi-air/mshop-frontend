@@ -101,13 +101,13 @@ fun ManageArticlesPage(viewModel: ArticleManagementViewModel = viewModel()) {
             IconButton(
                 onClick = { /* TODO */ },
                 modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f))
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Dodaj novi artikal",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
