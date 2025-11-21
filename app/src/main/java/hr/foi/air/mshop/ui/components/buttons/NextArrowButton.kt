@@ -1,4 +1,4 @@
-package hr.foi.air.mshop.ui.components
+package hr.foi.air.mshop.ui.components.buttons
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons

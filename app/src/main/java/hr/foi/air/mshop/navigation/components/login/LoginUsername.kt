@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import hr.foi.air.mshop.ui.components.NextArrow
+import hr.foi.air.mshop.ui.components.buttons.NextArrow
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 
 @Composable

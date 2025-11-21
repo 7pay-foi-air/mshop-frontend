@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
-import hr.foi.air.mshop.ui.components.NextArrow
+import hr.foi.air.mshop.ui.components.buttons.NextArrow
 
 @Composable
 fun RegistrationOrganizationPage(
