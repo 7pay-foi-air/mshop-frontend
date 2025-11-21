@@ -3,6 +3,7 @@ package hr.foi.air.mshop.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,6 +17,7 @@ import hr.foi.air.mshop.navigation.components.EditArticlePage
 import hr.foi.air.mshop.navigation.components.Homepage
 import hr.foi.air.mshop.navigation.components.LoginPassword
 import hr.foi.air.mshop.navigation.components.LoginUsername
+import hr.foi.air.mshop.navigation.components.ManageArticlesPage
 import hr.foi.air.mshop.navigation.components.ManageUsersPage
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
 import hr.foi.air.mshop.ui.components.DrawerItem
@@ -28,6 +30,7 @@ object AppRoutes {
     const val ADD_USER = "addUser"
     const val REGISTER_ORGANIZATION = "regOrg"
     const val ADD_ARTICLE = "addArticle"
+    const val MANAGE_ARTICLES = "manageArticles"
 }
 
 // Used for routes where no icons appear in the top left corner
@@ -40,12 +43,17 @@ val drawerItems = listOf(
         route = AppRoutes.HOME
     ),
     DrawerItem(
-        icon = Icons.Default.Settings,
+        icon = Icons.Default.Person,
         title = "Upravljanje korisnicima",
         route = AppRoutes.MANAGE_USERS
     ),
-
+    DrawerItem(
+        icon = Icons.Default.Settings,
+        title = "Upravljanje artiklima",
+        route = AppRoutes.MANAGE_ARTICLES
+    )
 )
+
 //Used for defining routes where the menu icon is displayed; others display the back arrow
 val menuRoutes = drawerItems.map {it.route}.toSet()
 
@@ -77,7 +85,7 @@ fun AppNavHost(
         }
         composable(AppRoutes.LOGIN_PASSWORD) {
             LoginPassword(
-                onNext = { navController.navigate(AppRoutes.MANAGE_USERS) }
+                onNext = { navController.navigate(AppRoutes.HOME) }
             )
         }
         composable(AppRoutes.HOME) {
@@ -86,8 +94,6 @@ fun AppNavHost(
         composable(AppRoutes.ADD_USER) {
             AddUserPage()
         }
-
-
         composable(AppRoutes.ADD_ARTICLE) {
             AddArticlePage(
                 onAdd = { newArticle ->
@@ -98,8 +104,8 @@ fun AppNavHost(
                 }
             )
         }
-
-
-
+        composable(AppRoutes.MANAGE_ARTICLES){
+            ManageArticlesPage()
+        }
     }
 }
