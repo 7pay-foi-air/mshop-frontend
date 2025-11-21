@@ -71,7 +71,7 @@ fun AppNavHost(
         }
         composable(AppRoutes.LOGIN_PASSWORD) {
             LoginPassword(
-                onNext = { navController.navigate(AppRoutes.MANAGE_USERS) }
+                onNext = { navController.navigate(AppRoutes.HOME) }
             )
         }
         composable(AppRoutes.HOME) {
