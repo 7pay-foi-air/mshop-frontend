@@ -19,12 +19,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.ui.components.QuantitySelector
-import hr.foi.air.mshop.viewmodels.Product
 
 @Composable
 fun ProductListItem(
-    product: Product,
+    product: Article,
     quantity: Int,
     onIncrement: () -> Unit,
     onDecrement: () -> Unit,
@@ -53,7 +53,7 @@ fun ProductListItem(
         centerContent = {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = product.name,
+                    text = product.articleName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,

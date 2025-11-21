@@ -1,4 +1,4 @@
-package hr.foi.air.mshop.navigation.components
+package hr.foi.air.mshop.navigation.components.userManagement
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState

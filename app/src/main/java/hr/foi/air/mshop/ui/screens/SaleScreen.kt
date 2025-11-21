@@ -22,7 +22,7 @@ import hr.foi.air.mshop.viewmodels.HomepageViewModel
 @Composable
 fun SaleScreen(viewModel: HomepageViewModel) {
     val query by viewModel.searchQuery.collectAsState()
-    val filteredArticles by viewModel.filteredProducts.collectAsState()
+    val filteredArticles by viewModel.filteredArticles.collectAsState()
 
     Column( modifier = Modifier.fillMaxWidth()){
         SearchField(
@@ -40,9 +40,9 @@ fun SaleScreen(viewModel: HomepageViewModel) {
                 ProductListItem(
                     product = product,
                     onClick = {  },
-                    quantity = viewModel.selectedProducts.collectAsState().value[product.id] ?: 0,
-                    onIncrement = { viewModel.addProduct(product) },
-                    onDecrement = { viewModel.removeProduct(product) }
+                    quantity = viewModel.selectedArticles.collectAsState().value[product.id] ?: 0,
+                    onIncrement = { viewModel.addArticle(product) },
+                    onDecrement = { viewModel.removeArticle(product) }
                 )
             }
         }

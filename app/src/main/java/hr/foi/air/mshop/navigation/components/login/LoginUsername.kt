@@ -1,4 +1,4 @@
-package hr.foi.air.mshop.navigation.components
+package hr.foi.air.mshop.navigation.components.login
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -19,13 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import hr.foi.air.mshop.ui.components.NextArrow
-import hr.foi.air.mshop.ui.components.StyledButton
 import hr.foi.air.mshop.ui.components.UnderLabelTextField
 
 @Composable
