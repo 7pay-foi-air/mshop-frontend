@@ -86,7 +86,12 @@ fun NavigationDrawer(
                             scope.launch { drawerState.close() }
                         },
                         icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f),
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary
+                        )
                     )
                 }
             }
