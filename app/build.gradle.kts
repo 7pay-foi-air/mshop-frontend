@@ -72,4 +72,8 @@ dependencies {
     // Logging interceptor (za debug)
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
+    //core
+    implementation(project(":core"))
+
+
 }

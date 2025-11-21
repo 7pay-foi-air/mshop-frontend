@@ -11,11 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.navigation.components.AddArticlePage
 import hr.foi.air.mshop.navigation.components.AddUserPage
+import hr.foi.air.mshop.navigation.components.EditArticlePage
 import hr.foi.air.mshop.navigation.components.Homepage
 import hr.foi.air.mshop.navigation.components.LoginPassword
 import hr.foi.air.mshop.navigation.components.LoginUsername
+import hr.foi.air.mshop.navigation.components.ManageArticlesPage
 import hr.foi.air.mshop.navigation.components.ManageUsersPage
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
 import hr.foi.air.mshop.ui.components.DrawerItem
@@ -28,6 +31,11 @@ object AppRoutes {
     const val ADD_USER = "addUser"
     const val REGISTER_ORGANIZATION = "regOrg"
     const val ADD_ARTICLE = "addArticle"
+    const val EDIT_ARTICLE_ROUTE = "editArticle/{id}"
+    fun editArticleRoute(id: Long) = "editArticle/$id"
+
+    const val MANAGE_ARTICLES = "manageArticles" //TO OBRISI !!!
+
 }
 
 // Used for routes where no icons appear in the top left corner
@@ -47,7 +55,7 @@ val drawerItems = listOf(
     DrawerItem(
         icon = Icons.Default.List,
         title = "Upravljanje artiklima",
-        route = AppRoutes.ADD_ARTICLE
+        route = AppRoutes.MANAGE_ARTICLES
     )
 )
 //Used for defining routes where the menu icon is displayed; others display the back arrow
@@ -90,9 +98,52 @@ fun AppNavHost(
         composable(AppRoutes.ADD_USER) {
             AddUserPage()
         }
-        composable(AppRoutes.ADD_ARTICLE) {
-            AddArticlePage()
+
+        //ovo je samo meni testno obrisiii prije merga...
+        composable(AppRoutes.MANAGE_ARTICLES) {
+            ManageArticlesPage(navController)
         }
+
+        composable(AppRoutes.ADD_ARTICLE) {
+            AddArticlePage(
+                onAdd = { newArticle ->
+                    navController.popBackStack()
+                },
+                onCancel = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+
+        composable(AppRoutes.EDIT_ARTICLE_ROUTE) {
+            backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")?.toLong()
+                ?: return@composable
+
+            // hardcode artikal za test
+            val fakeArticle = Article(
+                id = id,
+                ean = "123456",
+                articleName = "Hardcode artikal",
+                description = "opis...",
+                price = 10.0
+            )
+
+            EditArticlePage(
+                article = fakeArticle,
+                onSave = { updated ->
+                    navController.popBackStack()
+                },
+                onCancel = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+
+
+
 
     }
 }

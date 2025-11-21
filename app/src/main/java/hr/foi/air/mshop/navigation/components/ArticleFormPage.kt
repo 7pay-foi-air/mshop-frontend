@@ -19,7 +19,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Upload
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,25 +31,43 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.ui.components.StyledButton
 import hr.foi.air.mshop.ui.components.UnderLabelTextField
 
 
-@Composable
-fun AddArticlePage() {
 
-    var ean by remember { mutableStateOf("") }
-    var articleName by remember { mutableStateOf("") }
-    var articleDescription by remember { mutableStateOf("") }
-    var price by remember { mutableStateOf("") }
-    var imagePath by remember { mutableStateOf("") }
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+@Composable
+fun ArticleFormPage(
+    articleToEdit: Article? = null,
+    onSubmit: (Article) -> Unit,
+    onCancel: () -> Unit
+) {
+
+    val isEditMode = articleToEdit != null
+
+    var ean by remember(articleToEdit) { mutableStateOf(articleToEdit?.ean ?: "") }
+    var articleName by remember(articleToEdit) { mutableStateOf(articleToEdit?.articleName ?: "") }
+    var articleDescription by remember(articleToEdit) { mutableStateOf(articleToEdit?.description ?: "") }
+    var price by remember(articleToEdit) { mutableStateOf(articleToEdit?.price?.toString() ?: "") }
+
+    var imageUri by remember(articleToEdit) {
+        mutableStateOf<Uri?>(
+            articleToEdit?.imageUri?.let { Uri.parse(it) }   // ako postoji stara lokalna slika
+        )
+    }
+
+    var imageUrl by remember(articleToEdit) { mutableStateOf(articleToEdit?.imageUrl) }
+
+    // prikaz naziva slike u text fieldu (ako editaš i već postoji url)
+    var imagePath by remember(articleToEdit) {
+        mutableStateOf(articleToEdit?.imageUrl?.substringAfterLast('/') ?: "")
+    }
 
     var eanVisited by remember { mutableStateOf(false) };
     var eanHadFocus by remember { mutableStateOf(false) }
@@ -85,12 +102,16 @@ fun AddArticlePage() {
     ) { uri ->
         if (uri != null) {
             imageUri = uri
+            imageUrl = null  // nova lokalna slika ima prednost nad starom remote slikom
+
             val lastSegment = uri.lastPathSegment
             val displayName = lastSegment?.substringAfterLast('/') ?: "slika"
-
             imagePath = displayName
         }
     }
+
+    val imageModel: Any? = imageUri ?: imageUrl
+
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState()),
@@ -104,7 +125,7 @@ fun AddArticlePage() {
         )
 
         Text(
-            "Dodavanje novog artikla",
+            if (isEditMode) "Ažuriranje artikla" else "Dodavanje novog artikla",
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(bottom = 24.dp)
         )
@@ -114,8 +135,14 @@ fun AddArticlePage() {
             value = ean,
             onValueChange = { ean = it },
             placeholder = "",
-            isError = eanVisited && eanEmpty,
-            errorText = if (eanVisited && eanEmpty) "Obavezno polje" else null,
+            isError = eanError,
+            errorText = when {
+                !eanVisited -> null
+                eanEmpty -> "Obavezno polje"
+                eanNotNumeric -> "Mora biti broj"
+                else -> null
+            },
+            //enabled = !isEditMode, //crveni se
             modifier = Modifier.onFocusChanged { f ->
                 if (f.isFocused) eanHadFocus = true
                 if (!f.isFocused && eanHadFocus) eanVisited = true
@@ -131,7 +158,7 @@ fun AddArticlePage() {
             onValueChange = { articleName = it },
             placeholder = "",
             isError = nameError,
-            errorText = if (articleNameVisited && articleNameEmpty) "Obavezno polje" else null,
+            errorText = if (nameError) "Obavezno polje" else null,
             modifier = Modifier.onFocusChanged { f ->
                 if (f.isFocused) articleNameHadFocus = true
                 if (!f.isFocused && articleNameHadFocus) articleNameVisited = true
@@ -204,38 +231,57 @@ fun AddArticlePage() {
         Spacer(Modifier.height(12.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Preview slike
+            // Preview slike (prikaz stare ako je rijec o uredivanju inace prikaz nove lokalne)
             Box(
                 modifier = Modifier
                     .size(140.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (imageUri != null) {
+                if (imageModel != null) {
                     Image(
-                        painter = rememberAsyncImagePainter(imageUri),
-                        contentDescription = "Odabrana slika",
+                        painter = rememberAsyncImagePainter(imageModel),
+                        contentDescription = "Slika artikla",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
                 } else {
-
                     Text("Nije odabrana slika")
                 }
             }
 
-            StyledButton(
-                label = "DODAJ",
-                enabled = allValid,
-                onClick = {
-                    // akcija
-                },
-                modifier = Modifier.padding(start = 16.dp)
-            )
+
+            Column(modifier = Modifier.padding(start = 16.dp)) {
+
+                StyledButton(
+                    label = if (isEditMode) "SPREMI" else "DODAJ",
+                    enabled = allValid,
+                    onClick = {
+                        val newOrEdited = Article(
+                            id = articleToEdit?.id ?: 0L,   // 0L za novi (privremeno)
+                            ean = ean.trim(),
+                            articleName = articleName.trim(),
+                            description = articleDescription.trim(),
+                            price = price.toDouble(),
+                            imageUrl = imageUrl,
+                            imageUri = imageUri?.toString()
+                        )
+                        onSubmit(newOrEdited)
+                    }
+                )
+
+                if (isEditMode) {
+                    Spacer(Modifier.height(8.dp))
+                    StyledButton(
+                        label = "ODUSTANI",
+                        enabled = true,
+                        onClick = onCancel
+                    )
+                }
+            }
         }
     }
 }
