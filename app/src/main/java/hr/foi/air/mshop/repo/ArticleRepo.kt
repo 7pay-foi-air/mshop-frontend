@@ -30,4 +30,23 @@ class ArticleRepo {
             Result.failure(e)
         }
     }
+
+    suspend fun updateArticle(article: Article): Result<String> {
+        val id = article.id
+            ?: return Result.failure(Exception("Odaberite artikl (nedostaje ID artikla)"))
+        return try {
+            //BACKEND: Ako je imageUri null → ne mijenjaj sliku
+            val request = article.toRequest()
+            val response = api.updateArticle(id, request)
+
+            if (response.isSuccessful) {
+                Result.success(response.body()?.message ?: "Uspješno ažurirano")
+            } else {
+                Result.failure(Exception("Greška ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 }

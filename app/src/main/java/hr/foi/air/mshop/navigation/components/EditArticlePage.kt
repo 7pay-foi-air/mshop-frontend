@@ -9,5 +9,9 @@ fun EditArticlePage(
     onSave: (Article) -> Unit,
     onCancel: () -> Unit
 ){
-
+    ArticleFormPage(
+        articleToEdit = article,
+        onSubmit = { updatedArticle -> onSave(updatedArticle) },
+        onCancel = onCancel
+    )
 }
