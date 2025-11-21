@@ -261,7 +261,7 @@ fun ArticleFormPage(
                     enabled = allValid,
                     onClick = {
                         val newOrEdited = Article(
-                            id = articleToEdit?.id ?: 0L,   // 0L za novi (privremeno)
+                            id = articleToEdit?.id,
                             ean = ean.trim(),
                             articleName = articleName.trim(),
                             description = articleDescription.trim(),

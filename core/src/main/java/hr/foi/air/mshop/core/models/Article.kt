@@ -1,7 +1,7 @@
 package hr.foi.air.mshop.core.models
 
 data class Article(
-    val id: Long,
+    val id: Int? = null,
     val ean: String,
     val articleName : String,
     val description : String?,

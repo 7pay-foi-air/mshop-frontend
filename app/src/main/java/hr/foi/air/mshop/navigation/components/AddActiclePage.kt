@@ -10,10 +10,7 @@ fun AddArticlePage(
 ){
     ArticleFormPage(
         articleToEdit = null,
-        onSubmit = { newArticle ->
-            // TU SE RADI KAJ CE BACKEND ONDA S TIM...
-            onAdd(newArticle)
-        },
+        onSubmit = { newArticle -> onAdd(newArticle) },
         onCancel = onCancel
     )
 }

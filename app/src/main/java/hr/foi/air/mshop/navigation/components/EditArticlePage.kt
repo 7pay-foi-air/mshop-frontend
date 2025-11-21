@@ -9,12 +9,5 @@ fun EditArticlePage(
     onSave: (Article) -> Unit,
     onCancel: () -> Unit
 ){
-    ArticleFormPage(
-        articleToEdit = article,
-        onSubmit = { updatedArticle ->
-            // spajanje s backendom
-            onSave(updatedArticle)
-        },
-        onCancel = onCancel
-    )
+
 }
