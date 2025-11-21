@@ -91,12 +91,12 @@ fun AddUserPage() {
 
     val allValid =
         firstName.isNotBlank() &&
-                lastName.isNotBlank()  &&
-                username.isNotBlank()  &&
-                address.isNotBlank()   &&
-                email.isNotBlank()     && !emailFormatInvalid &&
-                phoneNum.isNotBlank()  && !phoneFormatInvalid &&
-                !dobMissing
+        lastName.isNotBlank()  &&
+        username.isNotBlank()  &&
+        address.isNotBlank()   &&
+        email.isNotBlank()     && !emailFormatInvalid &&
+        phoneNum.isNotBlank()  && !phoneFormatInvalid &&
+        !dobMissing
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState()),

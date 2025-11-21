@@ -2,6 +2,7 @@ package hr.foi.air.mshop.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -9,7 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import hr.foi.air.mshop.core.models.Article
+import hr.foi.air.mshop.navigation.components.AddArticlePage
 import hr.foi.air.mshop.navigation.components.AddUserPage
+import hr.foi.air.mshop.navigation.components.EditArticlePage
 import hr.foi.air.mshop.navigation.components.Homepage
 import hr.foi.air.mshop.navigation.components.LoginPassword
 import hr.foi.air.mshop.navigation.components.LoginUsername
@@ -25,6 +29,7 @@ object AppRoutes {
     const val MANAGE_USERS = "manageUsers"
     const val ADD_USER = "addUser"
     const val REGISTER_ORGANIZATION = "regOrg"
+    const val ADD_ARTICLE = "addArticle"
     const val MANAGE_ARTICLES = "manageArticles"
 }
 
@@ -88,6 +93,16 @@ fun AppNavHost(
         }
         composable(AppRoutes.ADD_USER) {
             AddUserPage()
+        }
+        composable(AppRoutes.ADD_ARTICLE) {
+            AddArticlePage(
+                onAdd = { newArticle ->
+                    navController.popBackStack()
+                },
+                onCancel = {
+                    navController.popBackStack()
+                }
+            )
         }
         composable(AppRoutes.MANAGE_ARTICLES){
             ManageArticlesPage()
