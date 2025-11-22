@@ -13,6 +13,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class LoginViewModel : ViewModel() {
     private val repository = LoginRepo()
@@ -32,11 +35,12 @@ class LoginViewModel : ViewModel() {
     fun login() {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
-            Log.d("LoginViewModel", "Attempting to login with username: $username")
-
             try {
                 val response = repository.loginUser(username, password)
-                Log.d("LoginViewModel", "Response received: Code=${response.code()}, Successful=${response.isSuccessful}")
+                Log.d(
+                    "LoginViewModel",
+                    "Response received: Code=${response.code()}, Successful=${response.isSuccessful}"
+                )
 
                 if (response.isSuccessful && response.body() != null) {
                     val loginResponse = response.body()!!
@@ -45,23 +49,38 @@ class LoginViewModel : ViewModel() {
                     if (loginResponse.error == null && loginResponse.accessToken != null) {
                         val token = loginResponse.accessToken
                         SessionManager.startSession(token)
-                        Log.d("LoginViewModel", "Session started for UserID: ${SessionManager.currentUserId}")
                         _loginState.value = LoginState.Success(loginResponse)
 
                     } else {
-                        Log.e("LoginViewModel", "API Error from response: ${loginResponse.error}")
-                        _loginState.value = LoginState.Error(loginResponse.error ?: "Unknown error occurred")
+                        _loginState.value =
+                            LoginState.Error(loginResponse.error ?: "Nepoznata greška")
 
                     }
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    Log.e("LoginViewModel", "Login failed: Code=${response.code()}, Message=${response.message()}, Error Body: $errorBody")
-                    _loginState.value = LoginState.Error("Login failed: ${response.message()}")
+                    Log.e(
+                        "LoginViewModel",
+                        "Login failed: Code=${response.code()}, Message=${response.message()}, Error Body: $errorBody"
+                    )
 
+                    when (response.code()) {
+                        400 -> _loginState.value =
+                            LoginState.Error("Loš zahtjev.")
+
+                        401 -> _loginState.value =
+                            LoginState.Error("Pogrešno korisničko ime ili lozinka.")
+
+                        else -> _loginState.value =
+                            LoginState.Error("Prijava nije uspjela (Kod: ${response.code()})")
+
+                    }
                 }
             } catch (e: Exception) {
-                Log.e("LoginViewModel", "An unexpected error occurred", e)
-                _loginState.value = LoginState.Error("An unexpected error occurred: ${e.message}")
+                val errorMessage = when (e) {
+                    is UnknownHostException, is SocketTimeoutException, is ConnectException -> "Nije moguće uspostaviti vezu s poslužiteljem. Provjerite internetsku vezu."
+                    else -> "Došlo je do neočekivane pogreške."
+                }
+                _loginState.value = LoginState.Error(errorMessage)
             }
         }
     }
@@ -78,8 +97,8 @@ class LoginViewModel : ViewModel() {
         _loginState.value = LoginState.Idle
     }
 
-    fun onNextClicked(onSuccess: () -> Unit) {
-        if(username.isBlank()) {
+    fun onProceedToPassword(onSuccess: () -> Unit) {
+        if (username.isBlank()) {
             viewModelScope.launch {
                 _toastMessage.emit("Unesite korisničko ime.")
             }

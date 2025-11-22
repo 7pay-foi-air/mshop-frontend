@@ -96,7 +96,7 @@ fun LoginUsername(
                 .padding(bottom = 32.dp),
             size = 64.dp,
             onClick = {
-                viewModel.onNextClicked(onSuccess = onNext)
+                viewModel.onProceedToPassword(onSuccess = onNext)
             }
         )
     }
