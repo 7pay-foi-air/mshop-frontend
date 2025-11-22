@@ -1,4 +1,4 @@
-package hr.foi.air.mshop.navigation.components
+package hr.foi.air.mshop.navigation.components.login
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -25,9 +25,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.ui.components.DialogMessage
-import hr.foi.air.mshop.ui.components.NextArrow
-import hr.foi.air.mshop.ui.components.UnderLabelPasswordField
-import hr.foi.air.mshop.ui.components.UnderLabelTextField
+import hr.foi.air.mshop.ui.components.buttons.NextArrow
+import hr.foi.air.mshop.ui.components.textFields.UnderLabelPasswordField
 
 @Composable
 fun LoginPassword(

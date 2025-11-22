@@ -1,4 +1,4 @@
-package hr.foi.air.mshop.navigation.components
+package hr.foi.air.mshop.navigation.components.articleManagement
 
 import androidx.compose.runtime.Composable
 import hr.foi.air.mshop.core.models.Article

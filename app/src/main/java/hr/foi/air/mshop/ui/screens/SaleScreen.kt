@@ -14,15 +14,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import hr.foi.air.mshop.ui.components.ListItems.ProductListItem
-import hr.foi.air.mshop.ui.components.SearchField
+import hr.foi.air.mshop.ui.components.listItems.ProductListItem
+import hr.foi.air.mshop.ui.components.textFields.SearchField
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SaleScreen(viewModel: HomepageViewModel) {
     val query by viewModel.searchQuery.collectAsState()
-    val filteredArticles by viewModel.filteredProducts.collectAsState()
+    val filteredArticles by viewModel.filteredArticles.collectAsState()
 
     Column( modifier = Modifier.fillMaxWidth()){
         SearchField(
@@ -40,9 +40,9 @@ fun SaleScreen(viewModel: HomepageViewModel) {
                 ProductListItem(
                     product = product,
                     onClick = {  },
-                    quantity = viewModel.selectedProducts.collectAsState().value[product.id] ?: 0,
-                    onIncrement = { viewModel.addProduct(product) },
-                    onDecrement = { viewModel.removeProduct(product) }
+                    quantity = viewModel.selectedArticles.collectAsState().value[product.id] ?: 0,
+                    onIncrement = { viewModel.addArticle(product) },
+                    onDecrement = { viewModel.removeArticle(product) }
                 )
             }
         }

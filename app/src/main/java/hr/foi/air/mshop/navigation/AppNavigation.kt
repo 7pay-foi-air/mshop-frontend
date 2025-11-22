@@ -2,38 +2,45 @@ package hr.foi.air.mshop.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import hr.foi.air.mshop.core.models.Article
-import hr.foi.air.mshop.navigation.components.AddArticlePage
-import hr.foi.air.mshop.navigation.components.AddUserPage
-import hr.foi.air.mshop.navigation.components.EditArticlePage
+import hr.foi.air.mshop.navigation.components.articleManagement.AddArticlePage
+import hr.foi.air.mshop.navigation.components.userManagement.AddUserPage
+import hr.foi.air.mshop.navigation.components.articleManagement.EditArticlePage
 import hr.foi.air.mshop.navigation.components.Homepage
-import hr.foi.air.mshop.navigation.components.LoginPassword
-import hr.foi.air.mshop.navigation.components.LoginUsername
-import hr.foi.air.mshop.navigation.components.ManageArticlesPage
-import hr.foi.air.mshop.navigation.components.ManageUsersPage
+import hr.foi.air.mshop.navigation.components.login.LoginPassword
+import hr.foi.air.mshop.navigation.components.login.LoginUsername
+import hr.foi.air.mshop.navigation.components.articleManagement.ManageArticlesPage
+import hr.foi.air.mshop.navigation.components.userManagement.ManageUsersPage
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
 import hr.foi.air.mshop.ui.components.DrawerItem
+import hr.foi.air.mshop.viewmodels.ArticleManagementViewModel
 
 object AppRoutes {
+    // LOGIN
     const val LOGIN_USERNAME = "logUsername"
     const val LOGIN_PASSWORD = "logPassword"
+    
+    // HOME
     const val HOME = "home"
+    
+    // USER MANAGEMENT
     const val MANAGE_USERS = "manageUsers"
     const val ADD_USER = "addUser"
     const val REGISTER_ORGANIZATION = "regOrg"
-    const val ADD_ARTICLE = "addArticle"
+    
+    // ARTICLE MANAGEMENT
     const val MANAGE_ARTICLES = "manageArticles"
-
-    const val EDIT_ARTICLE_ROUTE = "editArticle/{id}"
-    fun editArticleRoute(id: Int?) = "editArticle/$id"
+    const val ADD_ARTICLE = "addArticle"
+    const val EDIT_ARTICLE = "editArticle"
 }
 
 // Used for routes where no icons appear in the top left corner
@@ -57,7 +64,7 @@ val drawerItems = listOf(
     )
 )
 
-//Used for defining routes where the menu icon is displayed; others display the back arrow
+// Used for defining routes where the menu icon is displayed; others display the back arrow
 val menuRoutes = drawerItems.map {it.route}.toSet()
 
 @Composable
@@ -97,6 +104,9 @@ fun AppNavHost(
         composable(AppRoutes.ADD_USER) {
             AddUserPage()
         }
+        composable(AppRoutes.MANAGE_ARTICLES){
+            ManageArticlesPage(navController)
+        }
         composable(AppRoutes.ADD_ARTICLE) {
             AddArticlePage(
                 onAdd = { newArticle ->
@@ -107,31 +117,13 @@ fun AppNavHost(
                 }
             )
         }
-        composable(AppRoutes.MANAGE_ARTICLES){
-            ManageArticlesPage()
-        }
-        composable(AppRoutes.EDIT_ARTICLE_ROUTE) {
-                backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id")?.toInt()
-                ?: return@composable
-
-            // hardcode artikal za test
-            val fakeArticle = Article(
-                id = id,
-                ean = "123456",
-                articleName = "Hardcode artikal",
-                description = "opis...",
-                price = 10.0
-            )
-
+        composable(AppRoutes.EDIT_ARTICLE) { entry ->
+            val graphEntry = remember(entry) { navController.getBackStackEntry(AppRoutes.MANAGE_ARTICLES) }
+            val articleViewModel: ArticleManagementViewModel = viewModel(graphEntry)
             EditArticlePage(
-                article = fakeArticle,
-                onSave = { updated ->
-                    navController.popBackStack()
-                },
-                onCancel = {
-                    navController.popBackStack()
-                }
+                viewModel = articleViewModel,
+                onSave = { navController.popBackStack() },
+                onCancel = { navController.popBackStack() }
             )
         }
     }

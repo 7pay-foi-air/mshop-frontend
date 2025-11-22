@@ -1,4 +1,4 @@
-package hr.foi.air.mshop.navigation.components
+package hr.foi.air.mshop.navigation.components.articleManagement
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -37,10 +37,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import hr.foi.air.mshop.core.models.Article
-import hr.foi.air.mshop.ui.components.StyledButton
-import hr.foi.air.mshop.ui.components.UnderLabelTextField
-
-
+import hr.foi.air.mshop.ui.components.buttons.StyledButton
+import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 
 @Composable
 fun ArticleFormPage(

@@ -1,4 +1,4 @@
-package hr.foi.air.mshop.ui.components.ListItems
+package hr.foi.air.mshop.ui.components.listItems
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable

@@ -2,12 +2,17 @@ package hr.foi.air.mshop.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import hr.foi.air.mshop.core.models.Article
+import hr.foi.air.mshop.core.repository.ArticleRepository
+import hr.foi.air.mshop.repo.MockArticleRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.apply
 
 data class ChargeAmountUIState(
     val text: String = "0,00€",
@@ -19,22 +24,22 @@ data class ChargeAmountUIState(
 }
 
 class HomepageViewModel(
-    private val productRepository: ProductRepository = MockProductRepository()
+    private val articleRepository: ArticleRepository = MockArticleRepo()
 ) : ViewModel() {
-    private val _selectedProducts = MutableStateFlow<Map<Int, Int>>(emptyMap())
+    private val _selectedArticles = MutableStateFlow<Map<Int, Int>>(emptyMap())
     private val _chargeAmountUIState = MutableStateFlow(ChargeAmountUIState())
     private val _searchQuery = MutableStateFlow("")
 
-    val selectedProducts: StateFlow<Map<Int, Int>> = _selectedProducts.asStateFlow()
+    val selectedArticles: StateFlow<Map<Int, Int>> = _selectedArticles.asStateFlow()
     val chargeAmountUIState: StateFlow<ChargeAmountUIState> = _chargeAmountUIState.asStateFlow()
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    val filteredProducts: StateFlow<List<Product>> = _searchQuery
-        .combine(productRepository.getAllProducts()) { query, products ->
+    val filteredArticles: StateFlow<List<Article>> = _searchQuery
+        .combine(articleRepository.getAllArticles()) { query, articles ->
             if (query.isBlank()) {
-                products
+                articles
             } else {
-                products.filter { it.name.contains(query, ignoreCase = true) }
+                articles.filter { it.articleName.contains(query, ignoreCase = true) }
             }
         }.stateIn(
             scope = viewModelScope,
@@ -46,36 +51,42 @@ class HomepageViewModel(
         _searchQuery.value = newQuery
     }
 
-    fun addProduct(product: Product) {
+    fun addArticle(article: Article) {
         viewModelScope.launch {
-            val currentQuantity = _selectedProducts.value[product.id] ?: 0
-            _selectedProducts.value += (product.id to (currentQuantity + 1))
-            updateChargeAmountFromPrice()
-        }
-    }
-
-    fun removeProduct(product: Product) {
-        viewModelScope.launch {
-            val currentQuantity = _selectedProducts.value[product.id] ?: 0
-            if (currentQuantity > 1) {
-                _selectedProducts.value += (product.id to (currentQuantity - 1))
-            } else {
-                _selectedProducts.value -= product.id
+            _selectedArticles.update { currentMap ->
+                val currentQuantity = currentMap[article.id] ?: 0
+                (currentMap + (article.id to currentQuantity + 1)) as Map<Int, Int>
             }
             updateChargeAmountFromPrice()
         }
     }
 
-    fun removeProductCompletely(product: Product){
+    fun removeArticle(article: Article) {
         viewModelScope.launch {
-            _selectedProducts.value -= product.id
+            _selectedArticles.update { currentMap ->
+                val currentQuantity = currentMap[article.id] ?: 0
+                (if (currentQuantity > 1) {
+                    currentMap + (article.id to currentQuantity - 1)
+                } else {
+                    currentMap - article.id
+                }) as Map<Int, Int>
+            }
+            updateChargeAmountFromPrice()
+        }
+    }
+    fun removeArticleCompletely(article: Article){
+        viewModelScope.launch {
+            _selectedArticles.update { currentMap ->
+                (currentMap - article.id) as Map<Int, Int>
+            }
             updateChargeAmountFromPrice()
         }
     }
 
+
     fun clearSelection() {
         viewModelScope.launch {
-            _selectedProducts.value = emptyMap()
+            _selectedArticles.value = emptyMap()
             updateChargeAmountFromPrice()
         }
     }
@@ -93,10 +104,10 @@ class HomepageViewModel(
     }
 
     private fun updateChargeAmountFromPrice(){
-        val allProducts = productRepository.getAllProducts().value
-        val currentTotalPrice = _selectedProducts.value.entries.sumOf { ( productId, quantity) ->
-            val product = allProducts.find { it.id == productId }
-            (product?.price ?: 0.0) * quantity
+        val allArticles = articleRepository.getAllArticles().value
+        val currentTotalPrice = _selectedArticles.value.entries.sumOf { ( articleId, quantity) ->
+            val article = allArticles.find { it.id == articleId }
+            (article?.price ?: 0.0) * quantity
         }
         _chargeAmountUIState.value = _chargeAmountUIState.value.copy(
             text = String.format("%.2f€", currentTotalPrice)

@@ -13,18 +13,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import hr.foi.air.mshop.ui.components.ListItems.ProductListItem
+import hr.foi.air.mshop.core.models.Article
+import hr.foi.air.mshop.ui.components.listItems.ProductListItem
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
-import hr.foi.air.mshop.viewmodels.Product
 
-private fun findProductById(id: Int, allProducts: List<Product>): Product? {
+private fun findProductById(id: Int, allProducts: List<Article>): Article? {
     return allProducts.find { it.id == id }
 }
 
 @Composable
 fun CartScreen( viewModel: HomepageViewModel ) {
-    val selectedProductsMap by viewModel.selectedProducts.collectAsState()
-    val allProducts by viewModel.filteredProducts.collectAsState()
+    val selectedProductsMap by viewModel.selectedArticles.collectAsState()
+    val allProducts by viewModel.filteredArticles.collectAsState()
 
     if (selectedProductsMap.isEmpty()) {
         Box(
@@ -48,10 +48,10 @@ fun CartScreen( viewModel: HomepageViewModel ) {
                         product = product,
                         quantity = quantity,
                         onClick = { },
-                        onIncrement = { viewModel.addProduct(product) },
-                        onDecrement = { viewModel.removeProduct(product) },
+                        onIncrement = { viewModel.addArticle(product) },
+                        onDecrement = { viewModel.removeArticle(product) },
                         showRemoveButton = true,
-                        onRemove = { viewModel.removeProductCompletely(product) }
+                        onRemove = { viewModel.removeArticleCompletely(product) }
                     )
                 }
             }

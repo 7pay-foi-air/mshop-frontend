@@ -1,4 +1,4 @@
-package hr.foi.air.mshop.ui.components.ListItems
+package hr.foi.air.mshop.ui.components.listItems
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,11 +21,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import hr.foi.air.mshop.viewmodels.Product
+import hr.foi.air.mshop.core.models.Article
 
 @Composable
 fun ArticleManagementListItem(
-    product: Product,
+    article: Article,
     onEditClicked: () -> Unit,
     onDeleteClicked: () -> Unit,
     modifier: Modifier = Modifier
@@ -52,14 +52,14 @@ fun ArticleManagementListItem(
         centerContent = {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = product.name,
+                    text = article.articleName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "€${String.format("%.2f", product.price)}",
+                    text = "€${String.format("%.2f", article.price)}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Normal
                 )
