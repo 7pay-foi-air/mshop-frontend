@@ -1,11 +1,12 @@
 package hr.foi.air.mshop.core.repository
 
 import hr.foi.air.mshop.core.models.Article
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 interface ArticleRepository {
-    /*suspend*/ fun getAllArticles(): StateFlow<List<Article>>
-    suspend fun createArticle(article: Article): Result<Article>
-    suspend fun updateArticle(article: Article): Result<Article>
-    /*suspend*/ fun deleteArticle(articleId: Int)
+    fun getAllArticles(): Flow<List<Article>>
+
+    suspend fun createArticle(article: Article): Result<String>
+    suspend fun updateArticle(article: Article): Result<String>
+    suspend fun deleteArticle(articleId: Int): Result<Unit>
 }

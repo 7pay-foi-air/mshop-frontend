@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.repository.ArticleRepository
-import hr.foi.air.mshop.repo.MockArticleRepo
+import hr.foi.air.mshop.repo.ArticleRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 class ArticleManagementViewModel(
-    private val articleRepository: ArticleRepository = MockArticleRepo()
+    private val articleRepository: ArticleRepository = ArticleRepo()
 ): ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -57,8 +57,7 @@ class ArticleManagementViewModel(
 
     fun deleteArticle() {
         _articleToDelete.value?.let { articleToRemove ->
-            articleRepository.deleteArticle(articleToRemove.id!!)
-            println("Deleting product: ${articleToRemove.articleName}")
+            //articleRepository.deleteArticle(articleToRemove.id!!)
         }
         onDismissDeleteDialog()
     }

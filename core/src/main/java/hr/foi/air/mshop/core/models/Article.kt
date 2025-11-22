@@ -6,6 +6,7 @@ data class Article(
     val articleName : String,
     val description : String?,
     val price: Double,
+    val stockQuantity: Int?,
     val imageUrl: String?  = null, // remote slika s backenda
     val imageUri: String? = null,   // lokalno odabrana slika
 )
