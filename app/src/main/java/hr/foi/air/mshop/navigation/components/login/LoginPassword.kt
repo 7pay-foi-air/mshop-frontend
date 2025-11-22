@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.data.LoginState
 import hr.foi.air.mshop.ui.components.DialogMessage
+import hr.foi.air.mshop.ui.components.FullScreenLoadingIndicator
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelPasswordField
 import hr.foi.air.mshop.viewmodels.LoginViewModel
@@ -63,9 +63,7 @@ fun LoginPassword(
             .padding(horizontal = 24.dp, vertical = 16.dp)
     ){
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(24.dp))
@@ -132,9 +130,6 @@ fun LoginPassword(
                     }
                 }
             )
-            if (loginState is LoginState.Loading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally) )
-            }
         }
     }
 
@@ -150,6 +145,10 @@ fun LoginPassword(
         },
         onDismiss = { viewModel.onForgotPasswordDialogDismiss() }
     )
+
+    if (loginState is LoginState.Loading) {
+        FullScreenLoadingIndicator()
+    }
 }
 
 @Preview(showBackground = true)

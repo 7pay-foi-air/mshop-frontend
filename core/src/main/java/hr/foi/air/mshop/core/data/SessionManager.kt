@@ -15,9 +15,6 @@ object SessionManager {
     var accessToken: String? by mutableStateOf(null)
         private set
 
-    val isLoggedIn: Boolean
-        get() = accessToken != null
-
     fun startSession(token: String) {
         accessToken = token
         currentUserId = JWTHelper.getUserIdFromToken(token)
