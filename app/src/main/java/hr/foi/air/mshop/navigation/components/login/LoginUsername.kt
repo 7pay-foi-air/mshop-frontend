@@ -11,30 +11,39 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
+import hr.foi.air.mshop.viewmodels.LoginViewModel
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun LoginUsername(
-    navController: NavController,
-    onNext: () -> Unit = {}
+    onNext: () -> Unit,
+    viewModel: LoginViewModel
 ){
-    var username by remember {
-        mutableStateOf("")
-    }
     val context = LocalContext.current
+    val loginState by viewModel.loginState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.toastMessage.collectLatest { message ->
+            if (message.isNotBlank()) { // Prevent showing empty toasts
+                Toast.makeText(
+                    context,
+                    message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
 
     Column (
         modifier = Modifier
@@ -42,23 +51,19 @@ fun LoginUsername(
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier
-            .height(24.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             text = "mShop",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold),
-            modifier = Modifier
-                .padding(top = 16.dp, bottom = 16.dp)
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
         )
 
         Text(
             text = "Prijava",
             style = MaterialTheme.typography.headlineSmall.copy(
                 fontWeight = FontWeight.Bold),
-            modifier = Modifier
-                .padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 32.dp)
         )
 
         Column(
@@ -70,35 +75,23 @@ fun LoginUsername(
         ) {
             Text(
                 text = "Predstavite nam se",
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold),
-                modifier = Modifier
-                    .padding(bottom = 32.dp)
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(bottom = 32.dp)
             )
 
             Text(
                 text = "Unesite Vaše korisničko ime",
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .padding(bottom = 32.dp)
+                modifier = Modifier.padding(bottom = 32.dp)
             )
 
             UnderLabelTextField(
                 caption = "Korisničko ime",
-                value = username,
-                onValueChange = { username = it },
+                value = viewModel.username,
+                onValueChange = { viewModel.username = it },
                 placeholder = ""
             )
         }
-
-//        StyledButton(
-//            label = "Registrirajte organizaciju",
-//            onClick = {
-//                navController.navigate("regOrg")
-//            },
-//            modifier = Modifier
-//                .padding(bottom = 16.dp)
-//        )
 
         NextArrow(
             modifier = Modifier
@@ -106,15 +99,7 @@ fun LoginUsername(
                 .padding(bottom = 32.dp),
             size = 64.dp,
             onClick = {
-                if(username.isBlank()){
-                    Toast.makeText(
-                        context,
-                        "Unesite korisničko ime!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else{
-                    onNext()
-                }
+                viewModel.onNextClicked(onSuccess = onNext)
             }
         )
     }
@@ -123,6 +108,5 @@ fun LoginUsername(
 @Preview(showBackground = true)
 @Composable
 fun LoginUsernamePreview(){
-    val navController = rememberNavController()
-    LoginUsername(navController = navController)
+    LoginUsername(onNext = {}, viewModel = LoginViewModel())
 }
