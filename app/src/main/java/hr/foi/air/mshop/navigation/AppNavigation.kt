@@ -11,7 +11,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import hr.foi.air.mshop.core.models.Article
+import androidx.navigation.navigation
 import hr.foi.air.mshop.navigation.components.articleManagement.AddArticlePage
 import hr.foi.air.mshop.navigation.components.userManagement.AddUserPage
 import hr.foi.air.mshop.navigation.components.articleManagement.EditArticlePage
@@ -23,9 +23,11 @@ import hr.foi.air.mshop.navigation.components.userManagement.ManageUsersPage
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
 import hr.foi.air.mshop.ui.components.DrawerItem
 import hr.foi.air.mshop.viewmodels.ArticleManagementViewModel
+import hr.foi.air.mshop.viewmodels.LoginViewModel
 
 object AppRoutes {
     // LOGIN
+    const val LOGIN_GRAPH = "login"
     const val LOGIN_USERNAME = "logUsername"
     const val LOGIN_PASSWORD = "logPassword"
     
@@ -74,9 +76,45 @@ fun AppNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppRoutes.LOGIN_USERNAME,
+        startDestination = AppRoutes.LOGIN_GRAPH,
         modifier = modifier
     ) {
+        navigation(
+            startDestination = AppRoutes.LOGIN_USERNAME,
+            route = AppRoutes.LOGIN_GRAPH
+        ){
+            composable(AppRoutes.LOGIN_USERNAME) { backStackEntry ->
+                // Get the NavGraph's backStackEntry and create the ViewModel
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(AppRoutes.LOGIN_GRAPH)
+                }
+                val loginViewModel: LoginViewModel = viewModel(parentEntry)
+
+                LoginUsername(
+                    viewModel = loginViewModel,
+                    onNext = { navController.navigate(AppRoutes.LOGIN_PASSWORD) }
+                )
+            }
+            composable(AppRoutes.LOGIN_PASSWORD) { backStackEntry ->
+                // Do the same for the password screen
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(AppRoutes.LOGIN_GRAPH)
+                }
+                val loginViewModel: LoginViewModel = viewModel(parentEntry)
+
+                LoginPassword(
+                    viewModel = loginViewModel,
+                    onForgotPassword = { /* TODO */ },
+                    onLoginSuccess = {
+                        navController.navigate(AppRoutes.HOME) {
+                            popUpTo(AppRoutes.LOGIN_GRAPH) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+        }
         composable(AppRoutes.REGISTER_ORGANIZATION) {
             RegistrationOrganizationPage(
                 onNext = { navController.navigate(AppRoutes.ADD_USER) }
@@ -85,17 +123,6 @@ fun AppNavHost(
         composable(AppRoutes.MANAGE_USERS) {
             ManageUsersPage(
                 onAddUser = { navController.navigate(AppRoutes.ADD_USER) }
-            )
-        }
-        composable(AppRoutes.LOGIN_USERNAME) {
-            LoginUsername(
-                navController,
-                onNext = { navController.navigate(AppRoutes.LOGIN_PASSWORD) }
-            )
-        }
-        composable(AppRoutes.LOGIN_PASSWORD) {
-            LoginPassword(
-                onNext = { navController.navigate(AppRoutes.HOME) }
             )
         }
         composable(AppRoutes.HOME) {
