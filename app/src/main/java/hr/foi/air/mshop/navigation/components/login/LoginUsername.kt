@@ -12,8 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,11 +29,10 @@ fun LoginUsername(
     viewModel: LoginViewModel
 ){
     val context = LocalContext.current
-    val loginState by viewModel.loginState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collectLatest { message ->
-            if (message.isNotBlank()) { // Prevent showing empty toasts
+            if (message.isNotBlank()) {
                 Toast.makeText(
                     context,
                     message,

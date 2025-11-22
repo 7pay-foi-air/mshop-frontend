@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import hr.foi.air.mshop.core.data.SessionManager
 import hr.foi.air.mshop.data.LoginState
 import hr.foi.air.mshop.repo.LoginRepo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,14 +29,6 @@ class LoginViewModel : ViewModel() {
     var showForgottenPasswordDialog by mutableStateOf(false)
         private set
 
-    fun onForgotPasswordClick() {
-        showForgottenPasswordDialog = true
-    }
-
-    fun onForgotPasswordDialogDismiss() {
-        showForgottenPasswordDialog = false
-    }
-
     fun login() {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
@@ -49,12 +42,15 @@ class LoginViewModel : ViewModel() {
                     val loginResponse = response.body()!!
                     Log.d("LoginViewModel", "Successful Response Body: $loginResponse")
 
-                    if (loginResponse.error == null) {
+                    if (loginResponse.error == null && loginResponse.accessToken != null) {
+                        val token = loginResponse.accessToken
+                        SessionManager.startSession(token)
+                        Log.d("LoginViewModel", "Session started for UserID: ${SessionManager.currentUserId}")
                         _loginState.value = LoginState.Success(loginResponse)
 
                     } else {
                         Log.e("LoginViewModel", "API Error from response: ${loginResponse.error}")
-                        _loginState.value = LoginState.Error(loginResponse.error)
+                        _loginState.value = LoginState.Error(loginResponse.error ?: "Unknown error occurred")
 
                     }
                 } else {
@@ -68,6 +64,14 @@ class LoginViewModel : ViewModel() {
                 _loginState.value = LoginState.Error("An unexpected error occurred: ${e.message}")
             }
         }
+    }
+
+    fun onForgotPasswordClick() {
+        showForgottenPasswordDialog = true
+    }
+
+    fun onForgotPasswordDialogDismiss() {
+        showForgottenPasswordDialog = false
     }
 
     fun resetState() {
