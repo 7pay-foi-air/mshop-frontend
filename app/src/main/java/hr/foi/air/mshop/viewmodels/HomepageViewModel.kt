@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.repository.ArticleRepository
-import hr.foi.air.mshop.repo.MockArticleRepo
+import hr.foi.air.mshop.repo.ArticleRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.apply
 
 data class ChargeAmountUIState(
     val text: String = "0,00€",
@@ -24,7 +23,7 @@ data class ChargeAmountUIState(
 }
 
 class HomepageViewModel(
-    private val articleRepository: ArticleRepository = MockArticleRepo()
+    articleRepository: ArticleRepository = ArticleRepo()
 ) : ViewModel() {
     private val _selectedArticles = MutableStateFlow<Map<Int, Int>>(emptyMap())
     private val _chargeAmountUIState = MutableStateFlow(ChargeAmountUIState())
@@ -54,35 +53,39 @@ class HomepageViewModel(
     fun addArticle(article: Article) {
         viewModelScope.launch {
             _selectedArticles.update { currentMap ->
-                val currentQuantity = currentMap[article.id] ?: 0
-                (currentMap + (article.id to currentQuantity + 1)) as Map<Int, Int>
+                val articleId = article.id ?: return@update currentMap
+                val currentQuantity = currentMap[articleId] ?: 0
+                currentMap + (articleId to currentQuantity + 1)
             }
             updateChargeAmountFromPrice()
         }
     }
+
 
     fun removeArticle(article: Article) {
         viewModelScope.launch {
             _selectedArticles.update { currentMap ->
-                val currentQuantity = currentMap[article.id] ?: 0
-                (if (currentQuantity > 1) {
-                    currentMap + (article.id to currentQuantity - 1)
+                val articleId = article.id ?: return@update currentMap
+                val currentQuantity = currentMap[articleId] ?: 0
+                if (currentQuantity > 1) {
+                    currentMap + (articleId to currentQuantity - 1)
                 } else {
-                    currentMap - article.id
-                }) as Map<Int, Int>
-            }
-            updateChargeAmountFromPrice()
-        }
-    }
-    fun removeArticleCompletely(article: Article){
-        viewModelScope.launch {
-            _selectedArticles.update { currentMap ->
-                (currentMap - article.id) as Map<Int, Int>
+                    currentMap - articleId
+                }
             }
             updateChargeAmountFromPrice()
         }
     }
 
+    fun removeArticleCompletely(article: Article){
+        viewModelScope.launch {
+            _selectedArticles.update { currentMap ->
+                val articleId = article.id ?: return@update currentMap
+                currentMap - articleId
+            }
+            updateChargeAmountFromPrice()
+        }
+    }
 
     fun clearSelection() {
         viewModelScope.launch {
@@ -104,7 +107,7 @@ class HomepageViewModel(
     }
 
     private fun updateChargeAmountFromPrice(){
-        val allArticles = articleRepository.getAllArticles().value
+        val allArticles = filteredArticles.value
         val currentTotalPrice = _selectedArticles.value.entries.sumOf { ( articleId, quantity) ->
             val article = allArticles.find { it.id == articleId }
             (article?.price ?: 0.0) * quantity

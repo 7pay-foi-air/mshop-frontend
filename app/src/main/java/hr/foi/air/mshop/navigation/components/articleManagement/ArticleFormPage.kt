@@ -265,7 +265,8 @@ fun ArticleFormPage(
                             description = articleDescription.trim(),
                             price = price.toDouble(),
                             imageUrl = imageUrl,
-                            imageUri = imageUri?.toString()
+                            imageUri = imageUri?.toString(),
+                            stockQuantity = 0
                         )
                         onSubmit(newOrEdited)
                     }

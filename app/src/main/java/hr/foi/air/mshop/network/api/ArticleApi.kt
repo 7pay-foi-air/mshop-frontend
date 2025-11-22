@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.network.api
 
+import hr.foi.air.mshop.network.dto.AllArticlesResponse
 import hr.foi.air.mshop.network.dto.ArticleRequest
 import hr.foi.air.mshop.network.dto.ArticleResponse
 import retrofit2.Response
@@ -11,22 +12,22 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface ArticleApi {
-    @GET("articles")
+    @GET("items")
     suspend fun getArticles(
-    ): Response<ArticleResponse>
+    ): Response<AllArticlesResponse>
 
-    @POST("articles")
+    @POST("items")
     suspend fun  createArticle(
         @Body article: ArticleRequest
     ): Response<ArticleResponse>
 
-    @PUT("articles/{id}")
+    @PUT("items/{id}")
     suspend fun updateArticle(
         @Path("id") id: Int,
         @Body request: ArticleRequest
     ): Response<ArticleResponse>
 
-    @DELETE("articles/{id}")
+    @DELETE("items/{id}")
     suspend fun deleteArticle(
         @Path("id") id: Int
     ): Response<ArticleResponse>

@@ -101,21 +101,6 @@ fun Homepage(homepageViewModel: HomepageViewModel = viewModel()) {
             }
         }
 
-//        PrimaryTabRow(
-//            selectedTabIndex = selectedTabIndex,
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(top = 16.dp, bottom = 16.dp)
-//        ) {
-//            tabTitles.forEachIndexed { index, title ->
-//                Tab(
-//                    selected = selectedTabIndex == index,
-//                    onClick = { selectedTabIndex = index },
-//                    text = { Text(title) }
-//                )
-//            }
-//        }
-
         TabRow(
             selectedTabIndex = selectedTabIndex,
             modifier = Modifier
