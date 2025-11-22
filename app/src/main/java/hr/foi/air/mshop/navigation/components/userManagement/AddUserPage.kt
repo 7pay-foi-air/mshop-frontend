@@ -8,12 +8,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import hr.foi.air.mshop.network.dto.AddUserRequest
 import hr.foi.air.mshop.ui.components.DateFieldUnderLabel
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
+import hr.foi.air.mshop.viewmodels.AddUserViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -21,7 +25,12 @@ import java.util.regex.Pattern
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddUserPage() {
+fun AddUserPage(
+    onUserAdded: (() -> Unit)? = null
+) {
+
+    val viewModel: AddUserViewModel = viewModel()
+    val uiState = viewModel.state
 
     var firstName by remember { mutableStateOf("") }
     var lastName  by remember { mutableStateOf("") }
@@ -59,6 +68,14 @@ fun AddUserPage() {
             SimpleDateFormat("dd.MM.yyyy.", Locale.getDefault()).format(Date(it))
         } ?: ""
     }
+
+    // backend format DOB
+    val dobBackend = remember(dateOfBirthMillis) {
+        dateOfBirthMillis?.let {
+            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(it))
+        } ?: ""
+    }
+
     var showDatePicker by remember { mutableStateOf(false) }
     if (showDatePicker) {
         val dateState = rememberDatePickerState(initialSelectedDateMillis = dateOfBirthMillis ?: System.currentTimeMillis())
@@ -219,17 +236,60 @@ fun AddUserPage() {
 
         Row(modifier = Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Checkbox(checked = isAdmin, onCheckedChange = { isAdmin = it })
-            Text("Admin", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+            Text("Admin",
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.padding(start = 4.dp))
         }
 
         Spacer(Modifier.height(16.dp))
 
+        if (uiState.loading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(8.dp))
+        }
+
         StyledButton(
-            label = "Dodaj",
-            enabled = allValid,
-            onClick = { /* submit */ },
+            label = if (uiState.loading) "Spremanje..." else "Dodaj",
+            enabled = allValid && !uiState.loading,
+            onClick = {
+                val req = AddUserRequest(
+                    address = address.trim(),
+                    date_of_birth = dobBackend,
+                    email = email.trim(),
+                    first_name = firstName.trim(),
+                    is_admin = isAdmin,
+                    last_name = lastName.trim(),
+                    organisation_uuid = "02f2c243-6c29-4f21-a98c-955372bc6297",
+                    phone_number = phoneNum.trim(),
+                    username = username.trim()
+                )
+                viewModel.addUser(req)
+            },
             modifier = Modifier.padding(top = 16.dp)
         )
+
+        uiState.successMessage?.let{
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "$it",
+                color = Color(0xFF2E7D32),
+            )
+        }
+
+        uiState.errorMessage?.let{
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "$it",
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
+        // Clear message on new typing
+        LaunchedEffect(firstName, lastName, username, address, email, phoneNum) {
+            if (uiState.successMessage != null || uiState.errorMessage != null) {
+                viewModel.clearMessages()
+            }
+        }
+
     }
 }
