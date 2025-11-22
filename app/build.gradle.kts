@@ -51,7 +51,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.material3)
+    //implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -60,7 +60,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    implementation(platform("androidx.compose:compose-bom:2025.10.01"))
+    //implementation(platform("androidx.compose:compose-bom:2025.10.01"))
     implementation ("androidx.compose.material:material-icons-extended")
     implementation("io.coil-kt:coil-compose:2.6.0")
 
@@ -74,6 +74,4 @@ dependencies {
 
     //core
     implementation(project(":core"))
-
-
 }

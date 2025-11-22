@@ -12,8 +12,8 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -101,7 +101,22 @@ fun Homepage(homepageViewModel: HomepageViewModel = viewModel()) {
             }
         }
 
-        PrimaryTabRow(
+//        PrimaryTabRow(
+//            selectedTabIndex = selectedTabIndex,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(top = 16.dp, bottom = 16.dp)
+//        ) {
+//            tabTitles.forEachIndexed { index, title ->
+//                Tab(
+//                    selected = selectedTabIndex == index,
+//                    onClick = { selectedTabIndex = index },
+//                    text = { Text(title) }
+//                )
+//            }
+//        }
+
+        TabRow(
             selectedTabIndex = selectedTabIndex,
             modifier = Modifier
                 .fillMaxWidth()
@@ -111,7 +126,8 @@ fun Homepage(homepageViewModel: HomepageViewModel = viewModel()) {
                 Tab(
                     selected = selectedTabIndex == index,
                     onClick = { selectedTabIndex = index },
-                    text = { Text(title) }
+                    text = { Text(title)
+                    }
                 )
             }
         }

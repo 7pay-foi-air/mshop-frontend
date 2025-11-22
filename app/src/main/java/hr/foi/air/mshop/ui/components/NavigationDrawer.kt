@@ -1,6 +1,9 @@
 package hr.foi.air.mshop.ui.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -23,7 +26,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.core.data.SessionManager
 import hr.foi.air.mshop.navigation.drawerItems
 import kotlinx.coroutines.launch
 
@@ -50,31 +55,53 @@ fun NavigationDrawer(
         gesturesEnabled = currentRoute in drawerItems.map {it.route},
         drawerContent = {
             ModalDrawerSheet {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(64.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "mShop", style = MaterialTheme.typography.headlineLarge)
-                }
+                Column(modifier = Modifier.fillMaxHeight()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(64.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "mShop", style = MaterialTheme.typography.headlineLarge)
+                    }
 
-                items.forEach { item ->
-                    NavigationDrawerItem(
-                        label = { Text(item.title) },
-                        selected = currentRoute == item.route,
-                        onClick = {
-                            onItemClick(item)
-                            scope.launch { drawerState.close() }
-                        },
-                        icon = { Icon(imageVector = item.icon, contentDescription = item.title) },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                        colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f),
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            selectedTextColor = MaterialTheme.colorScheme.primary
+                    items.forEach { item ->
+                        NavigationDrawerItem(
+                            label = { Text(item.title) },
+                            selected = currentRoute == item.route,
+                            onClick = {
+                                onItemClick(item)
+                                scope.launch { drawerState.close() }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.title
+                                )
+                            },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = NavigationDrawerItemDefaults.colors(
+                                selectedContainerColor = MaterialTheme.colorScheme.tertiary.copy(
+                                    alpha = 0.20f
+                                ),
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary
+                            )
                         )
-                    )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f) )
+
+                    SessionManager.currentUserId.let { userId ->
+                        Text(
+                            text = "ID: $userId",
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
+                    }
                 }
             }
         },

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -32,6 +33,9 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures{
+        compose = true
+    }
 }
 
 dependencies {
@@ -43,4 +47,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation("com.auth0.android:jwtdecode:2.0.2")
+    implementation(platform(libs.androidx.compose.bom))
+    implementation("androidx.compose.runtime:runtime")
 }
