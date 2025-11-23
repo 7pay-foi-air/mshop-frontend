@@ -260,10 +260,12 @@ fun ArticleFormPage(
                     onClick = {
                         val newOrEdited = Article(
                             id = articleToEdit?.id,
+                            uuidItem = articleToEdit?.uuidItem,
                             ean = ean.trim(),
                             articleName = articleName.trim(),
                             description = articleDescription.trim(),
                             price = price.toDouble(),
+                            currency = articleToEdit?.currency ?: "EUR",
                             imageUrl = imageUrl,
                             imageUri = imageUri?.toString(),
                             stockQuantity = 1
