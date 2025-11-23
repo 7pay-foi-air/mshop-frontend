@@ -1,5 +1,7 @@
 package hr.foi.air.mshop.repo
 
+import android.content.Context
+import android.net.Uri
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.repository.ArticleRepository
 import hr.foi.air.mshop.network.NetworkService
@@ -7,6 +9,9 @@ import hr.foi.air.mshop.network.dto.ArticleRequest
 import hr.foi.air.mshop.network.dto.ArticleResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class ArticleRepo : ArticleRepository {
     private val api = NetworkService.articleApi
@@ -45,16 +50,67 @@ class ArticleRepo : ArticleRepository {
         }
     }
 
-    override suspend fun createArticle(article: Article): Result<String> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updateArticle(article: Article): Result<String> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun deleteArticle(articleId: Int): Result<Unit> {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun createArticle(article: Article, context: Context): Result<String> {
+        return try {
+            val nameBody = article.articleName
+                .toRequestBody("text/plain".toMediaType())
+
+            val descBody = (article.description ?: "")
+                .toRequestBody("text/plain".toMediaType())
+
+            val priceBody = article.price.toString()
+                .toRequestBody("text/plain".toMediaType())
+
+            val currencyBody = (article.currency.ifBlank { "EUR" })
+                .toRequestBody("text/plain".toMediaType())
+
+            // mapiramo ean -> sku (dok nemate posebno sku polje)
+            val skuBody = article.ean
+                .toRequestBody("text/plain".toMediaType())
+
+            val stockQuantityBody = (article.stockQuantity.takeIf { it > 0 } ?: 1)
+                .toString()
+                .toRequestBody("text/plain".toMediaType())
+
+            // slika je opcionalna
+            val imagePart = article.imageUri?.let { uriStr ->
+                val uri = Uri.parse(uriStr)
+                val bytes = context.contentResolver.openInputStream(uri)!!.readBytes()
+                val fileBody = bytes.toRequestBody("image/*".toMediaType())
+                MultipartBody.Part.createFormData(
+                    name = "image",
+                    filename = "item.jpg",
+                    body = fileBody
+                )
+            }
+
+            val response = api.createItem(
+                name = nameBody,
+                description = descBody,
+                price = priceBody,
+                currency = currencyBody,
+                sku = skuBody,
+                stockQuantity = stockQuantityBody,
+                image = imagePart
+            )
+
+            if (response.isSuccessful) {
+                Result.success(response.body()?.message ?: "Uspješno dodano")
+            } else {
+                Result.failure(Exception("Greška ${response.code()}"))
+            }
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateArticle(article: Article, context: Context): Result<String> {
+        return Result.failure(Exception("Update još nije podržan na backendu."))
     }
 
 //    suspend fun createArticle(article: Article) : Result<String>{
