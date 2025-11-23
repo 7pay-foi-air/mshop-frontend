@@ -39,6 +39,7 @@ import coil.compose.rememberAsyncImagePainter
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
+import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextFieldMultiline
 
 @Composable
 fun ArticleFormPage(
@@ -165,14 +166,13 @@ fun ArticleFormPage(
 
         Spacer(Modifier.height(8.dp))
 
-        UnderLabelTextField(
+        UnderLabelTextFieldMultiline(
             caption = "Opis artikla",
             value = articleDescription,
             onValueChange = { articleDescription = it },
             placeholder = "",
             isError = false,
             errorText = null,
-            singleLine = false,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
@@ -266,7 +266,7 @@ fun ArticleFormPage(
                             price = price.toDouble(),
                             imageUrl = imageUrl,
                             imageUri = imageUri?.toString(),
-                            stockQuantity = 0
+                            stockQuantity = 1
                         )
                         onSubmit(newOrEdited)
                     }

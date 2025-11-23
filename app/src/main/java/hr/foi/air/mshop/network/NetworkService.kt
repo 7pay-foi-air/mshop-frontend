@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.network
 
+import hr.foi.air.mshop.core.data.SessionManager
 import hr.foi.air.mshop.network.api.AccountApi
 import hr.foi.air.mshop.network.api.ArticleApi
 import okhttp3.OkHttpClient
@@ -15,8 +16,21 @@ object NetworkService {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
+    private val authInterceptor = { chain: okhttp3.Interceptor.Chain ->
+        val original = chain.request()
+        val builder = original.newBuilder()
+
+        val token = SessionManager.accessToken
+        if (!token.isNullOrBlank()) {
+            builder.addHeader("Authorization", "Bearer $token")
+        }
+
+        chain.proceed(builder.build())
+    }
+
     private val client = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
+        .addInterceptor(authInterceptor)
         .build()
 
     val accountRetrofit: Retrofit = Retrofit.Builder()
