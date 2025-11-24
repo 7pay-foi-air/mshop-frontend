@@ -52,6 +52,10 @@ class ArticleManagementViewModel(
         _articleToEdit.value = article
     }
 
+    fun onFinishEditArticle() {
+        _articleToEdit.value = null
+    }
+
     fun onOpenDeleteDialog(article: Article) {
         _articleToDelete.update { article }
     }
@@ -59,7 +63,6 @@ class ArticleManagementViewModel(
     fun onDismissDeleteDialog() {
         _articleToDelete.value = null
     }
-
 
     fun deleteArticle() {
         _articleToDelete.value?.let { articleToRemove ->
