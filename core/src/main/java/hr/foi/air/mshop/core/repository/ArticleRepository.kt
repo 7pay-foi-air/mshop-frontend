@@ -9,5 +9,5 @@ interface ArticleRepository {
 
     suspend fun createArticle(article: Article, context: Context): Result<String>
     suspend fun updateArticle(article: Article, context: Context): Result<String>
-    suspend fun deleteArticle(articleId: Int): Result<Unit>
+    suspend fun deleteArticle(articleUUID: String): Result<Unit>
 }

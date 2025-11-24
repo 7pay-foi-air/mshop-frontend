@@ -43,8 +43,8 @@ interface ArticleApi {
     ): Response<MessageResponse>
 
 
-    @DELETE("items/{id}")
+    @DELETE("items/{uuid}")
     suspend fun deleteArticle(
-        @Path("id") id: Int
+        @Path("uuid") uuid: String
     ): Response<ArticleResponse>
 }
