@@ -2,11 +2,13 @@ package hr.foi.air.mshop.repo
 
 import android.content.Context
 import android.net.Uri
+import com.google.gson.Gson
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.repository.ArticleRepository
 import hr.foi.air.mshop.network.NetworkService
 import hr.foi.air.mshop.network.dto.ArticleRequest
 import hr.foi.air.mshop.network.dto.ArticleResponse
+import hr.foi.air.mshop.network.dto.UpdateItemRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.MediaType.Companion.toMediaType
@@ -26,6 +28,7 @@ class ArticleRepo : ArticleRepository {
 
     private fun ArticleResponse.toDomainModel() = Article(
         id = this.uuidItem.hashCode(),
+        uuidItem = this.uuidItem,
         articleName = this.name,
         description = this.description,
         price = this.price,
@@ -33,6 +36,33 @@ class ArticleRepo : ArticleRepository {
         ean = this.sku,
         stockQuantity = this.stockQuantity
     )
+
+    private fun buildImagePart(uriStr: String, context: Context): MultipartBody.Part? {
+        val uri = Uri.parse(uriStr)
+
+        // stvarni MIME tip slike
+        val mimeType = context.contentResolver.getType(uri) ?: return null
+
+        val bytes = context.contentResolver.openInputStream(uri)
+            ?.use { it.readBytes() }   // use{} zatvara stream
+            ?: return null
+
+        val fileBody = bytes.toRequestBody(mimeType.toMediaType())
+
+        val ext = when (mimeType) {
+            "image/png" -> "png"
+            "image/gif" -> "gif"
+            "image/webp" -> "webp"
+            else -> "jpg"
+        }
+
+        return MultipartBody.Part.createFormData(
+            name = "image",
+            filename = "item.$ext",
+            body = fileBody
+        )
+    }
+
 
     override fun getAllArticles(): Flow<List<Article>> = flow {
         try {
@@ -68,7 +98,7 @@ class ArticleRepo : ArticleRepository {
             val currencyBody = (article.currency.ifBlank { "EUR" })
                 .toRequestBody("text/plain".toMediaType())
 
-            // mapiramo ean -> sku (dok nemate posebno sku polje)
+            // mapiramo ean -> sku
             val skuBody = article.ean
                 .toRequestBody("text/plain".toMediaType())
 
@@ -78,14 +108,7 @@ class ArticleRepo : ArticleRepository {
 
             // slika je opcionalna
             val imagePart = article.imageUri?.let { uriStr ->
-                val uri = Uri.parse(uriStr)
-                val bytes = context.contentResolver.openInputStream(uri)!!.readBytes()
-                val fileBody = bytes.toRequestBody("image/*".toMediaType())
-                MultipartBody.Part.createFormData(
-                    name = "image",
-                    filename = "item.jpg",
-                    body = fileBody
-                )
+                buildImagePart(uriStr, context)
             }
 
             val response = api.createItem(
@@ -109,41 +132,43 @@ class ArticleRepo : ArticleRepository {
         }
     }
 
-    override suspend fun updateArticle(article: Article, context: Context): Result<String> {
-        return Result.failure(Exception("Update još nije podržan na backendu."))
-    }
 
-//    suspend fun createArticle(article: Article) : Result<String>{
-//        return try{
-//            val request = article.toRequest()
-//            val response = api.createArticle(request)
-//
-//            if(response.isSuccessful) {
-//                Result.success(response.body()?.message ?: "Uspješno dodano")
-//            }else{
-//                Result.failure(Exception("Greška ${response.code()}"))
-//            }
-//
-//        }catch (e: Exception){
-//            Result.failure(e)
-//        }
-//    }
-//
-//    suspend fun updateArticle(article: Article): Result<String> {
-//        val id = article.id
-//            ?: return Result.failure(Exception("Odaberite artikl (nedostaje ID artikla)"))
-//        return try {
-//            //BACKEND: Ako je imageUri null → ne mijenjaj sliku
-//            val request = article.toRequest()
-//            val response = api.updateArticle(id, request)
-//
-//            if (response.isSuccessful) {
-//                Result.success(response.body()?.message ?: "Uspješno ažurirano")
-//            } else {
-//                Result.failure(Exception("Greška ${response.code()}"))
-//            }
-//        } catch (e: Exception) {
-//            Result.failure(e)
-//        }
-//    }
+    override suspend fun updateArticle(article: Article, context: Context): Result<String> {
+        val uuid = article.uuidItem
+            ?: return Result.failure(Exception("Nedostaje uuid artikla."))
+
+        return try {
+            val reqObj = UpdateItemRequest(
+                name = article.articleName.trim(),
+                description = article.description?.trim().orEmpty(),
+                price = article.price,
+                currency = article.currency.ifBlank { "EUR" },
+                sku = article.ean.trim().ifBlank { null },     // ean šaljem kao sku
+                stockQuantity = article.stockQuantity.takeIf { it > 0 } ?: 1
+            )
+
+            val jsonString = Gson().toJson(reqObj)
+
+            val dataBody = jsonString
+                .toRequestBody("application/json".toMediaType())
+
+            val imagePart = article.imageUri?.let { uriStr ->
+                buildImagePart(uriStr, context)
+            }
+
+            val response = api.updateItem(
+                uuid = uuid,
+                data = dataBody,
+                image = imagePart
+            )
+
+            if (response.isSuccessful) {
+                Result.success(response.body()?.message ?: "Uspješno ažurirano")
+            } else {
+                Result.failure(Exception("Greška ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
