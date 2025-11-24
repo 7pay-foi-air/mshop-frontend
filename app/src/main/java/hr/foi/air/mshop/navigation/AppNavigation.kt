@@ -142,13 +142,19 @@ fun AppNavHost(
         }
 
         composable(AppRoutes.EDIT_ARTICLE) { entry ->
-            val graphEntry = remember(entry) { navController.getBackStackEntry(AppRoutes.MANAGE_ARTICLES) }
+            val graphEntry = remember(entry) {
+                navController.getBackStackEntry(AppRoutes.MANAGE_ARTICLES)
+            }
             val articleViewModel: ArticleManagementViewModel = viewModel(graphEntry)
+
             EditArticlePage(
-                viewModel = articleViewModel,
-                onSave = { navController.popBackStack() },
-                onCancel = { navController.popBackStack() }
+                articleVm = articleViewModel,
+                onCancel = { navController.popBackStack() },
+                onUpdatedSuccessfully = {
+                    navController.popBackStack()
+                }
             )
         }
+
     }
 }

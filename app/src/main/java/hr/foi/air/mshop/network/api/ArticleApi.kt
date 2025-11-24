@@ -4,6 +4,7 @@ import hr.foi.air.mshop.network.dto.AllArticlesResponse
 import hr.foi.air.mshop.network.dto.ArticleRequest
 import hr.foi.air.mshop.network.dto.ArticleResponse
 import hr.foi.air.mshop.network.dto.CreateItemResponse
+import hr.foi.air.mshop.network.dto.MessageResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -33,11 +34,14 @@ interface ArticleApi {
         @Part image: MultipartBody.Part?                // optional
     ): Response<CreateItemResponse>
 
-    @PUT("items/{id}")
-    suspend fun updateArticle(
-        @Path("id") id: Int,
-        @Body request: ArticleRequest
-    ): Response<ArticleResponse>
+    @Multipart
+    @PUT("items/{uuid}")
+    suspend fun updateItem(
+        @Path("uuid") uuid: String,
+        @Part("data") data: RequestBody,
+        @Part image: MultipartBody.Part? = null
+    ): Response<MessageResponse>
+
 
     @DELETE("items/{uuid}")
     suspend fun deleteArticle(
