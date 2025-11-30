@@ -76,5 +76,5 @@ dependencies {
     //core
     implementation(project(":core"))
 
-    implementation("com.google.mlkit:genai-prompt:1.0.0-alpha1")
+    implementation("com.google.mediapipe:tasks-genai:0.10.27")
 }

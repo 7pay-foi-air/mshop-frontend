@@ -10,16 +10,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.mlkit.genai.common.DownloadStatus
-import com.google.mlkit.genai.common.FeatureStatus
-import com.google.mlkit.genai.prompt.Generation
-import com.google.mlkit.genai.prompt.TextPart
-import com.google.mlkit.genai.prompt.generateContentRequest
+import com.google.mediapipe.tasks.genai.llminference.LlmInference
 import hr.foi.air.mshop.navigation.*
 import hr.foi.air.mshop.ui.components.BackArrowButton
 import hr.foi.air.mshop.ui.components.MenuIconButton
@@ -28,9 +23,41 @@ import hr.foi.air.mshop.ui.theme.MShopTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private var llmInference : LlmInference? = null
+    private val MODEL_PATH = "/data/local/tmp/llm/gemma2-2b-it-gpu-int8.bin"
+    private val SYSTEM_INSTRUCTION = """
+        Based on the user's prompt, identify the intent and any associated parameters.
+        Your response must be ONLY a JSON object with two keys: "intent" and "parameters".
+        The "intent" can be one of the following: 
+        -"SET_ALARM" - when the user wants to set an alarm at a given time
+        -"OPEN_SETTINGS" - when the user wants to open the settings page in the app
+        -"VIEW_PRODUCTS" - when the user wants to see the product page in the app 
+        -or "UNKNOWN" - if it's something unrelated to the defined intents.
+        The "parameters" should be a JSON object containing relevant details, or an empty object if none are found.
+        
+        Example:
+        User: "Set an alarm for 7:30 AM"
+        Assistant: {"intent": "SET_ALARM", "parameters": {"time": "07:30"}}
+        
+        Example:
+        User: "Take me to the  page"
+        Assistant: {"intent": "OPEN_SETTINGS", "parameters": {null}}
+        
+        Example:
+        User: "Open the product page"
+        Assistant: {"intent": "VIEW_PRODUCTS", "parameters": {null}}
+        
+        Example:
+        User: *something unrelated to your app*
+        Assistant: {"intent": "UNKNOWN", "parameters": {null}}
+    """.trimIndent()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        initializeLlmInference()
+
         setContent {
             MShopTheme {
                 Surface(
@@ -43,57 +70,48 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // --- suspend fun za test Gemini Nano ---
-    suspend fun runPromptTest(): String {
-        val generativeModel = Generation.getClient()
+    private fun initializeLlmInference() {
+        try {
+            val options = LlmInference.LlmInferenceOptions.builder()
+                .setModelPath(MODEL_PATH)
+                .setMaxTopK(64)
+                .build()
 
-        val status = generativeModel.checkStatus()
+            llmInference = LlmInference.createFromOptions(this, options)
+            Log.i("LLM", "MediaPipe LlmInference uspješno inicijaliziran.")
 
-        when (status) {
-            FeatureStatus.UNAVAILABLE -> {
-                Log.d("GEMINI", "FeatureStatus.UNAVAILABLE")
-            }
+        } catch (e: Exception) {
+            Log.e("LLM", "Greška pri inicijalizaciji LlmInference: ${e.message}")
+            llmInference = null
+        }
+    }
 
-            FeatureStatus.DOWNLOADABLE -> {
-                Log.d("GEMINI", "FeatureStatus.DOWNLOADABLE")
-                // Gemini Nano can be downloaded on this device, but is not currently downloaded
-                generativeModel.download().collect { status ->
-                    when (status) {
-                        is DownloadStatus.DownloadStarted ->
-                            Log.d("GEMINI", "starting download for Gemini Nano")
+    fun runPromptTest(userPrompt: String): String {
+        val model = llmInference
 
-                        is DownloadStatus.DownloadProgress ->
-                            Log.d("GEMINI", "Nano ${status.totalBytesDownloaded} bytes downloaded")
-
-                        DownloadStatus.DownloadCompleted -> {
-                            Log.d("GEMINI", "Gemini Nano download complete")
-                            //modelDownloaded = true
-                        }
-
-                        is DownloadStatus.DownloadFailed -> {
-                            Log.e("GEMINI", "Nano download failed ${status.e.message}")
-                        }
-                    }
-                }
-            }
-
-            FeatureStatus.DOWNLOADING -> {
-                Log.d("GEMINI", "FeatureStatus.DOWNLOADING")
-            }
-
-            FeatureStatus.AVAILABLE -> {
-                Log.d("GEMINI", "FeatureStatus.AVAILABLE")
-            }
+        if (model == null) {
+            return "Greška: LLM model nije inicijaliziran (provjerite ADB putanju)."
         }
 
+        // Kreiramo puni prompt kombinirajući sistemsku uputu i korisnički unos
+        val fullPrompt = "$SYSTEM_INSTRUCTION\n\nUser: \"$userPrompt\"\nAssistant:"
+        Log.d("LLM", "Šaljem prompt: \"$fullPrompt\"")
 
-        if (status != FeatureStatus.AVAILABLE) {
-            return "Gemini Nano nije dostupan"
+        try {
+            val response = model.generateResponse(fullPrompt)
+            val generatedText = response
+            Log.d("LLM", "Generirani tekst: $generatedText")
+            return generatedText
+
+        } catch (e: Exception) {
+            Log.e("LLM", "Greška pri generiranju sadržaja: ${e.message}")
+            return "Greška pri generiranju: ${e.message}"
         }
+    }
 
-        val response = generativeModel.generateContent("Write a 3 sentence story about a magical dog.")
-
-        return response.toString()
+    override fun onDestroy() {
+        llmInference?.close()
+        super.onDestroy()
     }
 }
 
@@ -104,7 +122,7 @@ fun MainScreen() {
     val currentRoute = backStackEntry?.destination?.route
 
     val showNavigationUI = currentRoute !in authRoutes
-    val fabResult = remember { mutableStateOf("Klikni gumb za test Gemini Nano") }
+    val fabResult = remember { mutableStateOf("Klikni gumb za test Gemma 2") }
 
     val scope = rememberCoroutineScope()
 
@@ -113,8 +131,10 @@ fun MainScreen() {
             FloatingActionButton(
                 onClick = {
                     scope.launch {
-                        val result = (navController.context as? MainActivity)?.runPromptTest()
-                        fabResult.value = result ?: "Greška: MainActivity nije dostupan"
+                        // Primjer korisničkog unosa. Kasnije ovo možete povezati s TextField-om.
+                        val userInput = "Please open the settings for me"
+                        val result = (navController.context as? MainActivity)?.runPromptTest(userInput)
+                        fabResult.value = "Korisnik: $userInput\nOdgovor: ${result ?: "Greška"}"
                     }
                 }
             ) {
