@@ -3,7 +3,7 @@ package hr.foi.air.mshop.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.Article
-import hr.foi.air.mshop.core.repository.ArticleRepository
+import hr.foi.air.mshop.core.repository.IArticleRepository
 import hr.foi.air.mshop.repo.ArticleRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +23,7 @@ data class ChargeAmountUIState(
 }
 
 class HomepageViewModel(
-    articleRepository: ArticleRepository = ArticleRepo()
+    articleRepository: IArticleRepository = ArticleRepo()
 ) : ViewModel() {
     private val _selectedArticles = MutableStateFlow<Map<Int, Int>>(emptyMap())
     private val _chargeAmountUIState = MutableStateFlow(ChargeAmountUIState())

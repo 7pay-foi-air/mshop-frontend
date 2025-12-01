@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.network
 
+import hr.foi.air.mshop.BuildConfig
 import hr.foi.air.mshop.core.data.SessionManager
 import hr.foi.air.mshop.network.api.AccountApi
 import hr.foi.air.mshop.network.api.ArticleApi
@@ -9,8 +10,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object NetworkService {
-    private const val ACCOUNT_BASE_URL = "http://10.0.2.2:8080/api/v1/"
-    private const val ARTICLE_BASE_URL = "http://10.0.2.2:8082/api/v1/"
+    private const val ACCOUNT_BASE_URL = "http://${BuildConfig.SUBDOMAIN}:8080/api/v1/"
+    private const val ARTICLE_BASE_URL = "http://${BuildConfig.SUBDOMAIN}:8082/api/v1/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

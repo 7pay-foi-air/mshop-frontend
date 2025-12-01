@@ -4,19 +4,18 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.Article
-import hr.foi.air.mshop.core.repository.ArticleRepository
+import hr.foi.air.mshop.core.repository.IArticleRepository
 import hr.foi.air.mshop.repo.ArticleRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ArticleManagementViewModel(
-    private val articleRepository: ArticleRepository = ArticleRepo()
+    private val articleRepository: IArticleRepository = ArticleRepo()
 ): ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()

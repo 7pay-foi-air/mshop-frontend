@@ -4,7 +4,7 @@ import android.content.Context
 import hr.foi.air.mshop.core.models.Article
 import kotlinx.coroutines.flow.Flow
 
-interface ArticleRepository {
+interface IArticleRepository {
     fun getAllArticles(): Flow<List<Article>>
 
     suspend fun createArticle(article: Article, context: Context): Result<String>

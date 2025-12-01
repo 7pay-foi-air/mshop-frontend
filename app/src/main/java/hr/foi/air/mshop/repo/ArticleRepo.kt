@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.gson.Gson
 import hr.foi.air.mshop.core.models.Article
-import hr.foi.air.mshop.core.repository.ArticleRepository
+import hr.foi.air.mshop.core.repository.IArticleRepository
 import hr.foi.air.mshop.network.NetworkService
 import hr.foi.air.mshop.network.dto.ArticleResponse
 import hr.foi.air.mshop.network.dto.UpdateItemRequest
@@ -15,7 +15,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
-class ArticleRepo : ArticleRepository {
+class ArticleRepo : IArticleRepository {
     private val api = NetworkService.articleApi
 
     private fun ArticleResponse.toDomainModel() = Article(
