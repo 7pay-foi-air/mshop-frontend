@@ -10,10 +10,10 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import hr.foi.air.mshop.languagemodels.ILanguageModel
+import hr.foi.air.mshop.languagemodels.LlmTestDialog
 import hr.foi.air.mshop.languagemodels.OnDeviceLLM
 import hr.foi.air.mshop.navigation.*
 import hr.foi.air.mshop.ui.components.BackArrowButton
@@ -55,37 +55,32 @@ fun MainScreen() {
     val currentRoute = backStackEntry?.destination?.route
 
     val showNavigationUI = currentRoute !in authRoutes
-
-    val fabResult = remember { mutableStateOf("Klikni gumb za test Gemma 2") }
+    var showDialog by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
+    if (showDialog) {
+        val mainActivity = (navController.context as? MainActivity)
+        LlmTestDialog(
+            onDismissRequest = { showDialog = false },
+            onQuery = { userInput ->
+                mainActivity?.languageModel?.getResponse(userInput)
+            }
+        )
+    }
+
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(
+            SmallFloatingActionButton(
                 onClick = {
-                    scope.launch {
-                        val userInput = "pokaži popis mojih kontakata"
-                        val result = (navController.context as? MainActivity)?.languageModel?.getResponse(userInput)
-                        fabResult.value = "Korisnik: $userInput\nOdgovor: ${result ?: "Greška"}"
-                    }
+                    showDialog = true
                 }
             ) {
                 Icon(Icons.Default.PlayArrow, contentDescription = "Test LLM")
             }
         }
     ) { paddingValues ->
-
         Column(modifier = Modifier.padding(paddingValues)) {
-
-            // Prikaz rezultata testa ispod FAB-a
-            Text(
-                text = fabResult.value,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
-
             if (showNavigationUI) {
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
