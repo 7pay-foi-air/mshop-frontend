@@ -1,10 +1,12 @@
 package hr.foi.air.mshop.navigation
 
+import android.view.SurfaceControl
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -21,8 +23,10 @@ import hr.foi.air.mshop.navigation.components.login.LoginUsername
 import hr.foi.air.mshop.navigation.components.articleManagement.ManageArticlesPage
 import hr.foi.air.mshop.navigation.components.userManagement.ManageUsersPage
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
+import hr.foi.air.mshop.navigation.components.transaction.PaymentPage
 import hr.foi.air.mshop.ui.components.DrawerItem
 import hr.foi.air.mshop.viewmodels.ArticleManagementViewModel
+import hr.foi.air.mshop.viewmodels.HomepageViewModel
 import hr.foi.air.mshop.viewmodels.LoginViewModel
 
 object AppRoutes {
@@ -43,6 +47,8 @@ object AppRoutes {
     const val MANAGE_ARTICLES = "manageArticles"
     const val ADD_ARTICLE = "addArticle"
     const val EDIT_ARTICLE = "editArticle"
+
+    const val PAYMENT = "payment"
 }
 
 // Used for routes where no icons appear in the top left corner
@@ -126,7 +132,7 @@ fun AppNavHost(
             )
         }
         composable(AppRoutes.HOME) {
-            Homepage()
+            Homepage(navController)
         }
         composable(AppRoutes.ADD_USER) {
             AddUserPage()
@@ -155,6 +161,24 @@ fun AppNavHost(
                 }
             )
         }
+
+        composable(AppRoutes.PAYMENT) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(AppRoutes.HOME)
+            }
+            val homepageViewModel: HomepageViewModel = viewModel(parentEntry)
+
+            val chargeAmountState = homepageViewModel.chargeAmountUIState.collectAsState().value
+
+            PaymentPage(
+                totalAmount = chargeAmountState.text,   // npr. "123,45€"
+                onPay = { cardData ->
+                    //homepageViewModel.onPayClicked(cardData)
+                }
+            )
+        }
+
+
 
     }
 }
