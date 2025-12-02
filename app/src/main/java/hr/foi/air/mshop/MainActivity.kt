@@ -6,7 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -76,7 +78,7 @@ fun MainScreen() {
                     showDialog = true
                 }
             ) {
-                Icon(Icons.Default.PlayArrow, contentDescription = "Test LLM")
+                Icon(Icons.Default.Chat, contentDescription = "Test LLM")
             }
         }
     ) { paddingValues ->
