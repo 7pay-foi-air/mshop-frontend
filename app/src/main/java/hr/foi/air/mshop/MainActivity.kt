@@ -6,14 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import hr.foi.air.mshop.languagemodels.ILanguageModel
-import hr.foi.air.mshop.languagemodels.LlmTestDialog
+import hr.foi.air.mshop.languagemodels.LlmChatDialog
 import hr.foi.air.mshop.languagemodels.OnDeviceLLM
 import hr.foi.air.mshop.navigation.*
 import hr.foi.air.mshop.ui.components.BackArrowButton
@@ -61,10 +63,10 @@ fun MainScreen() {
 
     if (showDialog) {
         val mainActivity = (navController.context as? MainActivity)
-        LlmTestDialog(
+        LlmChatDialog(
             onDismissRequest = { showDialog = false },
             onQuery = { userInput ->
-                mainActivity?.languageModel?.getResponse(userInput)
+                mainActivity?.languageModel?.getResponseAsync(userInput)
             }
         )
     }
@@ -76,7 +78,7 @@ fun MainScreen() {
                     showDialog = true
                 }
             ) {
-                Icon(Icons.Default.PlayArrow, contentDescription = "Test LLM")
+                Icon(Icons.Default.Chat, contentDescription = "Test LLM")
             }
         }
     ) { paddingValues ->
