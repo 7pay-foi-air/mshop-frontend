@@ -1,5 +1,10 @@
 package hr.foi.air.mshop.languagemodels
 
+import android.Manifest
+import android.app.Activity
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,13 +22,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 enum class Sender { User, Bot }
 
-// sada id mora biti eksplicitno proslijeđen
 data class ChatMessage(
     val id: Long,
     val text: String,
@@ -76,13 +81,56 @@ fun LlmChatDialog(
     val scope = rememberCoroutineScope()
     var isSending by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
-    // sigurni generator jedinstvenih id-eva
-    val idGen = remember { AtomicLong(System.currentTimeMillis()) }
+    // id generator (ostavi kako imaš)
+    val idGen = remember { java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis()) }
     fun nextId() = idGen.getAndIncrement()
 
+    // STT manager single-shot
+    val sttManager = remember {
+        SpeechToTextManagerSingle(
+            context = context,
+            onPartialResult = { partial ->
+                // prikaz partiala u inputu (ako želiš append umjesto replace, prilagodi)
+                userInput = partial
+            },
+            onResult = { result ->
+                // finalni rezultat -> postavi u input
+                userInput = result
+            },
+            onError = { err ->
+                // opcionalno pokaži toast
+                android.widget.Toast.makeText(context, "STT: $err", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    // request RECORD_AUDIO permission
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            if (granted) {
+                // start listening immediately after grant
+                sttManager.startListeningOnce()
+            } else {
+                android.widget.Toast.makeText(context, "Record audio permission required", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+
+    // cleanup
+    DisposableEffect(Unit) {
+        onDispose {
+            sttManager.destroy()
+        }
+    }
+
     AlertDialog(
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = {
+            sttManager.stopListening()
+            onDismissRequest()
+        },
         title = { Text("Razgovor s AI") },
         text = {
             Column(
@@ -90,6 +138,7 @@ fun LlmChatDialog(
                     .fillMaxWidth()
                     .heightIn(min = 400.dp, max = 600.dp)
             ) {
+                // ... LazyColumn for messages (iste kao prije) ...
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f)
@@ -97,7 +146,6 @@ fun LlmChatDialog(
                         .padding(vertical = 8.dp),
                     state = listState
                 ) {
-                    // koristimo jedinstveni key koji dolazi iz nextId()
                     items(items = messages, key = { it.id }) { msg ->
                         MessageBubble(msg)
                     }
@@ -117,9 +165,33 @@ fun LlmChatDialog(
                         singleLine = true,
                         trailingIcon = {
                             IconButton(onClick = {
-                                // TODO: Speech-to-Text -> userInput
+                                // on mic click: start single-shot listening
+                                if (sttManager.isListening) {
+                                    // ako već slušaš, možeš zaustaviti
+                                    sttManager.stopListening()
+                                } else {
+                                    // check permission
+                                    val hasPermission = androidx.core.content.ContextCompat.checkSelfPermission(
+                                        context, android.Manifest.permission.RECORD_AUDIO
+                                    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+                                    if (!hasPermission) {
+                                        permissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+                                    } else {
+                                        sttManager.startListeningOnce()
+                                    }
+                                }
                             }) {
-                                Icon(imageVector = Icons.Default.Mic, contentDescription = "Mikrofon")
+                                // promijeni ikonu/izgled kad sluša
+                                if (sttManager.isListening) {
+                                    Icon(
+                                        imageVector = Icons.Default.Mic,
+                                        contentDescription = "Slušam...",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                } else {
+                                    Icon(imageVector = Icons.Default.Mic, contentDescription = "Mikrofon")
+                                }
                             }
                         }
                     )
@@ -130,7 +202,6 @@ fun LlmChatDialog(
                         onClick = {
                             if (userInput.isBlank() || isSending) return@IconButton
 
-                            // sakrij tipkovnicu prije promjena UI-a
                             focusManager.clearFocus(force = true)
 
                             val userText = userInput.trim()
@@ -139,26 +210,22 @@ fun LlmChatDialog(
                             userInput = ""
                             isSending = true
 
-                            // loading bubble s jedinstvenim id-em
                             val loadingId = nextId()
                             val loadingMsg = ChatMessage(id = loadingId, text = "Razmišlja...", sender = Sender.Bot, isLoading = true)
                             messages.add(loadingMsg)
 
                             scope.launch {
                                 val reply = try {
-                                    withContext(Dispatchers.IO) {
-                                        onQuery(userText)
-                                    } ?: "Greška prilikom dohvaćanja odgovora."
+                                    withContext(Dispatchers.IO) { onQuery(userText) }
+                                        ?: "Greška prilikom dohvaćanja odgovora."
                                 } catch (e: Exception) {
                                     "Greška: ${e.message}"
                                 }
 
                                 val idx = messages.indexOfFirst { it.id == loadingId }
-                                if (idx != -1) {
-                                    messages[idx] = messages[idx].copy(text = reply, isLoading = false)
-                                } else {
-                                    messages.add(ChatMessage(id = nextId(), text = reply, sender = Sender.Bot))
-                                }
+                                if (idx != -1) messages[idx] = messages[idx].copy(text = reply, isLoading = false)
+                                else messages.add(ChatMessage(id = nextId(), text = reply, sender = Sender.Bot))
+
                                 isSending = false
                             }
                         },
@@ -170,20 +237,14 @@ fun LlmChatDialog(
             }
 
             LaunchedEffect(messages.size) {
-                if (messages.isNotEmpty()) {
-                    listState.animateScrollToItem(messages.size - 1)
-                }
+                if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
             }
         },
         confirmButton = {
-            TextButton(onClick = { /* optional: replicate send if needed */ }, enabled = false) {
-                Text("Pošalji")
-            }
+            TextButton(onClick = { /* disabled */ }, enabled = false) { Text("Pošalji") }
         },
         dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("Zatvori")
-            }
+            TextButton(onClick = onDismissRequest) { Text("Zatvori") }
         }
     )
 }
