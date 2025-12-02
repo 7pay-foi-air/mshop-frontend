@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import hr.foi.air.mshop.languagemodels.ILanguageModel
-import hr.foi.air.mshop.languagemodels.LlmTestDialog
+import hr.foi.air.mshop.languagemodels.LlmChatDialog
 import hr.foi.air.mshop.languagemodels.OnDeviceLLM
 import hr.foi.air.mshop.navigation.*
 import hr.foi.air.mshop.ui.components.BackArrowButton
@@ -61,10 +61,10 @@ fun MainScreen() {
 
     if (showDialog) {
         val mainActivity = (navController.context as? MainActivity)
-        LlmTestDialog(
+        LlmChatDialog(
             onDismissRequest = { showDialog = false },
             onQuery = { userInput ->
-                mainActivity?.languageModel?.getResponse(userInput)
+                mainActivity?.languageModel?.getResponseAsync(userInput)
             }
         )
     }

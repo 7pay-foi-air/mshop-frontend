@@ -6,4 +6,5 @@ interface ILanguageModel {
     fun closeModel()
 
     fun getResponse(userPrompt: String): String
+    suspend fun getResponseAsync(userPrompt: String): String
 }
