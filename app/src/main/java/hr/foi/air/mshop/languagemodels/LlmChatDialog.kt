@@ -1,7 +1,7 @@
 package hr.foi.air.mshop.languagemodels
 
 import android.Manifest
-import android.app.Activity
+import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +26,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.material3.AlertDialog
+import androidx.core.content.ContextCompat
 
 enum class Sender { User, Bot }
 
@@ -83,43 +86,38 @@ fun LlmChatDialog(
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
 
-    // id generator (ostavi kako imaš)
-    val idGen = remember { java.util.concurrent.atomic.AtomicLong(System.currentTimeMillis()) }
+    val idGen = remember { AtomicLong(System.currentTimeMillis()) }
     fun nextId() = idGen.getAndIncrement()
 
-    // STT manager single-shot
+    var isSttListening by remember { mutableStateOf(false) }
+
     val sttManager = remember {
         SpeechToTextManagerSingle(
             context = context,
             onPartialResult = { partial ->
-                // prikaz partiala u inputu (ako želiš append umjesto replace, prilagodi)
                 userInput = partial
             },
             onResult = { result ->
-                // finalni rezultat -> postavi u input
                 userInput = result
+                isSttListening = false
             },
             onError = { err ->
-                // opcionalno pokaži toast
-                android.widget.Toast.makeText(context, "STT: $err", android.widget.Toast.LENGTH_SHORT).show()
+                isSttListening = false
             }
         )
     }
 
-    // request RECORD_AUDIO permission
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            if (granted) {
-                // start listening immediately after grant
-                sttManager.startListeningOnce()
-            } else {
-                android.widget.Toast.makeText(context, "Record audio permission required", android.widget.Toast.LENGTH_SHORT).show()
-            }
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            isSttListening = true
+            sttManager.startListeningOnce()
+        } else {
+            Toast.makeText(context, "Record audio permission required", Toast.LENGTH_SHORT).show()
         }
-    )
+    }
 
-    // cleanup
     DisposableEffect(Unit) {
         onDispose {
             sttManager.destroy()
@@ -129,6 +127,7 @@ fun LlmChatDialog(
     AlertDialog(
         onDismissRequest = {
             sttManager.stopListening()
+            isSttListening = false
             onDismissRequest()
         },
         title = { Text("Razgovor s AI") },
@@ -138,7 +137,6 @@ fun LlmChatDialog(
                     .fillMaxWidth()
                     .heightIn(min = 400.dp, max = 600.dp)
             ) {
-                // ... LazyColumn for messages (iste kao prije) ...
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f)
@@ -160,37 +158,41 @@ fun LlmChatDialog(
                     OutlinedTextField(
                         value = userInput,
                         onValueChange = { userInput = it },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 56.dp, max = 160.dp),
                         label = { Text("Upišite poruku") },
-                        singleLine = true,
+                        singleLine = false,
+                        maxLines = 6,
                         trailingIcon = {
                             IconButton(onClick = {
-                                // on mic click: start single-shot listening
-                                if (sttManager.isListening) {
-                                    // ako već slušaš, možeš zaustaviti
+                                if (isSttListening) {
                                     sttManager.stopListening()
+                                    isSttListening = false
                                 } else {
-                                    // check permission
-                                    val hasPermission = androidx.core.content.ContextCompat.checkSelfPermission(
-                                        context, android.Manifest.permission.RECORD_AUDIO
-                                    ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                                    val hasPermission = ContextCompat.checkSelfPermission(
+                                        context, Manifest.permission.RECORD_AUDIO
+                                    ) == PackageManager.PERMISSION_GRANTED
 
                                     if (!hasPermission) {
-                                        permissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+                                        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                                     } else {
+                                        isSttListening = true
                                         sttManager.startListeningOnce()
                                     }
                                 }
                             }) {
-                                // promijeni ikonu/izgled kad sluša
-                                if (sttManager.isListening) {
+                                if (isSttListening) {
                                     Icon(
                                         imageVector = Icons.Default.Mic,
                                         contentDescription = "Slušam...",
-                                        tint = MaterialTheme.colorScheme.primary
+                                        tint = MaterialTheme.colorScheme.error
                                     )
                                 } else {
-                                    Icon(imageVector = Icons.Default.Mic, contentDescription = "Mikrofon")
+                                    Icon(
+                                        imageVector = Icons.Default.Mic,
+                                        contentDescription = "Mikrofon"
+                                    )
                                 }
                             }
                         }
@@ -234,17 +236,20 @@ fun LlmChatDialog(
                         Icon(imageVector = Icons.Default.Send, contentDescription = "Pošalji")
                     }
                 }
-            }
 
-            LaunchedEffect(messages.size) {
-                if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
+                if (isSttListening) {
+                    Text("Slušam…", modifier = Modifier.padding(top = 6.dp), fontSize = 12.sp)
+                }
+
+                LaunchedEffect(messages.size) {
+                    if (messages.isNotEmpty()) {
+                        listState.animateScrollToItem(messages.size - 1)
+                    }
+                }
             }
         },
-        confirmButton = {
-            TextButton(onClick = { /* disabled */ }, enabled = false) { Text("Pošalji") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) { Text("Zatvori") }
-        }
+        confirmButton = {  },
+        dismissButton = {  },
+        properties = DialogProperties(dismissOnClickOutside = true)
     )
 }

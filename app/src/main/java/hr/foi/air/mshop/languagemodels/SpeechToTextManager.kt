@@ -1,4 +1,3 @@
-// SpeechToTextManagerSingle.kt
 package hr.foi.air.mshop.languagemodels
 
 import android.content.Context
@@ -16,26 +15,23 @@ class SpeechToTextManagerSingle(
     private val context: Context,
     private val onPartialResult: (String) -> Unit = {},
     private val onResult: (String) -> Unit = {},
-    private val onError: (String) -> Unit = {}
+    private val onError: (String) -> Unit = {},
+    private val onListeningStateChanged: (Boolean) -> Unit = {}
 ) {
     private val TAG = "STT_SINGLE"
     private var recognizer: SpeechRecognizer? = null
     private val mainHandler = Handler(Looper.getMainLooper())
-    @Volatile var isListening: Boolean = false
-        private set
+    @Volatile private var _isListening: Boolean = false
+
+    val isListening: Boolean get() = _isListening
 
     private val intent: Intent by lazy {
         Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-
-            // force Croatian - change if you want english
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale("hr", "HR"))
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "hr-HR")
-
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-
-            // more tolerant to silence so it won't cut too fast
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 1000L)
             putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 4000L)
@@ -45,6 +41,7 @@ class SpeechToTextManagerSingle(
     private val listener = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {
             Log.d(TAG, "onReadyForSpeech")
+            mainHandler.post { onListeningStateChanged(true) }
         }
 
         override fun onBeginningOfSpeech() {
@@ -57,7 +54,6 @@ class SpeechToTextManagerSingle(
 
         override fun onEndOfSpeech() {
             Log.d(TAG, "onEndOfSpeech")
-            // waiting for results callback
         }
 
         override fun onError(error: Int) {
@@ -75,7 +71,8 @@ class SpeechToTextManagerSingle(
             }
             Log.e(TAG, "onError: $msg")
             mainHandler.post {
-                isListening = false
+                _isListening = false
+                onListeningStateChanged(false)
                 onError(msg)
             }
         }
@@ -85,7 +82,8 @@ class SpeechToTextManagerSingle(
             val text = matches?.firstOrNull() ?: ""
             Log.d(TAG, "onResults: $text")
             mainHandler.post {
-                isListening = false
+                _isListening = false
+                onListeningStateChanged(false)
                 onResult(text)
             }
         }
@@ -115,15 +113,19 @@ class SpeechToTextManagerSingle(
 
     /** Start a single-shot listening session. */
     fun startListeningOnce() {
-        if (isListening) return
+        if (_isListening) return
         ensureRecognizer()
         try {
-            isListening = true
+            _isListening = true
+            mainHandler.post { onListeningStateChanged(true) }
             recognizer?.startListening(intent)
         } catch (e: Exception) {
-            isListening = false
+            _isListening = false
+            mainHandler.post {
+                onListeningStateChanged(false)
+                onError("startListening failed: ${e.message}")
+            }
             Log.e(TAG, "startListening failed: ${e.message}")
-            mainHandler.post { onError("startListening failed: ${e.message}") }
         }
     }
 
@@ -133,9 +135,10 @@ class SpeechToTextManagerSingle(
             recognizer?.stopListening()
             recognizer?.cancel()
         } catch (e: Exception) {
-            // ignore
+
         } finally {
-            isListening = false
+            _isListening = false
+            mainHandler.post { onListeningStateChanged(false) }
         }
     }
 
@@ -154,10 +157,11 @@ class SpeechToTextManagerSingle(
             })
             recognizer?.destroy()
         } catch (e: Exception) {
-            // ignore
+
         } finally {
             recognizer = null
-            isListening = false
+            _isListening = false
+            mainHandler.post { onListeningStateChanged(false) }
         }
     }
 }
