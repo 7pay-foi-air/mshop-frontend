@@ -36,7 +36,7 @@ import androidx.navigation.NavHostController
 import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.ui.components.listItems.ArticleManagementListItem
 import hr.foi.air.mshop.ui.components.textFields.SearchField
-import hr.foi.air.mshop.viewmodels.ArticleManagementViewModel
+import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 
 @Composable
 fun ManageArticlesPage(

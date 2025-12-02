@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import hr.foi.air.mshop.core.data.SessionManager
+import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.mshop.navigation.drawerItems
 import kotlinx.coroutines.launch
 

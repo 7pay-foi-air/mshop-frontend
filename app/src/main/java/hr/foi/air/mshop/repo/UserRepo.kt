@@ -1,7 +1,7 @@
 package hr.foi.air.mshop.repo
 
-import hr.foi.air.mshop.network.NetworkService
-import hr.foi.air.mshop.network.dto.AddUserRequest
+import hr.foi.air.ws.NetworkService
+import hr.foi.air.ws.models.userManagement.AddUserRequest
 import org.json.JSONObject
 
 class UserRepo {

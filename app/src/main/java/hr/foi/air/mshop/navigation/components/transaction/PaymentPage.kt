@@ -32,10 +32,7 @@ import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 @Composable
 fun PaymentPage(
     totalAmount: String,
-    onPay: (CardPaymentData) -> Unit,
-    uiSuccessMessage: String? = null,
-    uiErrorMessage: String? = null,
-    isLoading: Boolean = false
+    onPay: (CardPaymentData) -> Unit
 ) {
     var cardNumber by remember { mutableStateOf("") }
     var expiry by remember { mutableStateOf("") }
@@ -130,14 +127,9 @@ fun PaymentPage(
 
             Spacer(Modifier.height(24.dp))
 
-            if (isLoading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(8.dp))
-            }
-
             StyledButton(
-                label = if (isLoading) "Plaćanje..." else "PLATI",
-                enabled = allValid && !isLoading,
+                label = "PLATI",
+                enabled = allValid,
                 onClick = {
                     onPay(
                         CardPaymentData(
@@ -148,16 +140,6 @@ fun PaymentPage(
                     )
                 }
             )
-
-            uiSuccessMessage?.let {
-                Spacer(Modifier.height(12.dp))
-                Text(it, color = Color(0xFF2E7D32))
-            }
-
-            uiErrorMessage?.let {
-                Spacer(Modifier.height(12.dp))
-                Text(it, color = MaterialTheme.colorScheme.error)
-            }
         }
     }
 

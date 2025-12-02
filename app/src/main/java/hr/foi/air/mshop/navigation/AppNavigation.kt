@@ -1,6 +1,5 @@
 package hr.foi.air.mshop.navigation
 
-import android.view.SurfaceControl
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -23,9 +22,11 @@ import hr.foi.air.mshop.navigation.components.login.LoginUsername
 import hr.foi.air.mshop.navigation.components.articleManagement.ManageArticlesPage
 import hr.foi.air.mshop.navigation.components.userManagement.ManageUsersPage
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
+import hr.foi.air.mshop.navigation.components.transaction.PaymentDonePage
 import hr.foi.air.mshop.navigation.components.transaction.PaymentPage
+import hr.foi.air.mshop.navigation.components.transaction.PaymentProcessingPage
 import hr.foi.air.mshop.ui.components.DrawerItem
-import hr.foi.air.mshop.viewmodels.ArticleManagementViewModel
+import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
 import hr.foi.air.mshop.viewmodels.LoginViewModel
 
@@ -49,6 +50,9 @@ object AppRoutes {
     const val EDIT_ARTICLE = "editArticle"
 
     const val PAYMENT = "payment"
+
+    const val PAYMENT_PROCESSING = "payment_processing"
+    const val PAYMENT_DONE = "payment_done"
 }
 
 // Used for routes where no icons appear in the top left corner
@@ -162,6 +166,10 @@ fun AppNavHost(
             )
         }
 
+        composable(AppRoutes.PAYMENT_PROCESSING) {
+            PaymentProcessingPage()
+        }
+
         composable(AppRoutes.PAYMENT) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(AppRoutes.HOME)
@@ -178,7 +186,15 @@ fun AppNavHost(
             )
         }
 
+        composable(AppRoutes.PAYMENT_DONE) { backStackEntry ->
+            val transactionId = backStackEntry.arguments?.getString("transactionId") ?: "—"
 
-
+            PaymentDonePage(
+                transactionId = transactionId,
+                onBackToHome = {
+                    navController.popBackStack(AppRoutes.HOME, inclusive = false)
+                }
+            )
+        }
     }
 }

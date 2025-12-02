@@ -1,6 +1,6 @@
 package hr.foi.air.mshop.data
 
-import hr.foi.air.mshop.network.dto.login.LoginResponse
+import hr.foi.air.ws.models.login.LoginResponse
 
 sealed class LoginState {
     object Idle : LoginState()

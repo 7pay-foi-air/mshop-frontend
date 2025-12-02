@@ -6,9 +6,9 @@ import android.util.Log
 import com.google.gson.Gson
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.repository.IArticleRepository
-import hr.foi.air.mshop.network.NetworkService
-import hr.foi.air.mshop.network.dto.ArticleResponse
-import hr.foi.air.mshop.network.dto.UpdateItemRequest
+import hr.foi.air.ws.NetworkService
+import hr.foi.air.ws.models.articleManagement.ArticleResponse
+import hr.foi.air.ws.models.articleManagement.UpdateItemRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.MediaType.Companion.toMediaType
