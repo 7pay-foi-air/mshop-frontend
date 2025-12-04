@@ -4,9 +4,8 @@ import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import hr.foi.air.mshop.core.models.Article
-import hr.foi.air.mshop.viewmodels.ArticleManagementViewModel
-import hr.foi.air.mshop.viewmodels.EditArticleViewModel
+import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
+import hr.foi.air.mshop.viewmodels.articleManagement.EditArticleViewModel
 
 @Composable
 fun EditArticlePage(

@@ -7,8 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import hr.foi.air.mshop.core.models.Article
-import hr.foi.air.mshop.viewmodels.AddArticleViewModel
+import hr.foi.air.mshop.viewmodels.articleManagement.AddArticleViewModel
 
 @Composable
 fun AddArticlePage(

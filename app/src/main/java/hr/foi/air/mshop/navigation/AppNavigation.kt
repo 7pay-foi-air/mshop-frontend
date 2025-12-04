@@ -1,12 +1,15 @@
 package hr.foi.air.mshop.navigation
 
+import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -21,9 +24,14 @@ import hr.foi.air.mshop.navigation.components.login.LoginUsername
 import hr.foi.air.mshop.navigation.components.articleManagement.ManageArticlesPage
 import hr.foi.air.mshop.navigation.components.userManagement.ManageUsersPage
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
+import hr.foi.air.mshop.navigation.components.transaction.PaymentDonePage
+import hr.foi.air.mshop.navigation.components.transaction.PaymentPage
+import hr.foi.air.mshop.navigation.components.transaction.PaymentProcessingPage
 import hr.foi.air.mshop.ui.components.DrawerItem
-import hr.foi.air.mshop.viewmodels.ArticleManagementViewModel
+import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
+import hr.foi.air.mshop.viewmodels.HomepageViewModel
 import hr.foi.air.mshop.viewmodels.LoginViewModel
+import hr.foi.air.mshop.viewmodels.transaction.PaymentViewModel
 
 object AppRoutes {
     // LOGIN
@@ -43,6 +51,11 @@ object AppRoutes {
     const val MANAGE_ARTICLES = "manageArticles"
     const val ADD_ARTICLE = "addArticle"
     const val EDIT_ARTICLE = "editArticle"
+
+    const val PAYMENT = "payment"
+
+    const val PAYMENT_PROCESSING = "payment_processing"
+    const val PAYMENT_DONE = "payment_done"
 }
 
 // Used for routes where no icons appear in the top left corner
@@ -126,7 +139,7 @@ fun AppNavHost(
             )
         }
         composable(AppRoutes.HOME) {
-            Homepage()
+            Homepage(navController)
         }
         composable(AppRoutes.ADD_USER) {
             AddUserPage()
@@ -156,5 +169,63 @@ fun AppNavHost(
             )
         }
 
+        composable(AppRoutes.PAYMENT_PROCESSING) {
+            PaymentProcessingPage()
+        }
+
+        composable(AppRoutes.PAYMENT) { backStackEntry ->
+            val context = LocalContext.current
+
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(AppRoutes.HOME)
+            }
+            val homepageViewModel: HomepageViewModel = viewModel(parentEntry)
+            val paymentViewModel: PaymentViewModel = viewModel()
+            val chargeAmountState = homepageViewModel.chargeAmountUIState.collectAsState().value
+
+            PaymentPage(
+                totalAmount = chargeAmountState.text,   // npr. "123,45€"
+                onPay = { cardData -> //cardData se ne salje na backend
+                    val transaction = homepageViewModel.buildTransaction()
+
+                    if(transaction!= null) {
+                        navController.navigate(AppRoutes.PAYMENT_PROCESSING)
+                        paymentViewModel.processPayment(
+                            transaction = transaction,
+                            onSuccess = { transactionId ->
+                                // Kad backend završi s success idemo na DONE page s ID-em
+                                navController.navigate("${AppRoutes.PAYMENT_DONE}/$transactionId") {
+                                    popUpTo(AppRoutes.PAYMENT_PROCESSING) { inclusive = true }
+                                }
+                                //ocisti kosaricu
+                                homepageViewModel.clearSelection()
+                            },
+                            onError = { errorMsg ->
+                                navController.popBackStack()
+                                Toast.makeText(
+                                    context,
+                                    errorMsg ?: "Dogodila se greška!",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        )
+                    }else{
+                        Toast.makeText(context, "Košarica je prazna!", Toast.LENGTH_SHORT).show()
+                    }
+
+                }
+            )
+        }
+
+        composable("${AppRoutes.PAYMENT_DONE}/{transactionId}") { backStackEntry ->
+            val transactionId = backStackEntry.arguments?.getString("transactionId") ?: "—"
+
+            PaymentDonePage(
+                transactionId = transactionId,
+                onBackToHome = {
+                    navController.popBackStack(AppRoutes.HOME, inclusive = false)
+                }
+            )
+        }
     }
 }

@@ -29,13 +29,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.ui.screens.CartScreen
 import hr.foi.air.mshop.ui.screens.SaleScreen
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
 
 @Composable
-fun Homepage(homepageViewModel: HomepageViewModel = viewModel()) {
+fun Homepage(
+    navController: NavHostController,
+    homepageViewModel: HomepageViewModel = viewModel()
+) {
     val chargeAmountState by homepageViewModel.chargeAmountUIState.collectAsState()
 
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -92,7 +97,9 @@ fun Homepage(homepageViewModel: HomepageViewModel = viewModel()) {
                 )
             }
 
-            IconButton(onClick = { /* TODO */ }) {
+            IconButton(onClick = {
+                navController.navigate(AppRoutes.PAYMENT)
+            }) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = "Continue",
@@ -127,5 +134,6 @@ fun Homepage(homepageViewModel: HomepageViewModel = viewModel()) {
 @Preview(showBackground = true)
 @Composable
 fun HomepagePreview() {
-    Homepage()
+    val navController = androidx.navigation.compose.rememberNavController()
+    Homepage(navController)
 }

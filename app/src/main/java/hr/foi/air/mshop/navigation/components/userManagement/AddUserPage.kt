@@ -13,11 +13,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import hr.foi.air.mshop.network.dto.AddUserRequest
 import hr.foi.air.mshop.ui.components.DateFieldUnderLabel
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
-import hr.foi.air.mshop.viewmodels.AddUserViewModel
+import hr.foi.air.mshop.viewmodels.userManagement.AddUserViewModel
+import hr.foi.air.ws.models.userManagement.AddUserRequest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

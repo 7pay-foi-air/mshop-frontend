@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import hr.foi.air.mshop.core.data.SessionManager
+import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.mshop.data.LoginState
 import hr.foi.air.mshop.repo.LoginRepo
 import kotlinx.coroutines.flow.MutableStateFlow

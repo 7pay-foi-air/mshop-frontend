@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "mShop"
 include(":app")
 include(":core")
+include(":ws")
