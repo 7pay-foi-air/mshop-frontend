@@ -3,6 +3,8 @@ package hr.foi.air.mshop.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.Article
+import hr.foi.air.mshop.core.models.Transaction
+import hr.foi.air.mshop.core.models.TransactionItem
 import hr.foi.air.mshop.core.repository.IArticleRepository
 import hr.foi.air.mshop.repo.ArticleRepo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -114,6 +116,39 @@ class HomepageViewModel(
         }
         _chargeAmountUIState.value = _chargeAmountUIState.value.copy(
             text = String.format("%.2f€", currentTotalPrice)
+        )
+    }
+
+    fun buildTransaction(): Transaction? {
+        val selected = _selectedArticles.value
+        if(selected.isEmpty()) return null
+
+        val allArticles = filteredArticles.value
+        if(allArticles.isEmpty()) return null
+
+        val items = selected.mapNotNull { (articleId, quantity) ->
+            val article = allArticles.find { it.id == articleId }
+            val uuid = article?.uuidItem
+            if (article != null && uuid != null) {
+                TransactionItem(
+                    uuidItem = uuid,
+                    name = article.articleName,
+                    price = article.price,
+                    quantity = quantity
+                )
+            } else {
+                null
+            }
+        }
+
+        if (items.isEmpty()) return null
+        val total = items.sumOf { it.price * it.quantity }
+
+        return Transaction(
+            description = "Kupnja u mShopu",
+            items = items,
+            totalAmount = total,
+            currency = "EUR"
         )
     }
 }

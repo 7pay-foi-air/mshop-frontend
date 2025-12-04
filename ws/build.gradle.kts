@@ -52,6 +52,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -63,7 +64,6 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
 
-    implementation(libs.androidx.core.ktx)
     implementation("com.auth0.android:jwtdecode:2.0.2")
 
     implementation("androidx.compose.runtime:runtime:1.6.7")
