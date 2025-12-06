@@ -24,6 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,119 +33,79 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextFieldMultiline
+import hr.foi.air.mshop.viewmodels.articleManagement.ArticleFormViewModel
 
 @Composable
 fun ArticleFormPage(
     articleToEdit: Article? = null,
-    onSubmit: (Article) -> Unit,
+    viewModel: ArticleFormViewModel = viewModel(),
+    onSubmit: () -> Unit,
     onCancel: () -> Unit
 ) {
+    val context = LocalContext.current
 
-    val isEditMode = articleToEdit != null
-
-    var ean by remember(articleToEdit) { mutableStateOf(articleToEdit?.ean ?: "") }
-    var articleName by remember(articleToEdit) { mutableStateOf(articleToEdit?.articleName ?: "") }
-    var articleDescription by remember(articleToEdit) { mutableStateOf(articleToEdit?.description ?: "") }
-    var price by remember(articleToEdit) { mutableStateOf(articleToEdit?.price?.toString() ?: "") }
-
-    var imageUri by remember(articleToEdit) {
-        mutableStateOf<Uri?>(
-            articleToEdit?.imageUri?.let { Uri.parse(it) }   // ako postoji stara lokalna slika
-        )
+    LaunchedEffect(key1 = articleToEdit) {
+        viewModel.initializeState(articleToEdit)
     }
-
-    var imageUrl by remember(articleToEdit) { mutableStateOf(articleToEdit?.imageUrl) }
-
-    // prikaz naziva slike u text fieldu (ako editaš i već postoji url)
-    var imagePath by remember(articleToEdit) {
-        mutableStateOf(articleToEdit?.imageUrl?.substringAfterLast('/') ?: "")
-    }
-
-    var eanVisited by remember { mutableStateOf(false) };
-    var eanHadFocus by remember { mutableStateOf(false) }
-
-    var articleNameVisited by remember { mutableStateOf(false) };
-    var articleNameHadFocus by remember { mutableStateOf(false) }
-
-    var priceVisited by remember { mutableStateOf(false) };
-    var priceHadFocus by remember { mutableStateOf(false) }
-
-    val eanEmpty = ean.isBlank()
-    val articleNameEmpty = articleName.isBlank()
-    val priceEmpty = price.isBlank()
-
-    //pokusamo pretvoriti unesenu vrijednost u broj ako nije moguce unenesa vrijednost nije broj
-    val eanNotNumeric = !eanEmpty && ean.toLongOrNull() == null
-    val priceNotNumeric = !priceEmpty && price.toDoubleOrNull() == null
-
-    val eanError = eanVisited && (eanEmpty || eanNotNumeric)
-    val nameError = articleNameVisited && articleNameEmpty
-    val priceError = priceVisited && (priceEmpty || priceNotNumeric)
-
-    val allValid =
-        ean.isNotBlank() &&
-        articleName.isNotBlank() &&
-        price.isNotBlank() &&
-        price.toDoubleOrNull() != null
-
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
-            imageUri = uri
-            imageUrl = null  // nova lokalna slika ima prednost nad starom remote slikom
-
-            val lastSegment = uri.lastPathSegment
-            val displayName = lastSegment?.substringAfterLast('/') ?: "slika"
-            imagePath = displayName
+            viewModel.onImageSelected(uri)
         }
     }
 
-    val imageModel: Any? = imageUri ?: imageUrl
+    val imageModel: Any? = viewModel.imageUri ?: viewModel.imageUrl
 
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState()),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             "mShop",
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 4.dp)
         )
 
         Text(
-            if (isEditMode) "Ažuriranje artikla" else "Dodavanje novog artikla",
+            if (viewModel.isEditMode) "Ažuriranje artikla" else "Dodavanje novog artikla",
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
         UnderLabelTextField(
             caption = "Šifra proizvoda (ean)",
-            value = ean,
-            onValueChange = { ean = it },
+            value = viewModel.ean,
+            onValueChange = { viewModel.ean = it },
             placeholder = "",
-            isError = eanError,
+            isError = viewModel.eanError,
             errorText = when {
-                !eanVisited -> null
-                eanEmpty -> "Obavezno polje"
-                eanNotNumeric -> "Mora biti broj"
+                !viewModel.eanVisited -> null
+                viewModel.eanEmpty -> "Obavezno polje"
+                viewModel.eanNotNumeric -> "Mora biti broj"
                 else -> null
             },
-            //enabled = !isEditMode, //crveni se
             modifier = Modifier.onFocusChanged { f ->
-                if (f.isFocused) eanHadFocus = true
-                if (!f.isFocused && eanHadFocus) eanVisited = true
+                if (f.isFocused) viewModel.eanVisited = true
             }
         )
 
@@ -153,14 +114,13 @@ fun ArticleFormPage(
 
         UnderLabelTextField(
             caption = "Naziv artikla",
-            value = articleName,
-            onValueChange = { articleName = it },
+            value = viewModel.articleName,
+            onValueChange = { viewModel.articleName = it },
             placeholder = "",
-            isError = nameError,
-            errorText = if (nameError) "Obavezno polje" else null,
+            isError = viewModel.nameError,
+            errorText = if (viewModel.nameError) "Obavezno polje" else null,
             modifier = Modifier.onFocusChanged { f ->
-                if (f.isFocused) articleNameHadFocus = true
-                if (!f.isFocused && articleNameHadFocus) articleNameVisited = true
+                if (f.isFocused) viewModel.articleNameVisited = true
             }
         )
 
@@ -168,8 +128,8 @@ fun ArticleFormPage(
 
         UnderLabelTextFieldMultiline(
             caption = "Opis artikla",
-            value = articleDescription,
-            onValueChange = { articleDescription = it },
+            value = viewModel.description,
+            onValueChange = { viewModel.description = it },
             placeholder = "",
             isError = false,
             errorText = null,
@@ -182,19 +142,18 @@ fun ArticleFormPage(
 
         UnderLabelTextField(
             caption = "Jedinična cijena (€)",
-            value = price,
-            onValueChange = { price = it },
+            value = viewModel.price,
+            onValueChange = { viewModel.price = it },
             placeholder = "",
-            isError = priceError,
+            isError = viewModel.priceError,
             errorText = when {
-                !priceVisited -> null
-                priceEmpty -> "Obavezno polje"
-                priceNotNumeric -> "Mora biti broj (npr. 13.5 ili 13)"
+                !viewModel.priceVisited -> null
+                viewModel.priceEmpty -> "Obavezno polje"
+                viewModel.priceNotNumeric -> "Mora biti broj (npr. 13.5 ili 13)"
                 else -> null
             },
             modifier = Modifier.onFocusChanged { f ->
-                if (f.isFocused) priceHadFocus = true
-                if (!f.isFocused && priceHadFocus) priceVisited = true
+                if (f.isFocused) viewModel.priceVisited = true
             }
         )
 
@@ -202,7 +161,7 @@ fun ArticleFormPage(
 
         UnderLabelTextField(
             caption = "Slika",
-            value = imagePath,
+            value = viewModel.imagePath,
             onValueChange = { /* read-only */ },
             placeholder = "",
             isError = false,
@@ -255,26 +214,15 @@ fun ArticleFormPage(
             Column(modifier = Modifier.padding(start = 16.dp)) {
 
                 StyledButton(
-                    label = if (isEditMode) "SPREMI" else "DODAJ",
-                    enabled = allValid,
+                    label = if (viewModel.isEditMode) "SPREMI" else "DODAJ",
+                    enabled = viewModel.isFormValid,
                     onClick = {
-                        val newOrEdited = Article(
-                            id = articleToEdit?.id,
-                            uuidItem = articleToEdit?.uuidItem,
-                            ean = ean.trim(),
-                            articleName = articleName.trim(),
-                            description = articleDescription.trim(),
-                            price = price.toDouble(),
-                            currency = articleToEdit?.currency ?: "EUR",
-                            imageUrl = imageUrl,
-                            imageUri = imageUri?.toString(),
-                            stockQuantity = 1
-                        )
-                        onSubmit(newOrEdited)
+                        viewModel.saveArticle(context)
+                        onSubmit()
                     }
                 )
 
-                if (isEditMode) {
+                if (viewModel.isEditMode) {
                     Spacer(Modifier.height(8.dp))
                     StyledButton(
                         label = "ODUSTANI",
@@ -286,6 +234,17 @@ fun ArticleFormPage(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun ArticleFormPagePreview() {
+    ArticleFormPage(
+        onSubmit = { },
+        onCancel = { }
+    )
+}
+
+
 
 
 

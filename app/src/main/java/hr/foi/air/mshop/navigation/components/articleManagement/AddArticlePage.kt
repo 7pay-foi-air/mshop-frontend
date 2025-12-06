@@ -7,13 +7,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import hr.foi.air.mshop.viewmodels.articleManagement.AddArticleViewModel
+import hr.foi.air.mshop.viewmodels.articleManagement.ArticleFormViewModel
 
 @Composable
 fun AddArticlePage(
     onCancel: () -> Unit,
     onAddedSuccessfully: () -> Unit,
-    viewModel: AddArticleViewModel = viewModel()
+    viewModel: ArticleFormViewModel = viewModel()
 ){
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -34,8 +34,8 @@ fun AddArticlePage(
 
     ArticleFormPage(
         articleToEdit = null,
-        onSubmit = { article ->
-            viewModel.createArticle(article, context)
+        viewModel = viewModel,
+        onSubmit = {
         },
         onCancel = onCancel
     )
