@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import hr.foi.air.mshop.MainActivity
-import hr.foi.air.mshop.languagemodels.LlmTestDialog
+import hr.foi.air.mshop.languagemodels.LlmChatDialog
 import hr.foi.air.mshop.navigation.AppNavHost
 import hr.foi.air.mshop.navigation.authRoutes
 import hr.foi.air.mshop.navigation.drawerItems
@@ -43,10 +43,10 @@ fun MainScreen() {
 
     if (showDialog) {
         val mainActivity = (navController.context as? MainActivity)
-        LlmTestDialog(
+        LlmChatDialog(
             onDismissRequest = { showDialog = false },
             onQuery = { userInput ->
-                mainActivity?.languageModel?.getResponse(userInput)
+                mainActivity?.languageModel?.getResponseAsync(userInput)
             }
         )
     }
@@ -58,7 +58,7 @@ fun MainScreen() {
                     showDialog = true
                 }
             ) {
-                Icon(Icons.Default.PlayArrow, contentDescription = "Test LLM")
+                Icon(Icons.Default.Chat, contentDescription = "Test LLM")
             }
         }
     ) { paddingValues ->
