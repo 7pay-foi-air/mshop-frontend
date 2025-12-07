@@ -3,6 +3,7 @@ package hr.foi.air.mshop.navigation
 import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
 import hr.foi.air.mshop.navigation.components.transaction.PaymentDonePage
 import hr.foi.air.mshop.navigation.components.transaction.PaymentPage
 import hr.foi.air.mshop.navigation.components.transaction.PaymentProcessingPage
+import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionHistoryPage
 import hr.foi.air.mshop.ui.components.DrawerItem
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
@@ -38,24 +40,26 @@ object AppRoutes {
     const val LOGIN_GRAPH = "login"
     const val LOGIN_USERNAME = "logUsername"
     const val LOGIN_PASSWORD = "logPassword"
-    
+
     // HOME
     const val HOME = "home"
-    
     // USER MANAGEMENT
     const val MANAGE_USERS = "manageUsers"
     const val ADD_USER = "addUser"
     const val REGISTER_ORGANIZATION = "regOrg"
-    
+
     // ARTICLE MANAGEMENT
     const val MANAGE_ARTICLES = "manageArticles"
     const val ADD_ARTICLE = "addArticle"
     const val EDIT_ARTICLE = "editArticle"
 
+    //PAYMENTS
     const val PAYMENT = "payment"
-
     const val PAYMENT_PROCESSING = "payment_processing"
     const val PAYMENT_DONE = "payment_done"
+
+    //TRANSACTION HISTORY
+    const val TRANSACTION_HISTORY = "transaction_history"
 }
 
 // Used for routes where no icons appear in the top left corner
@@ -76,6 +80,11 @@ val drawerItems = listOf(
         icon = Icons.Default.Settings,
         title = "Upravljanje artiklima",
         route = AppRoutes.MANAGE_ARTICLES
+    ),
+    DrawerItem(
+        icon = Icons.Default.MonetizationOn,
+        title = "Povijest transakcija",
+        route = AppRoutes.TRANSACTION_HISTORY
     )
 )
 
@@ -226,6 +235,10 @@ fun AppNavHost(
                     navController.popBackStack(AppRoutes.HOME, inclusive = false)
                 }
             )
+        }
+
+        composable(AppRoutes.TRANSACTION_HISTORY) {
+            TransactionHistoryPage(navController = navController)
         }
     }
 }

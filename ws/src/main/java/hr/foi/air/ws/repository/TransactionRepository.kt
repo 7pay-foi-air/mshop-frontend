@@ -1,11 +1,14 @@
 package hr.foi.air.ws.repository
 import hr.foi.air.mshop.core.models.Transaction
+import hr.foi.air.mshop.core.models.TransactionHistoryRecord
 import hr.foi.air.mshop.core.models.TransactionResult
+import hr.foi.air.mshop.core.models.TransactionType
 import hr.foi.air.mshop.core.repository.ITransactionRepository
 import hr.foi.air.mshop.network.dto.transaction.CreateTransactionRequest
 import hr.foi.air.mshop.network.dto.transaction.TransactionItemRequest
 import hr.foi.air.mshop.network.dto.transaction.TransactionResponse
 import hr.foi.air.ws.api.ITransactionApi
+import hr.foi.air.ws.models.transaction.TransactionSummary
 
 class TransactionRepository(
     private val api: ITransactionApi
@@ -57,4 +60,24 @@ class TransactionRepository(
             currency = this.currency,
             isSuccessful = this.is_successful
         )
+
+    override suspend fun getTransactionsForCurrentUser(): List<TransactionHistoryRecord> {
+        val dtoList = api.getTransactionsForCurrentUser()
+        return dtoList.map { it.toDomain() }
+    }
+
+    // DTO -> DOMAIN (core model)
+    private fun TransactionSummary.toDomain(): TransactionHistoryRecord {
+        return TransactionHistoryRecord(
+            id = uuid_transaction,
+            totalAmount = total_amount,
+            currency = currency,
+            isSuccessful = is_successful,
+            completedAt = completed_at,
+            type = when (transaction_type.uppercase()) {
+                "REFUND" -> TransactionType.REFUND
+                else -> TransactionType.PAYMENT
+            }
+        )
+    }
 }
