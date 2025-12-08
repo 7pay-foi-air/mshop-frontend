@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.repository.IArticleRepository
-import hr.foi.air.mshop.repo.ArticleRepo
+import hr.foi.air.ws.repository.ArticleRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

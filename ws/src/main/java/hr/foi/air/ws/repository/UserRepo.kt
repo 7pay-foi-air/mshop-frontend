@@ -1,4 +1,4 @@
-package hr.foi.air.mshop.repo
+package hr.foi.air.ws.repository
 
 import hr.foi.air.ws.NetworkService
 import hr.foi.air.ws.models.userManagement.AddUserRequest

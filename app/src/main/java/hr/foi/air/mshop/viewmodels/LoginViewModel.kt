@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.mshop.data.LoginState
-import hr.foi.air.mshop.repo.LoginRepo
+import hr.foi.air.ws.repository.LoginRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow

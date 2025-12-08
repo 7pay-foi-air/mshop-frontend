@@ -24,7 +24,7 @@ data class RefundSummaryUI(
     val amountText: String,
     val dateText: String,
     val timeText: String,
-    val originalTransactionId: String  // "Povrat transakcije ID 123456"
+    val originalTransactionId: String
 )
 
 
