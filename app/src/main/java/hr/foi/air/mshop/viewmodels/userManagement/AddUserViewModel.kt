@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import hr.foi.air.mshop.repo.UserRepo
+import hr.foi.air.ws.repository.UserRepo
 import hr.foi.air.mshop.data.UIState
 import hr.foi.air.ws.models.userManagement.AddUserRequest
 import kotlinx.coroutines.launch

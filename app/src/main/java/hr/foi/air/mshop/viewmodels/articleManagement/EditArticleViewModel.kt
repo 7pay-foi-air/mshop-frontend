@@ -4,14 +4,15 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.Article
-import hr.foi.air.mshop.repo.ArticleRepo
+import hr.foi.air.mshop.core.repository.IArticleRepository
+import hr.foi.air.ws.repository.ArticleRepo
 import hr.foi.air.mshop.data.UIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class EditArticleViewModel(
-    private val repo: ArticleRepo = ArticleRepo()
+    private val repo: IArticleRepository = ArticleRepo()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UIState())
