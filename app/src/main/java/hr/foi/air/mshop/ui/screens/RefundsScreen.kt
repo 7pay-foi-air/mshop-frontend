@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.components.listItems.RefundHistoryListItem
 import hr.foi.air.mshop.viewmodels.transaction.TransactionHistoryViewModel
 
 @Composable
@@ -26,7 +27,7 @@ fun RefundsScreen(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("Povrati će biti implementirani kasnije.")
+            Text("Još nema zaprimljenih povrata.")
         }
     } else {
         LazyColumn(
@@ -34,7 +35,10 @@ fun RefundsScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(refunds) { refund ->
-                // RefundListItem ce tu ici
+                RefundHistoryListItem(
+                    refund = refund,
+                    onClick = { onTransactionClick(refund.id) }
+                )
             }
         }
     }

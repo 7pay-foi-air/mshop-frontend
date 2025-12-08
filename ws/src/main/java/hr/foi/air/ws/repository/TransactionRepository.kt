@@ -1,5 +1,6 @@
 package hr.foi.air.ws.repository
 import hr.foi.air.mshop.core.models.Transaction
+import hr.foi.air.mshop.core.models.TransactionHistoryDomain
 import hr.foi.air.mshop.core.models.TransactionHistoryRecord
 import hr.foi.air.mshop.core.models.TransactionResult
 import hr.foi.air.mshop.core.models.TransactionType
@@ -61,23 +62,45 @@ class TransactionRepository(
             isSuccessful = this.is_successful
         )
 
-    override suspend fun getTransactionsForCurrentUser(): List<TransactionHistoryRecord> {
-        val dtoList = api.getTransactionsForCurrentUser()
-        return dtoList.map { it.toDomain() }
+    override suspend fun getTransactionsForCurrentUser(): TransactionHistoryDomain {
+        return try {
+            val response = api.getTransactionsForCurrentUser()
+
+            if (!response.isSuccessful) {
+                TransactionHistoryDomain(emptyList(), emptyList())
+            } else {
+                val body = response.body() ?: return TransactionHistoryDomain(emptyList(), emptyList())
+
+                val paymentsDto = body.successfulTransactions
+                val refundsDto = body.refundedTransactions ?: emptyList()
+
+                val payments = paymentsDto.map { it.toDomain(TransactionType.PAYMENT) }
+                val refunds = refundsDto.map { it.toDomain(TransactionType.REFUND) }
+
+                TransactionHistoryDomain(
+                    payments = payments,
+                    refunds = refunds
+                )
+            }
+        } catch (e: Exception) {
+            TransactionHistoryDomain(emptyList(), emptyList())
+        }
     }
 
+
+
     // DTO -> DOMAIN (core model)
-    private fun TransactionSummary.toDomain(): TransactionHistoryRecord {
+    private fun TransactionSummary.toDomain(
+        type: TransactionType
+    ): TransactionHistoryRecord {
         return TransactionHistoryRecord(
             id = uuid_transaction,
             totalAmount = total_amount,
             currency = currency,
-            isSuccessful = is_successful,
-            completedAt = completed_at,
-            type = when (transaction_type.uppercase()) {
-                "REFUND" -> TransactionType.REFUND
-                else -> TransactionType.PAYMENT
-            }
+            createdAt = transaction_date,
+            type = type,
+            refundToTransactionId = transaction_refund_id
         )
     }
+
 }
