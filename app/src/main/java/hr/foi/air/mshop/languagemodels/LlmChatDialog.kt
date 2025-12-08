@@ -223,12 +223,10 @@ fun LlmChatDialog(
 
                                 Log.d("LlmChatDialog", "text: $text, result: $result")
 
-                                // Update poruke u chat-u
                                 val idx = messages.indexOfFirst { it.id == loadingId }
                                 if (idx != -1) messages[idx] = messages[idx].copy(text = text, isLoading = false)
                                 else messages.add(ChatMessage(id = nextId(), text = text, sender = Sender.Bot))
 
-                                // Pozovi handler da inicira funkcionalnost
                                 assistantHandler(result.intent, result.params)
 
                                 isSending = false

@@ -7,7 +7,11 @@ import androidx.navigation.NavController
 import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.ws.data.SessionManager
 
-fun createAssistantIntentHandler(navController: NavController, context: Context): LlmIntentHandler = { intent, params ->
+fun createAssistantIntentHandler(
+    navController: NavController,
+    context: Context,
+    onCloseChatDialog: () -> Unit
+): LlmIntentHandler = { intent, params ->
 
     Log.d("AssistantActions", "Intent: $intent, Params: $params")
 
@@ -42,7 +46,10 @@ fun createAssistantIntentHandler(navController: NavController, context: Context)
             }
             else{
                 SessionManager.endSession()
-                Toast.makeText(context, "Odjavljeni ste.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Odjavio sam Vas.", Toast.LENGTH_SHORT).show()
+
+                onCloseChatDialog()
+
                 navController.navigate(AppRoutes.LOGIN_GRAPH) {
                     popUpTo(0) { inclusive = true }
                 }

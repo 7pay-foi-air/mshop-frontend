@@ -44,7 +44,11 @@ fun MainScreen() {
 
     val mainActivity = (navController.context as? MainActivity)
     val assistantVm = mainActivity?.assistantViewModel
-    val assistantHandler = mainActivity?.let { createAssistantIntentHandler(navController, it) }
+    val assistantHandler = mainActivity?.let {
+        createAssistantIntentHandler(navController, it) {
+            showDialog = false
+        }
+    }
 
     if (showDialog && assistantVm != null && assistantHandler != null) {
         LlmChatDialog(

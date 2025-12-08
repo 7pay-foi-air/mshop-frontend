@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import hr.foi.air.mshop.languagemodels.ILanguageModel
 import hr.foi.air.mshop.languagemodels.LLMResult
 import hr.foi.air.mshop.languagemodels.parseLLMResult
-import hr.foi.air.ws.data.SessionManager
 
 class AssistantViewModel(
     private val languageModel: ILanguageModel
