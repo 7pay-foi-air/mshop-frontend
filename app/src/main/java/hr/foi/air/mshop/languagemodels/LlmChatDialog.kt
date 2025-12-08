@@ -2,6 +2,7 @@ package hr.foi.air.mshop.languagemodels
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.AlertDialog
 import androidx.core.content.ContextCompat
+import hr.foi.air.mshop.viewmodels.LLM.AssistantViewModel
 
 enum class Sender { User, Bot }
 
@@ -76,7 +78,8 @@ fun MessageBubble(message: ChatMessage) {
 @Composable
 fun LlmChatDialog(
     onDismissRequest: () -> Unit,
-    onQuery: suspend (String) -> String?
+    assistantViewModel: AssistantViewModel,
+    assistantHandler: LlmIntentHandler
 ) {
     var userInput by remember { mutableStateOf("") }
     val messages = remember { mutableStateListOf<ChatMessage>() }
@@ -205,7 +208,6 @@ fun LlmChatDialog(
                             if (userInput.isBlank() || isSending) return@IconButton
 
                             focusManager.clearFocus(force = true)
-
                             val userText = userInput.trim()
                             val userMsg = ChatMessage(id = nextId(), text = userText, sender = Sender.User)
                             messages.add(userMsg)
@@ -217,16 +219,17 @@ fun LlmChatDialog(
                             messages.add(loadingMsg)
 
                             scope.launch {
-                                val reply = try {
-                                    withContext(Dispatchers.IO) { onQuery(userText) }
-                                        ?: "Greška prilikom dohvaćanja odgovora."
-                                } catch (e: Exception) {
-                                    "Greška: ${e.message}"
-                                }
+                                val (text, result) = assistantViewModel.processMessage(userText)
 
+                                Log.d("LlmChatDialog", "text: $text, result: $result")
+
+                                // Update poruke u chat-u
                                 val idx = messages.indexOfFirst { it.id == loadingId }
-                                if (idx != -1) messages[idx] = messages[idx].copy(text = reply, isLoading = false)
-                                else messages.add(ChatMessage(id = nextId(), text = reply, sender = Sender.Bot))
+                                if (idx != -1) messages[idx] = messages[idx].copy(text = text, isLoading = false)
+                                else messages.add(ChatMessage(id = nextId(), text = text, sender = Sender.Bot))
+
+                                // Pozovi handler da inicira funkcionalnost
+                                assistantHandler(result.intent, result.params)
 
                                 isSending = false
                             }

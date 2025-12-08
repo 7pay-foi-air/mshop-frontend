@@ -21,6 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import hr.foi.air.mshop.MainActivity
 import hr.foi.air.mshop.languagemodels.LlmChatDialog
+import hr.foi.air.mshop.languagemodels.createAssistantIntentHandler
 import hr.foi.air.mshop.navigation.AppNavHost
 import hr.foi.air.mshop.navigation.authRoutes
 import hr.foi.air.mshop.navigation.drawerItems
@@ -41,13 +42,15 @@ fun MainScreen() {
 
     val scope = rememberCoroutineScope()
 
-    if (showDialog) {
-        val mainActivity = (navController.context as? MainActivity)
+    val mainActivity = (navController.context as? MainActivity)
+    val assistantVm = mainActivity?.assistantViewModel
+    val assistantHandler = mainActivity?.let { createAssistantIntentHandler(navController, it) }
+
+    if (showDialog && assistantVm != null && assistantHandler != null) {
         LlmChatDialog(
             onDismissRequest = { showDialog = false },
-            onQuery = { userInput ->
-                mainActivity?.languageModel?.getResponseAsync(userInput)
-            }
+            assistantViewModel = assistantVm,
+            assistantHandler = assistantHandler
         )
     }
 
