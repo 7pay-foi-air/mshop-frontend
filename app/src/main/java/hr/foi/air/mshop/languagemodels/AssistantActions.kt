@@ -16,43 +16,16 @@ fun createAssistantIntentHandler(
     Log.d("AssistantActions", "Intent: $intent, Params: $params")
 
     when (intent) {
-        /*"NEW_TRANSACTION" -> {
-            val isLoggedIn = SessionManager.accessToken != null
-            if (!isLoggedIn) {
-                Toast.makeText(context, "Morate se prijaviti da biste inicirali transakciju.", Toast.LENGTH_LONG).show()
-                navController.navigate(AppRoutes.LOGIN_GRAPH)
-            } else {
-                val value = params?.get("value") ?: ""
-                navController.navigate("${AppRoutes.PAYMENT}/$value")
-            }
-        }*/
-
         "VIEW_TRANSACTIONS" -> {
-            if (SessionManager.accessToken == null) {
-                Toast.makeText(context, "Morate se prijaviti da biste vidjeli povijest transakcija.", Toast.LENGTH_LONG).show()
-                navController.navigate(AppRoutes.LOGIN_GRAPH)
-            } else {
-                navController.navigate(AppRoutes.TRANSACTION_HISTORY)
-            }
-        }
-
-        "VIEW_PRODUCTS", "PRODUCTS" -> {
-            navController.navigate(AppRoutes.HOME)
+            navController.navigate(AppRoutes.TRANSACTION_HISTORY)
         }
 
         "LOGOUT" -> {
-            if (SessionManager.accessToken == null) {
-                Toast.makeText(context, "Niste prijavljeni.", Toast.LENGTH_LONG).show()
-            }
-            else{
-                SessionManager.endSession()
-                Toast.makeText(context, "Odjavio sam Vas.", Toast.LENGTH_SHORT).show()
-
-                onCloseChatDialog()
-
-                navController.navigate(AppRoutes.LOGIN_GRAPH) {
-                    popUpTo(0) { inclusive = true }
-                }
+            SessionManager.endSession()
+            Toast.makeText(context, "Odjavio sam Vas.", Toast.LENGTH_SHORT).show()
+            onCloseChatDialog()
+            navController.navigate(AppRoutes.LOGIN_GRAPH) {
+                popUpTo(0) { inclusive = true }
             }
         }
 

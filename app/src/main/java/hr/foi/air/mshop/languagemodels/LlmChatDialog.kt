@@ -31,6 +31,11 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.AlertDialog
 import androidx.core.content.ContextCompat
 import hr.foi.air.mshop.viewmodels.LLM.AssistantViewModel
+import hr.foi.air.ws.data.SessionManager
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.serialization.json.JsonObject
+import kotlin.coroutines.cancellation.CancellationException
 
 enum class Sender { User, Bot }
 
@@ -41,8 +46,45 @@ data class ChatMessage(
     val isLoading: Boolean = false
 )
 
+val criticalIntents = setOf(
+    "LOGOUT",
+)
+
+val intentRequiresLogin = setOf(
+    "LOGOUT",
+    "VIEW_TRANSACTIONS"
+)
+
+fun loginRequiredMessage(intent: String): String {
+    return when (intent) {
+        "LOGOUT" -> "Niste prijavljeni pa Vas ne mogu odjaviti. ⚠️"
+        "VIEW_TRANSACTIONS" -> "Morate biti prijavljeni kako biste mogli vidjeti popis transakcija. ⚠️"
+        else -> "Morate se prijaviti da biste izvršili tu radnju. ⚠️"
+    }
+}
+
+fun cancellationTextForIntent(intent: String): String {
+    return when (intent) {
+        "LOGOUT" -> "Odjava otkazana ❌"
+        else -> "Operacija otkazana ❌"
+    }
+}
+
+fun userFriendlyMessageForIntent(intent: String): String {
+    return when (intent) {
+        "LOGOUT" -> "Pokrenuo sam proces odjave 🚪"
+        "VIEW_TRANSACTIONS" -> "Prebacio sam Vas na stranicu za pregled transakcija. 🧾"
+        "UNKNOWN" -> "Nažalost nisam u potpunosti razumio Vaš zahtjev. 😅 \nLjubazno Vas molim da pokušate ponovo. 😊"
+        else -> "Pokrenuo sam proces... ⚙️"
+    }
+}
+
 @Composable
-fun MessageBubble(message: ChatMessage) {
+fun MessageBubble(
+    message: ChatMessage,
+    isCancellable: Boolean = false,
+    onCancel: (() -> Unit)? = null
+) {
     val isUser = message.sender == Sender.User
     Row(
         modifier = Modifier
@@ -66,14 +108,26 @@ fun MessageBubble(message: ChatMessage) {
                     Text("Razmišlja...", fontSize = 14.sp)
                 }
             } else {
-                Text(
-                    text = message.text,
-                    color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Column {
+                    Text(
+                        text = message.text,
+                        color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    if (isCancellable && onCancel != null) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            TextButton(onClick = onCancel) {
+                                Text("Odustani")
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun LlmChatDialog(
@@ -93,6 +147,11 @@ fun LlmChatDialog(
     fun nextId() = idGen.getAndIncrement()
 
     var isSttListening by remember { mutableStateOf(false) }
+
+    var pendingMessageId by remember { mutableStateOf<Long?>(null) }
+    var pendingJob by remember { mutableStateOf<Job?>(null) }
+    var pendingIntent: String? by remember { mutableStateOf(null) }
+    var pendingParams: JsonObject? by remember { mutableStateOf(null) }
 
     val sttManager = remember {
         SpeechToTextManagerSingle(
@@ -148,7 +207,25 @@ fun LlmChatDialog(
                     state = listState
                 ) {
                     items(items = messages, key = { it.id }) { msg ->
-                        MessageBubble(msg)
+                        MessageBubble(
+                            message = msg,
+                            isCancellable = (msg.id == pendingMessageId),
+                            onCancel = {
+                                pendingJob?.cancel()
+
+                                val cancelText = cancellationTextForIntent(pendingIntent ?: "")
+
+                                val idx = messages.indexOfFirst { it.id == pendingMessageId }
+                                if (idx != -1) {
+                                    messages[idx] = messages[idx].copy(text = cancelText)
+                                }
+
+                                pendingJob = null
+                                pendingMessageId = null
+                                pendingIntent = null
+                                pendingParams = null
+                            }
+                        )
                     }
                 }
 
@@ -219,15 +296,67 @@ fun LlmChatDialog(
                             messages.add(loadingMsg)
 
                             scope.launch {
-                                val (text, result) = assistantViewModel.processMessage(userText)
+                                val (aiText, result) = assistantViewModel.processMessage(userText)
+                                Log.d("LlmChatDialog", "text: $aiText, result: $result")
 
-                                Log.d("LlmChatDialog", "text: $text, result: $result")
+                                val intent = result.intent ?: ""
+                                val requiresLoginButNotLogged = intentRequiresLogin.contains(intent) && SessionManager.accessToken == null
+
+                                val displayText = if (requiresLoginButNotLogged) {
+                                    loginRequiredMessage(intent)
+                                } else {
+                                    userFriendlyMessageForIntent(intent)
+                                }
 
                                 val idx = messages.indexOfFirst { it.id == loadingId }
-                                if (idx != -1) messages[idx] = messages[idx].copy(text = text, isLoading = false)
-                                else messages.add(ChatMessage(id = nextId(), text = text, sender = Sender.Bot))
+                                if (idx != -1) {
+                                    messages[idx] = messages[idx].copy(text = displayText, isLoading = false)
+                                } else {
+                                    messages.add(ChatMessage(id = nextId(), text = displayText, sender = Sender.Bot))
+                                }
 
-                                assistantHandler(result.intent, result.params)
+                                if (criticalIntents.contains(intent) && !requiresLoginButNotLogged) {
+                                    pendingIntent = intent
+                                    pendingParams = result.params
+
+                                    val countdownId = nextId()
+                                    pendingMessageId = countdownId
+                                    val start = 5
+
+                                    messages.add(
+                                        ChatMessage(
+                                            id = countdownId,
+                                            text = "${userFriendlyMessageForIntent(intent)} Počinjem za $start sek…",
+                                            sender = Sender.Bot
+                                        )
+                                    )
+
+                                    pendingJob = scope.launch {
+                                        var c = start
+                                        try {
+                                            while (c > 0) {
+                                                delay(1000)
+                                                c--
+                                                val idx2 = messages.indexOfFirst { it.id == countdownId }
+                                                if (idx2 != -1) {
+                                                    messages[idx2] = messages[idx2].copy(text = "${userFriendlyMessageForIntent(intent)} Počinjem za $c sek…")
+                                                }
+                                            }
+                                            assistantHandler(pendingIntent!!, pendingParams)
+                                        } catch (ex: CancellationException) {
+                                        } finally {
+                                            pendingJob = null
+                                            pendingMessageId = null
+                                            pendingIntent = null
+                                            pendingParams = null
+                                        }
+                                    }
+
+                                } else {
+                                    if (!criticalIntents.contains(intent)) {
+                                        assistantHandler(intent, result.params)
+                                    }
+                                }
 
                                 isSending = false
                             }
