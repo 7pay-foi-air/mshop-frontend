@@ -1,6 +1,7 @@
 package hr.foi.air.mshop.navigation.components.articleManagement
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,9 +42,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import hr.foi.air.mshop.core.models.Article
+import hr.foi.air.mshop.imageloader.ImageLoaderManager
+import hr.foi.air.mshop.imageloader.interfaces.IPhotoListener
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextFieldMultiline
+import hr.foi.air.mshop.ui.screens.LoaderPickerScreen
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleFormViewModel
 
 @Composable
@@ -59,13 +63,33 @@ fun ArticleFormPage(
         viewModel.initializeState(articleToEdit)
     }
 
-    val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        if (uri != null) {
-            viewModel.onImageSelected(uri)
+    val imageLoaderManager = remember { ImageLoaderManager() }
+
+    val photoListener = remember {
+        object: IPhotoListener {
+            override fun onSuccess(imageUri: Uri) {
+                viewModel.onImageSelected(imageUri)
+            }
+            override fun onFailure(message: String) {
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
         }
     }
+
+    for(module in imageLoaderManager.imageLoaders) {
+        module.LoadImage(listener = photoListener)
+    }
+
+    if (viewModel.isImagePickerVisible) {
+        LoaderPickerScreen(
+            imageLoaderManager = imageLoaderManager,
+            onDismiss = { viewModel.hideImagePicker() },
+            onModuleSelected = { selectedModule ->
+                selectedModule.pickImage()
+            }
+        )
+    }
+
 
     val imageModel: Any? = viewModel.imageUri ?: viewModel.imageUrl
 
@@ -169,11 +193,7 @@ fun ArticleFormPage(
             trailingIcon = {
                 IconButton(
                     onClick = {
-                        imagePicker.launch(
-                            PickVisualMediaRequest(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly
-                            )
-                        )
+                        viewModel.showImagePicker()
                     }
                 ) {
                     Icon(

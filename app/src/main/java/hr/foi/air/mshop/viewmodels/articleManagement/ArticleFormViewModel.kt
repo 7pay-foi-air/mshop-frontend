@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.data.UIState
-import hr.foi.air.mshop.repo.ArticleRepo
+import hr.foi.air.ws.repository.ArticleRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,6 +21,8 @@ class ArticleFormViewModel(
     private val _uiState = MutableStateFlow(UIState())
     val uiState: StateFlow<UIState> = _uiState
 
+    var isImagePickerVisible by mutableStateOf(false)
+        private set
     var ean by mutableStateOf("")
     var articleName by mutableStateOf("")
     var description by mutableStateOf("")
@@ -117,6 +119,14 @@ class ArticleFormViewModel(
 
     fun clearMessages() {
         _uiState.value = _uiState.value.copy(successMessage = null, errorMessage = null)
+    }
+
+    fun showImagePicker() {
+        isImagePickerVisible = true
+    }
+
+    fun hideImagePicker() {
+        isImagePickerVisible = false
     }
 
 }
