@@ -1,4 +1,4 @@
-package hr.foi.air.mshop.repo
+package hr.foi.air.ws.repository
 
 import android.content.Context
 import android.net.Uri
