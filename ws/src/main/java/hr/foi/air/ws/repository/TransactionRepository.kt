@@ -10,6 +10,8 @@ import hr.foi.air.mshop.network.dto.transaction.TransactionItemRequest
 import hr.foi.air.mshop.network.dto.transaction.TransactionResponse
 import hr.foi.air.ws.api.ITransactionApi
 import hr.foi.air.ws.models.transaction.TransactionSummary
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class TransactionRepository(
     private val api: ITransactionApi
@@ -62,9 +64,13 @@ class TransactionRepository(
             isSuccessful = this.is_successful
         )
 
-    override suspend fun getTransactionsForCurrentUser(): TransactionHistoryDomain {
+    override suspend fun getTransactionsForCurrentUser(startDate: LocalDate?, endDate: LocalDate?): TransactionHistoryDomain {
         return try {
-            val response = api.getTransactionsForCurrentUser()
+            val formatter = DateTimeFormatter.ISO_DATE
+            val startStr = startDate?.format(formatter)
+            val endStr = endDate?.format(formatter)
+
+            val response = api.getTransactionsForCurrentUser(startStr, endStr)
 
             if (!response.isSuccessful) {
                 TransactionHistoryDomain(emptyList(), emptyList())

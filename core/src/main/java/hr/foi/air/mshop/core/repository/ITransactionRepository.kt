@@ -3,8 +3,9 @@ package hr.foi.air.mshop.core.repository
 import hr.foi.air.mshop.core.models.Transaction
 import hr.foi.air.mshop.core.models.TransactionHistoryDomain
 import hr.foi.air.mshop.core.models.TransactionResult
+import java.time.LocalDate
 
 interface ITransactionRepository {
     suspend fun createTransaction(transaction: Transaction): Result<TransactionResult>
-    suspend fun getTransactionsForCurrentUser(): TransactionHistoryDomain
+    suspend fun getTransactionsForCurrentUser(startDate: LocalDate? = null, endDate: LocalDate? = null): TransactionHistoryDomain
 }

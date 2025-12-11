@@ -15,7 +15,7 @@ class OnDeviceLLM(
         try {
             val options = LlmInference.LlmInferenceOptions.builder()
                 .setModelPath(BuildConfig.MODEL_PATH)
-                .setMaxTokens(4096)
+                .setMaxTokens(8192)
                 .build()
 
             llmInference = LlmInference.createFromOptions(context, options)

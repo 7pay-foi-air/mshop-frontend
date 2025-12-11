@@ -2,6 +2,7 @@ package hr.foi.air.mshop.languagemodels
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,6 +30,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.AlertDialog
 import androidx.core.content.ContextCompat
+import hr.foi.air.mshop.viewmodels.LLM.AssistantViewModel
+import hr.foi.air.ws.data.SessionManager
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
+import kotlin.coroutines.cancellation.CancellationException
 
 enum class Sender { User, Bot }
 
@@ -39,8 +48,14 @@ data class ChatMessage(
     val isLoading: Boolean = false
 )
 
+
+
 @Composable
-fun MessageBubble(message: ChatMessage) {
+fun MessageBubble(
+    message: ChatMessage,
+    isCancellable: Boolean = false,
+    onCancel: (() -> Unit)? = null
+) {
     val isUser = message.sender == Sender.User
     Row(
         modifier = Modifier
@@ -64,19 +79,32 @@ fun MessageBubble(message: ChatMessage) {
                     Text("Razmišlja...", fontSize = 14.sp)
                 }
             } else {
-                Text(
-                    text = message.text,
-                    color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Column {
+                    Text(
+                        text = message.text,
+                        color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    if (isCancellable && onCancel != null) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            TextButton(onClick = onCancel) {
+                                Text("Odustani")
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
+
 @Composable
 fun LlmChatDialog(
     onDismissRequest: () -> Unit,
-    onQuery: suspend (String) -> String?
+    assistantViewModel: AssistantViewModel,
+    assistantHandler: LlmIntentHandler
 ) {
     var userInput by remember { mutableStateOf("") }
     val messages = remember { mutableStateListOf<ChatMessage>() }
@@ -90,6 +118,11 @@ fun LlmChatDialog(
     fun nextId() = idGen.getAndIncrement()
 
     var isSttListening by remember { mutableStateOf(false) }
+
+    var pendingMessageId by remember { mutableStateOf<Long?>(null) }
+    var pendingJob by remember { mutableStateOf<Job?>(null) }
+    var pendingIntent: String? by remember { mutableStateOf(null) }
+    var pendingParams: JsonObject? by remember { mutableStateOf(null) }
 
     val sttManager = remember {
         SpeechToTextManagerSingle(
@@ -137,15 +170,29 @@ fun LlmChatDialog(
                     .fillMaxWidth()
                     .heightIn(min = 400.dp, max = 600.dp)
             ) {
-                LazyColumn(
+                Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    state = listState
                 ) {
-                    items(items = messages, key = { it.id }) { msg ->
-                        MessageBubble(msg)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        Spacer(modifier = Modifier.weight(1f))  // Gura sve prema dolje
+
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(messages, key = { it.id }) { msg ->
+                                MessageBubble(
+                                    message = msg,
+                                    isCancellable = (msg.id == pendingMessageId),
+                                    onCancel = { /* … */ }
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -205,7 +252,6 @@ fun LlmChatDialog(
                             if (userInput.isBlank() || isSending) return@IconButton
 
                             focusManager.clearFocus(force = true)
-
                             val userText = userInput.trim()
                             val userMsg = ChatMessage(id = nextId(), text = userText, sender = Sender.User)
                             messages.add(userMsg)
@@ -217,16 +263,70 @@ fun LlmChatDialog(
                             messages.add(loadingMsg)
 
                             scope.launch {
-                                val reply = try {
-                                    withContext(Dispatchers.IO) { onQuery(userText) }
-                                        ?: "Greška prilikom dohvaćanja odgovora."
-                                } catch (e: Exception) {
-                                    "Greška: ${e.message}"
+                                val (aiText, result) = assistantViewModel.processMessage(userText)
+                                Log.d("LlmChatDialog", "text: $aiText, result: $result")
+
+                                val intent = result.intent
+                                val requiresLoginButNotLogged = intentRequiresLogin.contains(intent) && SessionManager.accessToken == null
+
+                                val displayText = when (intent) {
+                                    "WANTS_INFO" -> userFriendlyMessageForIntent(intent, result.params)
+                                    else -> {
+                                        val requiresLoginButNotLogged = intentRequiresLogin.contains(intent) && SessionManager.accessToken == null
+                                        if (requiresLoginButNotLogged) loginRequiredMessage(intent)
+                                        else userFriendlyMessageForIntent(intent)
+                                    }
                                 }
 
                                 val idx = messages.indexOfFirst { it.id == loadingId }
-                                if (idx != -1) messages[idx] = messages[idx].copy(text = reply, isLoading = false)
-                                else messages.add(ChatMessage(id = nextId(), text = reply, sender = Sender.Bot))
+                                if (idx != -1) {
+                                    messages[idx] = messages[idx].copy(text = displayText, isLoading = false)
+                                } else {
+                                    messages.add(ChatMessage(id = nextId(), text = displayText, sender = Sender.Bot))
+                                }
+
+                                if (criticalIntents.contains(intent) && !requiresLoginButNotLogged) {
+                                    pendingIntent = intent
+                                    pendingParams = result.params
+
+                                    val countdownId = nextId()
+                                    pendingMessageId = countdownId
+                                    val start = 5
+
+                                    messages.add(
+                                        ChatMessage(
+                                            id = countdownId,
+                                            text = "Počinjem za $start sek…",
+                                            sender = Sender.Bot
+                                        )
+                                    )
+
+                                    pendingJob = scope.launch {
+                                        var c = start
+                                        try {
+                                            while (c > 0) {
+                                                delay(1000)
+                                                c--
+                                                val idx2 = messages.indexOfFirst { it.id == countdownId }
+                                                if (idx2 != -1) {
+                                                    messages[idx2] = messages[idx2].copy(text = "Počinjem za $c sek…")
+                                                }
+                                            }
+                                            assistantHandler(pendingIntent!!, pendingParams)
+                                        } catch (ex: CancellationException) {
+                                        } finally {
+                                            pendingJob = null
+                                            pendingMessageId = null
+                                            pendingIntent = null
+                                            pendingParams = null
+                                        }
+                                    }
+
+                                } else {
+                                    if (!criticalIntents.contains(intent)) {
+                                        assistantHandler(intent, result.params)
+                                    }
+                                }
 
                                 isSending = false
                             }
