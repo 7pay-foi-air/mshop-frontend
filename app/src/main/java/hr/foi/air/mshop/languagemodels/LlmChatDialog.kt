@@ -35,6 +35,8 @@ import hr.foi.air.ws.data.SessionManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.coroutines.cancellation.CancellationException
 
 enum class Sender { User, Bot }
@@ -46,38 +48,7 @@ data class ChatMessage(
     val isLoading: Boolean = false
 )
 
-val criticalIntents = setOf(
-    "LOGOUT",
-)
 
-val intentRequiresLogin = setOf(
-    "LOGOUT",
-    "VIEW_TRANSACTIONS"
-)
-
-fun loginRequiredMessage(intent: String): String {
-    return when (intent) {
-        "LOGOUT" -> "Niste prijavljeni pa Vas ne mogu odjaviti. ⚠️"
-        "VIEW_TRANSACTIONS" -> "Morate biti prijavljeni kako biste mogli vidjeti popis transakcija. ⚠️"
-        else -> "Morate se prijaviti da biste izvršili tu radnju. ⚠️"
-    }
-}
-
-fun cancellationTextForIntent(intent: String): String {
-    return when (intent) {
-        "LOGOUT" -> "Odjava otkazana ❌"
-        else -> "Operacija otkazana ❌"
-    }
-}
-
-fun userFriendlyMessageForIntent(intent: String): String {
-    return when (intent) {
-        "LOGOUT" -> "Pokrenuo sam proces odjave 🚪"
-        "VIEW_TRANSACTIONS" -> "Prebacio sam Vas na stranicu za pregled transakcija. 🧾"
-        "UNKNOWN" -> "Nažalost nisam u potpunosti razumio Vaš zahtjev. 😅 \nLjubazno Vas molim da pokušate ponovo. 😊"
-        else -> "Pokrenuo sam proces... ⚙️"
-    }
-}
 
 @Composable
 fun MessageBubble(
@@ -299,13 +270,16 @@ fun LlmChatDialog(
                                 val (aiText, result) = assistantViewModel.processMessage(userText)
                                 Log.d("LlmChatDialog", "text: $aiText, result: $result")
 
-                                val intent = result.intent ?: ""
+                                val intent = result.intent
                                 val requiresLoginButNotLogged = intentRequiresLogin.contains(intent) && SessionManager.accessToken == null
 
-                                val displayText = if (requiresLoginButNotLogged) {
-                                    loginRequiredMessage(intent)
-                                } else {
-                                    userFriendlyMessageForIntent(intent)
+                                val displayText = when (intent) {
+                                    "WANTS_INFO" -> userFriendlyMessageForIntent(intent, result.params)
+                                    else -> {
+                                        val requiresLoginButNotLogged = intentRequiresLogin.contains(intent) && SessionManager.accessToken == null
+                                        if (requiresLoginButNotLogged) loginRequiredMessage(intent)
+                                        else userFriendlyMessageForIntent(intent)
+                                    }
                                 }
 
                                 val idx = messages.indexOfFirst { it.id == loadingId }
@@ -326,7 +300,7 @@ fun LlmChatDialog(
                                     messages.add(
                                         ChatMessage(
                                             id = countdownId,
-                                            text = "${userFriendlyMessageForIntent(intent)} Počinjem za $start sek…",
+                                            text = "Počinjem za $start sek…",
                                             sender = Sender.Bot
                                         )
                                     )
@@ -339,7 +313,7 @@ fun LlmChatDialog(
                                                 c--
                                                 val idx2 = messages.indexOfFirst { it.id == countdownId }
                                                 if (idx2 != -1) {
-                                                    messages[idx2] = messages[idx2].copy(text = "${userFriendlyMessageForIntent(intent)} Počinjem za $c sek…")
+                                                    messages[idx2] = messages[idx2].copy(text = "Počinjem za $c sek…")
                                                 }
                                             }
                                             assistantHandler(pendingIntent!!, pendingParams)

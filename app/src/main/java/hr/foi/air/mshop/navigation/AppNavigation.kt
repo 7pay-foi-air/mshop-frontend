@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.navigation
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -13,9 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import hr.foi.air.mshop.core.models.Transaction
 import hr.foi.air.mshop.navigation.components.articleManagement.AddArticlePage
 import hr.foi.air.mshop.navigation.components.userManagement.AddUserPage
 import hr.foi.air.mshop.navigation.components.articleManagement.EditArticlePage
@@ -54,7 +58,7 @@ object AppRoutes {
     const val EDIT_ARTICLE = "editArticle"
 
     //PAYMENTS
-    const val PAYMENT = "payment"
+    const val PAYMENT = "payment?amount={amount}&assistant={assistant}"
     const val PAYMENT_PROCESSING = "payment_processing"
     const val PAYMENT_DONE = "payment_done"
 
@@ -182,7 +186,20 @@ fun AppNavHost(
             PaymentProcessingPage()
         }
 
-        composable(AppRoutes.PAYMENT) { backStackEntry ->
+        composable(
+            AppRoutes.PAYMENT,
+            arguments = listOf(
+                navArgument("amount") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = true
+                },
+                navArgument("assistant") {
+                    type = NavType.StringType
+                    nullable = true
+                }
+            )
+        ) { backStackEntry ->
             val context = LocalContext.current
 
             val parentEntry = remember(backStackEntry) {
@@ -192,22 +209,70 @@ fun AppNavHost(
             val paymentViewModel: PaymentViewModel = viewModel()
             val chargeAmountState = homepageViewModel.chargeAmountUIState.collectAsState().value
 
-            PaymentPage(
-                totalAmount = chargeAmountState.text,   // npr. "123,45€"
-                onPay = { cardData -> //cardData se ne salje na backend
-                    val transaction = homepageViewModel.buildTransaction()
+            val amountFromArguments = backStackEntry.arguments?.getString("amount")
+            //Log.d("AppNavHost", "amountFromArguments: $amountFromArguments")
+            val assistantFromArgumentsString = backStackEntry.arguments?.getString("assistant")
+            //Log.d("AppNavHost", "assistantFromArgumentsString: $assistantFromArgumentsString")
+            val assistantFromArguments = assistantFromArgumentsString?.toBooleanStrictOrNull() ?: false
+            //Log.d("AppNavHost", "assistantFromArguments: $assistantFromArguments")
 
-                    if(transaction!= null) {
+            var finalTotalAmount: String = chargeAmountState.text
+            if(assistantFromArguments && amountFromArguments != null){
+                finalTotalAmount = amountFromArguments
+            }
+
+            PaymentPage(
+                totalAmount = finalTotalAmount,
+                onPay = { cardData -> //cardData se ne salje na backend
+                    if(!assistantFromArguments){
+                        val transaction = homepageViewModel.buildTransaction()
+
+                        if(transaction!= null) {
+                            navController.navigate(AppRoutes.PAYMENT_PROCESSING)
+                            paymentViewModel.processPayment(
+                                transaction = transaction,
+                                onSuccess = { transactionId ->
+                                    // Kad backend završi s success idemo na DONE page s ID-em
+                                    navController.navigate("${AppRoutes.PAYMENT_DONE}/$transactionId") {
+                                        popUpTo(AppRoutes.PAYMENT_PROCESSING) { inclusive = true }
+                                    }
+                                    //ocisti kosaricu
+                                    homepageViewModel.clearSelection()
+                                },
+                                onError = { errorMsg ->
+                                    navController.popBackStack()
+                                    Toast.makeText(
+                                        context,
+                                        errorMsg ?: "Dogodila se greška!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            )
+                        }
+                    }
+                    else if(amountFromArguments != null) {
+                        val amount = amountFromArguments
+                            .replace("€", "")
+                            .replace(",", ".")
+                            .trim()
+                            .toDoubleOrNull() ?: 0.0
+
+                        val transaction =  Transaction(
+                            description = "Kupnja u mShopu",
+                            items = emptyList(),
+                            totalAmount = amount,
+                            currency = "EUR"
+                        )
+
+                        Log.d("AppNavHost", "transaction: $transaction")
+
                         navController.navigate(AppRoutes.PAYMENT_PROCESSING)
                         paymentViewModel.processPayment(
                             transaction = transaction,
                             onSuccess = { transactionId ->
-                                // Kad backend završi s success idemo na DONE page s ID-em
                                 navController.navigate("${AppRoutes.PAYMENT_DONE}/$transactionId") {
                                     popUpTo(AppRoutes.PAYMENT_PROCESSING) { inclusive = true }
                                 }
-                                //ocisti kosaricu
-                                homepageViewModel.clearSelection()
                             },
                             onError = { errorMsg ->
                                 navController.popBackStack()
@@ -218,7 +283,8 @@ fun AppNavHost(
                                 ).show()
                             }
                         )
-                    }else{
+                    }
+                    else{
                         Toast.makeText(context, "Košarica je prazna!", Toast.LENGTH_SHORT).show()
                     }
 
