@@ -23,6 +23,7 @@ import hr.foi.air.mshop.MainActivity
 import hr.foi.air.mshop.languagemodels.LlmChatDialog
 import hr.foi.air.mshop.languagemodels.createAssistantIntentHandler
 import hr.foi.air.mshop.navigation.AppNavHost
+import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.navigation.authRoutes
 import hr.foi.air.mshop.navigation.drawerItems
 import hr.foi.air.mshop.navigation.menuRoutes
@@ -83,6 +84,11 @@ fun MainScreen() {
                                 launchSingleTop = true
                                 restoreState = true
                             }
+                        }
+                    },
+                    onLogout = {
+                        navController.navigate(AppRoutes.LOGIN_GRAPH) {
+                            popUpTo(0) { inclusive = true }
                         }
                     },
                     navigationIcon = {
