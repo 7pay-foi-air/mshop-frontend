@@ -15,13 +15,12 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import hr.foi.air.image_loader.interfaces.IImageLoader
 import hr.foi.air.mshop.imageloader.ImageLoaderManager
-import hr.foi.air.mshop.imageloader.interfaces.IImageLoader
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

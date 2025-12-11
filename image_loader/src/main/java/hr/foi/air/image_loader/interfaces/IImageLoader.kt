@@ -1,7 +1,5 @@
-package hr.foi.air.mshop.imageloader.interfaces
+package hr.foi.air.image_loader.interfaces
 
-import android.graphics.drawable.Icon
-import android.media.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 

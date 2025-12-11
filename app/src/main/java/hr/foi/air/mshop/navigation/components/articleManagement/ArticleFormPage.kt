@@ -2,9 +2,6 @@ package hr.foi.air.mshop.navigation.components.articleManagement
 
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,10 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -43,7 +37,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.imageloader.ImageLoaderManager
-import hr.foi.air.mshop.imageloader.interfaces.IPhotoListener
+import hr.foi.air.image_loader.interfaces.IPhotoListener
+import hr.foi.air.image_loader.interfaces.IImageLoader
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextFieldMultiline
@@ -84,7 +79,7 @@ fun ArticleFormPage(
         LoaderPickerScreen(
             imageLoaderManager = imageLoaderManager,
             onDismiss = { viewModel.hideImagePicker() },
-            onModuleSelected = { selectedModule ->
+            onModuleSelected = { selectedModule : IImageLoader ->
                 selectedModule.pickImage()
             }
         )

@@ -23,3 +23,5 @@ rootProject.name = "mShop"
 include(":app")
 include(":core")
 include(":ws")
+include(":camera_loader")
+include(":image_loader")
