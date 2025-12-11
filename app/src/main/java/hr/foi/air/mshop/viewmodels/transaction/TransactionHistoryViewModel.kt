@@ -87,6 +87,11 @@ class TransactionHistoryViewModel(
         }
     }
 
+    fun setDateRange(from: LocalDate, to: LocalDate) {
+        fromDate.value = from
+        toDate.value = to
+    }
+
     private fun TransactionHistoryRecord.toPaymentUI(): TransactionSummaryUI {
         val date = createdAt.substring(0, 10)
         val time = if (createdAt.length >= 16) createdAt.substring(11, 16) else ""

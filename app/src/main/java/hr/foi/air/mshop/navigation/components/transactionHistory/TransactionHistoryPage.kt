@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.navigation.components.transactionHistory
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material3.Tab
@@ -7,7 +8,6 @@ import androidx.compose.material3.TabRow
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -18,24 +18,28 @@ import hr.foi.air.mshop.ui.components.DateFieldUnderLabel
 import hr.foi.air.mshop.ui.screens.PaymentsScreen
 import hr.foi.air.mshop.ui.screens.RefundsScreen
 import hr.foi.air.mshop.viewmodels.transaction.TransactionHistoryViewModel
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-fun LocalDate.toEpochDayMillis(): Long =
+fun LocalDate.toEpochMillis(): Long =
     this.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
 fun Long.toLocalDate(): LocalDate =
-    LocalDate.ofEpochDay(this / (24 * 60 * 60 * 1000))
+    Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionHistoryPage(
     navController: NavHostController,
-    viewModel: TransactionHistoryViewModel = viewModel()
+    viewModel: TransactionHistoryViewModel = viewModel(),
+    initialFromDate: LocalDate? = null,
+    initialToDate: LocalDate? = null
 ) {
-    val context = LocalContext.current
+    Log.d("TransactionHistoryPage", "initialFromDate: $initialFromDate, initialToDate: $initialToDate")
+
 
     val selectedTabIndex by viewModel.selectedTabIndex.collectAsState()
     val tabTitles = listOf("Plaćanja", "Povrati")
@@ -43,15 +47,28 @@ fun TransactionHistoryPage(
     var showFromPicker by remember { mutableStateOf(false) }
     var showToPicker by remember { mutableStateOf(false) }
 
+    LaunchedEffect(initialFromDate) {
+        if (initialFromDate != null) viewModel.fromDate.value = initialFromDate
+    }
+
+    LaunchedEffect(initialToDate) {
+        if (initialToDate != null) viewModel.toDate.value = initialToDate
+    }
+
     val fromDate by viewModel.fromDate.collectAsState()
     val toDate by viewModel.toDate.collectAsState()
 
-    val fromDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = fromDate?.toEpochDayMillis()
-    )
-    val toDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = toDate?.toEpochDayMillis()
-    )
+    val fromDatePickerState = rememberDatePickerState()
+
+    LaunchedEffect(fromDate) {
+        fromDatePickerState.selectedDateMillis = fromDate?.toEpochMillis()
+    }
+
+    val toDatePickerState = rememberDatePickerState()
+
+    LaunchedEffect(toDate) {
+        toDatePickerState.selectedDateMillis = toDate?.toEpochMillis()
+    }
 
     val displayFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy.", Locale("hr"))
 
@@ -166,4 +183,3 @@ fun TransactionHistoryPage(
         }
     }
 }
-

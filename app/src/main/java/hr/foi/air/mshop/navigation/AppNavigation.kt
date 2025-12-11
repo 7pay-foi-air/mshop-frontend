@@ -38,6 +38,8 @@ import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
 import hr.foi.air.mshop.viewmodels.LoginViewModel
 import hr.foi.air.mshop.viewmodels.transaction.PaymentViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object AppRoutes {
     // LOGIN
@@ -63,7 +65,7 @@ object AppRoutes {
     const val PAYMENT_DONE = "payment_done"
 
     //TRANSACTION HISTORY
-    const val TRANSACTION_HISTORY = "transaction_history"
+    const val TRANSACTION_HISTORY = "transaction_history?from={from}&to={to}"
 }
 
 // Used for routes where no icons appear in the top left corner
@@ -303,8 +305,33 @@ fun AppNavHost(
             )
         }
 
-        composable(AppRoutes.TRANSACTION_HISTORY) {
-            TransactionHistoryPage(navController = navController)
+        composable(
+            route = "transaction_history?from={from}&to={to}",
+            arguments = listOf(
+                navArgument("from") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument("to") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val fromArg = backStackEntry.arguments?.getString("from")
+            val toArg = backStackEntry.arguments?.getString("to")
+
+            val formatter = DateTimeFormatter.ISO_DATE
+            val fromDate = fromArg?.takeIf { it != "{from}" }?.let { LocalDate.parse(it, formatter) }
+            val toDate = toArg?.takeIf { it != "{to}" }?.let { LocalDate.parse(it, formatter) }
+
+            TransactionHistoryPage(
+                navController = navController,
+                initialFromDate = fromDate,
+                initialToDate = toDate
+            )
         }
     }
 }

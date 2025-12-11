@@ -90,14 +90,16 @@ fun createAssistantIntentHandler(
             val unit = params?.get("unit")?.jsonPrimitive?.content
 
             if(value != null && unit != null){
-                var (startDate, endDate) = getDateRange(value, unit)
+                val (startDate, endDate) = getDateRange(value, unit)
                 Log.d("AssistantActions", "startDate: $startDate, endDate: $endDate")
-                navController.navigate(AppRoutes.TRANSACTION_HISTORY)
-            }
-            else{
+                navController.navigate(
+                    "transaction_history?from=${Uri.encode(startDate)}&to=${Uri.encode(endDate)}"
+                )
+            } else {
                 navController.navigate(AppRoutes.TRANSACTION_HISTORY)
             }
         }
+
 
         "NEW_TRANSACTION" -> {
             val amountStr = params?.get("value")?.jsonPrimitive?.content ?: "0"
