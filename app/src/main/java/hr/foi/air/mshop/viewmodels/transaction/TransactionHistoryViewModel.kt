@@ -10,6 +10,8 @@ import hr.foi.air.ws.repository.TransactionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 data class TransactionSummaryUI(
     val id: String,
@@ -44,6 +46,9 @@ class TransactionHistoryViewModel(
     private val _refunds = MutableStateFlow<List<RefundSummaryUI>>(emptyList())
     val refunds: StateFlow<List<RefundSummaryUI>> = _refunds
 
+    val fromDate = MutableStateFlow<LocalDate?>(null)
+    val toDate = MutableStateFlow<LocalDate?>(null)
+
     init {
         loadTransactions()
     }
@@ -62,6 +67,25 @@ class TransactionHistoryViewModel(
         }
     }
 
+    fun filteredPayments(): List<TransactionSummaryUI> {
+        val formatter = DateTimeFormatter.ISO_DATE
+        val from = fromDate.value
+        val to = toDate.value
+        return _payments.value.filter {
+            val date = LocalDate.parse(it.dateText, formatter)
+            (from == null || !date.isBefore(from)) && (to == null || !date.isAfter(to))
+        }
+    }
+
+    fun filteredRefunds(): List<RefundSummaryUI> {
+        val formatter = DateTimeFormatter.ISO_DATE
+        val from = fromDate.value
+        val to = toDate.value
+        return _refunds.value.filter {
+            val date = LocalDate.parse(it.dateText, formatter)
+            (from == null || !date.isBefore(from)) && (to == null || !date.isAfter(to))
+        }
+    }
 
     private fun TransactionHistoryRecord.toPaymentUI(): TransactionSummaryUI {
         val date = createdAt.substring(0, 10)
