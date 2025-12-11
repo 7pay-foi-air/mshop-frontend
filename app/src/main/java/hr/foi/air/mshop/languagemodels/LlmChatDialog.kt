@@ -170,33 +170,29 @@ fun LlmChatDialog(
                     .fillMaxWidth()
                     .heightIn(min = 400.dp, max = 600.dp)
             ) {
-                LazyColumn(
+                Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    state = listState
                 ) {
-                    items(items = messages, key = { it.id }) { msg ->
-                        MessageBubble(
-                            message = msg,
-                            isCancellable = (msg.id == pendingMessageId),
-                            onCancel = {
-                                pendingJob?.cancel()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        Spacer(modifier = Modifier.weight(1f))  // Gura sve prema dolje
 
-                                val cancelText = cancellationTextForIntent(pendingIntent ?: "")
-
-                                val idx = messages.indexOfFirst { it.id == pendingMessageId }
-                                if (idx != -1) {
-                                    messages[idx] = messages[idx].copy(text = cancelText)
-                                }
-
-                                pendingJob = null
-                                pendingMessageId = null
-                                pendingIntent = null
-                                pendingParams = null
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(messages, key = { it.id }) { msg ->
+                                MessageBubble(
+                                    message = msg,
+                                    isCancellable = (msg.id == pendingMessageId),
+                                    onCancel = { /* … */ }
+                                )
                             }
-                        )
+                        }
                     }
                 }
 

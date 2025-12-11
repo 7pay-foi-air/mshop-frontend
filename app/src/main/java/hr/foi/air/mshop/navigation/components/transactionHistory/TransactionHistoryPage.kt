@@ -58,13 +58,17 @@ fun TransactionHistoryPage(
     val fromDate by viewModel.fromDate.collectAsState()
     val toDate by viewModel.toDate.collectAsState()
 
-    val fromDatePickerState = rememberDatePickerState()
+    val fromDatePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = initialFromDate?.toEpochMillis()
+    )
+
+    val toDatePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = initialToDate?.toEpochMillis()
+    )
 
     LaunchedEffect(fromDate) {
         fromDatePickerState.selectedDateMillis = fromDate?.toEpochMillis()
     }
-
-    val toDatePickerState = rememberDatePickerState()
 
     LaunchedEffect(toDate) {
         toDatePickerState.selectedDateMillis = toDate?.toEpochMillis()
@@ -134,7 +138,8 @@ fun TransactionHistoryPage(
                 confirmButton = {
                     TextButton(onClick = {
                         fromDatePickerState.selectedDateMillis?.let {
-                            viewModel.fromDate.value = it.toLocalDate()
+                            val newFrom = it.toLocalDate()
+                            viewModel.setDateRange(newFrom, viewModel.toDate.value)
                         }
                         showFromPicker = false
                     }) { Text("OK") }
@@ -154,10 +159,10 @@ fun TransactionHistoryPage(
                 confirmButton = {
                     TextButton(onClick = {
                         toDatePickerState.selectedDateMillis?.let {
-                            viewModel.toDate.value = it.toLocalDate()
+                            val newTo = it.toLocalDate()
+                            viewModel.setDateRange(viewModel.fromDate.value, newTo)
                         }
                         showToPicker = false
-
                     }) { Text("OK") }
                 },
                 dismissButton = {

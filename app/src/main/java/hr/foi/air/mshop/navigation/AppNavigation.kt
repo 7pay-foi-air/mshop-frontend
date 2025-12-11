@@ -38,6 +38,7 @@ import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
 import hr.foi.air.mshop.viewmodels.LoginViewModel
 import hr.foi.air.mshop.viewmodels.transaction.PaymentViewModel
+import hr.foi.air.ws.data.SessionManager
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -71,28 +72,37 @@ object AppRoutes {
 // Used for routes where no icons appear in the top left corner
 val authRoutes = setOf(AppRoutes.LOGIN_USERNAME, AppRoutes.LOGIN_PASSWORD)
 
-val drawerItems = listOf(
-    DrawerItem(
-        icon = Icons.Default.Home,
-        title = "Početna",
-        route = AppRoutes.HOME
-    ),
-    DrawerItem(
-        icon = Icons.Default.Person,
-        title = "Upravljanje korisnicima",
-        route = AppRoutes.MANAGE_USERS
-    ),
-    DrawerItem(
-        icon = Icons.Default.Settings,
-        title = "Upravljanje artiklima",
-        route = AppRoutes.MANAGE_ARTICLES
-    ),
-    DrawerItem(
-        icon = Icons.Default.MonetizationOn,
-        title = "Povijest transakcija",
-        route = AppRoutes.TRANSACTION_HISTORY
-    )
-)
+val drawerItems: List<DrawerItem>
+    get(){
+        val allItems = listOf(
+            DrawerItem(
+                icon = Icons.Default.Home,
+                title = "Početna",
+                route = AppRoutes.HOME
+            ),
+            DrawerItem(
+                icon = Icons.Default.Person,
+                title = "Upravljanje korisnicima",
+                route = AppRoutes.MANAGE_USERS
+            ),
+            DrawerItem(
+                icon = Icons.Default.Settings,
+                title = "Upravljanje artiklima",
+                route = AppRoutes.MANAGE_ARTICLES
+            ),
+            DrawerItem(
+                icon = Icons.Default.MonetizationOn,
+                title = "Povijest transakcija",
+                route = AppRoutes.TRANSACTION_HISTORY
+            )
+        )
+        if (SessionManager.currentUserRole == "cashier"){
+            return allItems.filter {
+                it.route != AppRoutes.MANAGE_USERS && it.route != AppRoutes.MANAGE_ARTICLES
+            }
+        }
+        return allItems
+    }
 
 // Used for defining routes where the menu icon is displayed; others display the back arrow
 val menuRoutes = drawerItems.map {it.route}.toSet()

@@ -53,43 +53,22 @@ class TransactionHistoryViewModel(
         loadTransactions()
     }
 
-    private fun loadTransactions() {
+    fun loadTransactions(startDate: LocalDate? = null, endDate: LocalDate? = null) {
         viewModelScope.launch {
             try {
-                val domain = repository.getTransactionsForCurrentUser()
-
+                val domain = repository.getTransactionsForCurrentUser(startDate, endDate)
                 _payments.value = domain.payments.map { it.toPaymentUI() }
                 _refunds.value = domain.refunds.map { it.toRefundUI() }
-
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    fun filteredPayments(): List<TransactionSummaryUI> {
-        val formatter = DateTimeFormatter.ISO_DATE
-        val from = fromDate.value
-        val to = toDate.value
-        return _payments.value.filter {
-            val date = LocalDate.parse(it.dateText, formatter)
-            (from == null || !date.isBefore(from)) && (to == null || !date.isAfter(to))
-        }
-    }
-
-    fun filteredRefunds(): List<RefundSummaryUI> {
-        val formatter = DateTimeFormatter.ISO_DATE
-        val from = fromDate.value
-        val to = toDate.value
-        return _refunds.value.filter {
-            val date = LocalDate.parse(it.dateText, formatter)
-            (from == null || !date.isBefore(from)) && (to == null || !date.isAfter(to))
-        }
-    }
-
-    fun setDateRange(from: LocalDate, to: LocalDate) {
+    fun setDateRange(from: LocalDate?, to: LocalDate?) {
         fromDate.value = from
         toDate.value = to
+        loadTransactions(from, to)
     }
 
     private fun TransactionHistoryRecord.toPaymentUI(): TransactionSummaryUI {

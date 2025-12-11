@@ -48,7 +48,7 @@ fun userFriendlyMessageForIntent(intent: String, params: JsonObject? = null): St
     return when (intent) {
         "LOGOUT" -> "Pokrenuo sam proces odjave 🚪"
         "VIEW_TRANSACTIONS" -> "Prebacio sam Vas na stranicu za pregled transakcija. 🧾"
-        "VIEW_TRANSACTIONS_PERIOD" -> "Prebacio sam Vas na stranicu za pregled transakcija u primijenio tražene filtre. 🧾"
+        "VIEW_TRANSACTIONS_PERIOD" -> "Prebacio sam Vas na stranicu za pregled transakcija i primijenio tražene filtre. 🧾"
         "NEW_TRANSACTION" -> "Prebacio sam Vas na stranicu za kreiranje nove transakcije. 🧾"
         "WANTS_INFO" -> {
             val msg = params?.get("message")?.jsonPrimitive?.contentOrNull

@@ -7,5 +7,4 @@ data class Transaction(
     val items: List<TransactionItem>,
     val currency: String = "EUR",
     val totalAmount: Double,
-    val createdAt: Date? = null,
 )
