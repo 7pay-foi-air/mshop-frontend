@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 val localProperties = Properties()
@@ -92,4 +93,8 @@ dependencies {
     implementation(project(":camera_loader"))
 
     implementation("com.google.mediapipe:tasks-genai:0.10.27")
+
+    implementation(libs.kotlinx.serialization.json)
+
+
 }
