@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -45,6 +46,7 @@ fun NavigationDrawer(
     items: List<DrawerItem>,
     currentRoute: String?,
     onItemClick: (DrawerItem) -> Unit,
+    onLogout: (() -> Unit)? = null,
     navigationIcon: @Composable () -> Unit,
     content: @Composable (Modifier) -> Unit
 ) {
@@ -91,6 +93,25 @@ fun NavigationDrawer(
                     }
 
                     Spacer(modifier = Modifier.weight(1f) )
+
+                    if (onLogout != null) {
+                        NavigationDrawerItem(
+                            label = { Text("Odjava") },
+                            selected = false,
+                            onClick = {
+                                SessionManager.endSession()
+                                scope.launch { drawerState.close() }
+                                onLogout()
+                            },
+                            icon = { Icon(imageVector = Icons.Default.PowerSettingsNew, contentDescription = "Odjava") },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                            colors = NavigationDrawerItemDefaults.colors(
+                                selectedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f),
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary
+                            )
+                        )
+                    }
 
                     SessionManager.currentUserId.let { userId ->
                         Text(
