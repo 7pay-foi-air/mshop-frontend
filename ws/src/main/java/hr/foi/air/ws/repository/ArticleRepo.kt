@@ -6,7 +6,9 @@ import android.util.Log
 import com.google.gson.Gson
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.repository.IArticleRepository
+import hr.foi.air.ws.BuildConfig
 import hr.foi.air.ws.NetworkService
+import hr.foi.air.ws.NetworkService.ARTICLE_BASE_URL
 import hr.foi.air.ws.models.articleManagement.ArticleResponse
 import hr.foi.air.ws.models.articleManagement.UpdateItemRequest
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +26,7 @@ class ArticleRepo : IArticleRepository {
         articleName = this.name,
         description = this.description,
         price = this.price,
-        imageUrl = this.imageUrl,
+        imageUrl = "${ARTICLE_BASE_URL.removeSuffix("/api/v1/")}/${this.imageUrl.removePrefix("/")}",
         ean = this.sku,
         stockQuantity = this.stockQuantity
     )
@@ -36,7 +38,7 @@ class ArticleRepo : IArticleRepository {
         val mimeType = context.contentResolver.getType(uri) ?: return null
 
         val bytes = context.contentResolver.openInputStream(uri)
-            ?.use { it.readBytes() }   // use{} zatvara stream
+            ?.use { it.readBytes() }
             ?: return null
 
         val fileBody = bytes.toRequestBody(mimeType.toMediaType())
@@ -62,6 +64,7 @@ class ArticleRepo : IArticleRepository {
             if (response.isSuccessful) {
                 val articles = response.body()?.map { it.toDomainModel() } ?: emptyList()
                 emit(articles)
+                Log.d("slika", "$articles")
             } else {
                 println("Error fetching articles: ${response.code()}")
                 emit(emptyList())
