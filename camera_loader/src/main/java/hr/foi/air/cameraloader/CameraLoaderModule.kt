@@ -32,7 +32,7 @@ class CameraLoaderModule : IImageLoader {
 
     @Composable
     override fun LoadImage(listener: IPhotoListener) {
-        /*this.listener = listener
+        this.listener = listener
         val context = LocalContext.current
 
         val launcher = rememberLauncherForActivityResult(
@@ -54,7 +54,7 @@ class CameraLoaderModule : IImageLoader {
                 lastImageUri = uri
                 launcher.launch(uri)
             }
-        }*/
+        }
     }
 
     override fun pickImage() {
