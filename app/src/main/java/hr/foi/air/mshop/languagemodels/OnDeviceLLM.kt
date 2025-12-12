@@ -33,7 +33,7 @@ class OnDeviceLLM(
 
     override fun getResponse(userPrompt: String): String {
         val model =
-            llmInference ?: return "Greška: LLM model nije inicijaliziran (provjerite ADB putanju)."
+            llmInference ?: return """{"intent":"LLM_UNINITIALIZED"}"""
 
         val fullPrompt = "${SystemPrompt.prompt}\n\"$userPrompt\"\n[END OF REAL USER PROMPT]"
         Log.d("LLM", "Šaljem prompt: \"$fullPrompt\"")
@@ -48,12 +48,12 @@ class OnDeviceLLM(
 
         } catch (e: Exception) {
             Log.e("LLM", "Greška pri generiranju sadržaja: ${e.message}")
-            return "Greška pri generiranju: ${e.message}"
+            return """{"intent":"LLM_ERROR"}"""
         }
     }
 
     override suspend fun getResponseAsync(userPrompt: String): String = withContext(Dispatchers.IO) {
-        val model = llmInference ?: return@withContext "Greška: LLM model nije inicijaliziran."
+        val model = llmInference ?: return@withContext """{"intent":"LLM_UNINITIALIZED"}"""
         val fullPrompt = "${SystemPrompt.prompt}\n\"$userPrompt\"\n[END OF REAL USER PROMPT]"
         Log.d("LLM", "Šaljem prompt: \"$fullPrompt\"")
         try {
@@ -64,7 +64,7 @@ class OnDeviceLLM(
             response
         } catch (e: Exception) {
             Log.e("LLM", "Greška pri generiranju sadržaja: ${e.message}")
-            "Greška pri generiranju: ${e.message}"
+            """{"intent":"LLM_ERROR"}"""
         }
     }
 

@@ -278,6 +278,8 @@ fun LlmChatDialog(
                                     }
                                 }
 
+                                Log.d("LlmChatDialog", "displayText: $displayText")
+
                                 val idx = messages.indexOfFirst { it.id == loadingId }
                                 if (idx != -1) {
                                     messages[idx] = messages[idx].copy(text = displayText, isLoading = false)

@@ -54,6 +54,8 @@ fun userFriendlyMessageForIntent(intent: String, params: JsonObject? = null): St
             val msg = params?.get("message")?.jsonPrimitive?.contentOrNull
             msg ?: "Dogodila se greška, molim Vas pokušajte ponovo."
         }
+        "LLM_UNINITIALIZED" -> "Greška pri inicijalizaciji LLM-a. Ponovo provjerite ADB putanju i zatim ponovo pokrenite aplikaciju."
+        "LLM_ERROR" -> "Dogodila se greška pri generiranju odgovora."
         "UNKNOWN" -> "Nažalost nisam u potpunosti razumio Vaš zahtjev. 😅 \nLjubazno Vas molim da pokušate ponovo. 😊"
         else -> "Pokrenuo sam proces... ⚙️"
     }
