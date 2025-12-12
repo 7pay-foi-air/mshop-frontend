@@ -4,15 +4,15 @@ import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import hr.foi.air.mshop.viewmodels.articleManagement.ArticleFormViewModel
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
-import hr.foi.air.mshop.viewmodels.articleManagement.EditArticleViewModel
 
 @Composable
 fun EditArticlePage(
     onCancel: () -> Unit,
     onUpdatedSuccessfully: () -> Unit,
     articleVm: ArticleManagementViewModel = viewModel(),
-    editVm: EditArticleViewModel = viewModel()
+    editVm: ArticleFormViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val uiState by editVm.uiState.collectAsState()
@@ -36,8 +36,8 @@ fun EditArticlePage(
     articleToEdit?.let { article ->
         ArticleFormPage(
             articleToEdit = article,
-            onSubmit = { updatedArticle ->
-                editVm.updateArticle(updatedArticle, context)
+            viewModel = editVm,
+            onSubmit = {
             },
             onCancel = onCancel
         )

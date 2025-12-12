@@ -89,6 +89,8 @@ dependencies {
     //core
     implementation(project(":core"))
     implementation(project(":ws"))
+    implementation(project(":image_loader"))
+    implementation(project(":camera_loader"))
 
     implementation("com.google.mediapipe:tasks-genai:0.10.27")
 

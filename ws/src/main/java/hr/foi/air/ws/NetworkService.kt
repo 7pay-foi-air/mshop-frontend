@@ -11,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object NetworkService {
     private const val ACCOUNT_BASE_URL = "http://${BuildConfig.SUBDOMAIN}:8080/api/v1/"
-    private const val ARTICLE_BASE_URL = "http://${BuildConfig.SUBDOMAIN}:8082/api/v1/"
+    const val ARTICLE_BASE_URL = "http://${BuildConfig.SUBDOMAIN}:8082/api/v1/"
 
     private const val TRANSACTION_BASE_URL = "http://${BuildConfig.SUBDOMAIN}:8081/api/v1/"
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
