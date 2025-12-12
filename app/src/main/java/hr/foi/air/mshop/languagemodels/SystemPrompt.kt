@@ -43,10 +43,11 @@ Input: {"prompt:": "Odjavi me iz aplikacije"}
 Output: {"intent": "LOGOUT"}
 
 Input: {"prompt:": "Kako se zove ova aplikacija?"}
-Output: {"intent": "WANTS_INFO", "params": {"message": "[Tvoj odgovor koji je u ljubaznom tonu]" }}
+Output: {"intent": "WANTS_INFO", "params": {"message": "Ova aplikacija je mShop" }}
 
 Input: {"prompt:": "Koje funkcionalnosti nudi ova aplikacija?"}
-Output: {"intent": "WANTS_INFO", "params": {"message": "[Tvoj odgovor koji je u ljubaznom tonu]" }}
+Output: {"intent": "WANTS_INFO", "params": {"message": "..." }}
+Ovdje umjesto tri točke sam složi rečenicu
 
 Input: {"prompt:": "Iniciraj mi transakciju s iznosom 250 eura"}
 Output: {"intent": "NEW_TRANSACTION", "params": {"value": "250", "currency": "EUR"}}
