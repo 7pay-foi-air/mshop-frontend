@@ -71,7 +71,9 @@ data class AddUserUIState(
     } ?: ""
 }
 
-class AddUserViewModel(private val repo: UserRepo = UserRepo()): ViewModel() {
+class AddUserViewModel(
+    private val repo: UserRepo = UserRepo()
+): ViewModel() {
     var uiState by mutableStateOf(AddUserUIState())
         private set
 
@@ -133,6 +135,10 @@ class AddUserViewModel(private val repo: UserRepo = UserRepo()): ViewModel() {
 
     fun onDatePickerDismissed() {
         uiState = uiState.copy(dobVisited = true, showDatePicker = false)
+    }
+
+    fun onMessageShown() {
+        uiState = uiState.copy(successMessage = null, errorMessage = null)
     }
 
     fun addUser() {

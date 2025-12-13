@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.navigation.components.userManagement
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -9,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,7 @@ fun AddUserPage(
 ) {
     val viewModel: AddUserViewModel = viewModel()
     val uiState = viewModel.uiState
+    val context = LocalContext.current
 
     if (uiState.showDatePicker) {
         val dateState = rememberDatePickerState(
@@ -48,9 +51,15 @@ fun AddUserPage(
         ) { DatePicker(state = dateState) }
     }
 
-    LaunchedEffect(uiState.successMessage) {
+    LaunchedEffect(uiState.successMessage, uiState.errorMessage) {
         if (uiState.successMessage != null) {
+            Toast.makeText(context, uiState.successMessage, Toast.LENGTH_LONG).show()
             onUserAdded?.invoke()
+            viewModel.onMessageShown()
+        }
+        if (uiState.errorMessage != null) {
+            Toast.makeText(context, uiState.errorMessage, Toast.LENGTH_LONG).show()
+            viewModel.onMessageShown()
         }
     }
 
@@ -196,21 +205,5 @@ fun AddUserPage(
             onClick = viewModel::addUser,
             modifier = Modifier.padding(top = 16.dp)
         )
-
-        uiState.successMessage?.let {
-            Spacer(Modifier.height(12.dp))
-            Text(
-                it,
-                color = Color(0xFF2E7D32),
-            )
-        }
-
-        uiState.errorMessage?.let {
-            Spacer(Modifier.height(12.dp))
-            Text(
-                it,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
     }
 }
