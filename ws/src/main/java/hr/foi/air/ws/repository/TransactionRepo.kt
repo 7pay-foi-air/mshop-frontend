@@ -1,4 +1,5 @@
 package hr.foi.air.ws.repository
+
 import hr.foi.air.mshop.core.models.Transaction
 import hr.foi.air.mshop.core.models.TransactionHistoryDomain
 import hr.foi.air.mshop.core.models.TransactionHistoryRecord
@@ -13,7 +14,7 @@ import hr.foi.air.ws.models.transaction.TransactionSummary
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class TransactionRepository(
+class TransactionRepo(
     private val api: ITransactionApi
 ): ITransactionRepository {
     override suspend fun createTransaction(
@@ -40,7 +41,6 @@ class TransactionRepository(
         }
     }
 
-    // pretvaranje transaction(core) u CreateTransactionRequest(DTO)
     private fun Transaction.toRequest(): CreateTransactionRequest = CreateTransactionRequest(
         payment_method = "card_payment",
         currency = this.currency,
@@ -55,7 +55,6 @@ class TransactionRepository(
         }
     )
 
-    // TransactionResponse (DTO) -> TransactionResult (core)
     private fun TransactionResponse.toDomainResult(): TransactionResult =
         TransactionResult(
             transactionId = this.uuid_transaction,
@@ -93,9 +92,6 @@ class TransactionRepository(
         }
     }
 
-
-
-    // DTO -> DOMAIN (core model)
     private fun TransactionSummary.toDomain(
         type: TransactionType
     ): TransactionHistoryRecord {
@@ -108,5 +104,4 @@ class TransactionRepository(
             refundToTransactionId = transaction_refund_id
         )
     }
-
 }

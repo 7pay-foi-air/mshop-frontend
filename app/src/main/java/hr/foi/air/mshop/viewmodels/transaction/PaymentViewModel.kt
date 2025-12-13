@@ -6,14 +6,14 @@ import hr.foi.air.mshop.core.models.Transaction
 import hr.foi.air.mshop.core.repository.ITransactionRepository
 import hr.foi.air.mshop.data.UIState
 import hr.foi.air.ws.NetworkService
-import hr.foi.air.ws.repository.TransactionRepository
+import hr.foi.air.ws.repository.TransactionRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class PaymentViewModel(
     private val transactionRepository: ITransactionRepository =
-        TransactionRepository(NetworkService.transactionApi)
+        TransactionRepo(NetworkService.transactionApi)
 ): ViewModel() {
     private val _uiState = MutableStateFlow(UIState())
     val uiState: StateFlow<UIState> = _uiState

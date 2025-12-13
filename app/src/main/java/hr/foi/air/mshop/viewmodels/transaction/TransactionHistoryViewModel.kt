@@ -3,15 +3,13 @@ package hr.foi.air.mshop.viewmodels.transaction
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.TransactionHistoryRecord
-import hr.foi.air.mshop.core.models.TransactionType
 import hr.foi.air.mshop.core.repository.ITransactionRepository
 import hr.foi.air.ws.NetworkService
-import hr.foi.air.ws.repository.TransactionRepository
+import hr.foi.air.ws.repository.TransactionRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 data class TransactionSummaryUI(
     val id: String,
@@ -31,7 +29,7 @@ data class RefundSummaryUI(
 
 
 class TransactionHistoryViewModel(
-    private val repository: ITransactionRepository = TransactionRepository(NetworkService.transactionApi)
+    private val repository: ITransactionRepository = TransactionRepo(NetworkService.transactionApi)
 ) : ViewModel() {
     private val _selectedTabIndex = MutableStateFlow(0)
     val selectedTabIndex: StateFlow<Int> = _selectedTabIndex

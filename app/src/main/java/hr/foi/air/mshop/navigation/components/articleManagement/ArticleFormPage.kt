@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Upload
@@ -165,6 +166,7 @@ fun ArticleFormPage(
             onValueChange = { viewModel.price = it },
             placeholder = "",
             isError = viewModel.priceError,
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
             errorText = when {
                 !viewModel.priceVisited -> null
                 viewModel.priceEmpty -> "Obavezno polje"
@@ -185,6 +187,7 @@ fun ArticleFormPage(
             placeholder = "",
             isError = false,
             errorText = null,
+            enabled = false,
             trailingIcon = {
                 IconButton(
                     onClick = {

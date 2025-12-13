@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -116,6 +117,7 @@ fun LoginPassword(
             NextArrow(
                 modifier = Modifier
                     .align(Alignment.End)
+                    .offset(y = (-30).dp)
                     .padding(bottom = 32.dp),
                 size = 64.dp,
                 onClick = {

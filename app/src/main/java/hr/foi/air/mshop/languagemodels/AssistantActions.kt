@@ -6,7 +6,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.navigation.NavController
 import hr.foi.air.mshop.navigation.AppRoutes
-import hr.foi.air.mshop.viewmodels.HomepageViewModel
 import hr.foi.air.ws.data.SessionManager
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull

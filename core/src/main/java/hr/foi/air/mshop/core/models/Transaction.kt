@@ -1,7 +1,5 @@
 package hr.foi.air.mshop.core.models
 
-import java.util.Date
-
 data class Transaction(
     val description: String,
     val items: List<TransactionItem>,

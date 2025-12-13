@@ -24,7 +24,8 @@ fun UnderLabelTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
     isError: Boolean = false,
     errorText: String? = null,
-    trailingIcon: @Composable (() -> Unit)? = null
+    trailingIcon: @Composable (() -> Unit)? = null,
+    enabled : Boolean = true
 ) {
     Column(modifier = modifier) {
         OutlinedTextField(
@@ -36,6 +37,7 @@ fun UnderLabelTextField(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
             isError = isError,
+            enabled = enabled,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
@@ -45,7 +47,6 @@ fun UnderLabelTextField(
             ),
             trailingIcon = trailingIcon,
             supportingText = {
-                // Prikaži GREŠKU ako postoji, inače samo caption
                 if (errorText != null) {
                     Text(
                         text = caption + " - " + errorText,

@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
-
 typealias LlmIntentHandler = (intent: String, parameters: JsonObject?) -> Unit
 
 @Serializable
