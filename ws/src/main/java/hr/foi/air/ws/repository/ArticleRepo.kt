@@ -25,7 +25,9 @@ class ArticleRepo : IArticleRepository {
         articleName = this.name,
         description = this.description,
         price = this.price,
-        imageUrl = "${ARTICLE_BASE_URL.removeSuffix("/api/v1/")}/${this.imageUrl.removePrefix("/")}",
+        imageUrl = this.imageUrl?.let {
+            "${ARTICLE_BASE_URL.removeSuffix("/api/v1/")}/${it.removePrefix("/")}"
+        },
         ean = this.sku,
         stockQuantity = this.stockQuantity
     )
