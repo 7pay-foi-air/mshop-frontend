@@ -17,106 +17,48 @@ import hr.foi.air.mshop.ui.components.DateFieldUnderLabel
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.viewmodels.userManagement.AddUserViewModel
-import hr.foi.air.ws.models.userManagement.AddUserRequest
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.regex.Pattern
+import hr.foi.air.mshop.viewmodels.userManagement.FocusedField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddUserPage(
     onUserAdded: (() -> Unit)? = null
 ) {
-
     val viewModel: AddUserViewModel = viewModel()
-    val uiState = viewModel.state
+    val uiState = viewModel.uiState
 
-    var firstName by remember { mutableStateOf("") }
-    var lastName  by remember { mutableStateOf("") }
-    var username  by remember { mutableStateOf("") }
-    var address   by remember { mutableStateOf("") }
-    var email     by remember { mutableStateOf("") }
-    var phoneNum  by remember { mutableStateOf("") }
-    var isAdmin   by remember { mutableStateOf(false) }
-
-    // visited + hadFocus po polju
-    var fnVisited by remember { mutableStateOf(false) };
-    var fnHadFocus by remember { mutableStateOf(false) }
-
-    var lnVisited by remember { mutableStateOf(false) };
-    var lnHadFocus by remember { mutableStateOf(false) }
-
-    var unVisited by remember { mutableStateOf(false) };
-    var unHadFocus by remember { mutableStateOf(false) }
-
-    var adVisited by remember { mutableStateOf(false) };
-    var adHadFocus by remember { mutableStateOf(false) }
-
-    var emVisited by remember { mutableStateOf(false) };
-    var emHadFocus by remember { mutableStateOf(false) }
-
-    var phVisited by remember { mutableStateOf(false) };
-    var phHadFocus by remember { mutableStateOf(false) }
-
-    var dobVisited by remember { mutableStateOf(false) } // za date koristimo zatvaranje pickera - dob - dateOfBirth
-
-    // DOB
-    var dateOfBirthMillis by remember { mutableStateOf<Long?>(null) }
-    val dobText = remember(dateOfBirthMillis) {
-        dateOfBirthMillis?.let {
-            SimpleDateFormat("dd.MM.yyyy.", Locale.getDefault()).format(Date(it))
-        } ?: ""
-    }
-
-    // backend format DOB
-    val dobBackend = remember(dateOfBirthMillis) {
-        dateOfBirthMillis?.let {
-            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(it))
-        } ?: ""
-    }
-
-    var showDatePicker by remember { mutableStateOf(false) }
-    if (showDatePicker) {
-        val dateState = rememberDatePickerState(initialSelectedDateMillis = dateOfBirthMillis ?: System.currentTimeMillis())
+    if (uiState.showDatePicker) {
+        val dateState = rememberDatePickerState(
+            initialSelectedDateMillis = uiState.dateOfBirthMillis ?: System.currentTimeMillis()
+        )
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false; dobVisited = true },
+            onDismissRequest = {
+                viewModel.onDatePickerDismissed()
+            },
             confirmButton = {
                 TextButton(onClick = {
-                    dateOfBirthMillis = dateState.selectedDateMillis
-                    showDatePicker = false
-                    dobVisited = true
+                    viewModel.onDateOfBirthChange(dateState.selectedDateMillis)
                 }) { Text("OK") }
             },
-            dismissButton = { TextButton(onClick = { showDatePicker = false; dobVisited = true }) { Text("Odustani") } }
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.onDatePickerDismissed()
+                }) { Text("Odustani") }
+            }
         ) { DatePicker(state = dateState) }
     }
 
-    // regexi
-    val emailRegex = remember { Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$") }
-    val phoneRegex = remember { Pattern.compile("^((\\+\\d{1,3})?\\s?\\d{6,14})$") }
-
-    // provjere
-    val firstNameEmpty = firstName.isBlank()
-    val lastNameEmpty  = lastName.isBlank()
-    val usernameEmpty  = username.isBlank()
-    val addressEmpty   = address.isBlank()
-    val dobMissing     = dateOfBirthMillis == null
-
-    val emailFormatInvalid = email.isNotBlank() && !emailRegex.matcher(email).matches()
-    val phoneFormatInvalid = phoneNum.isNotBlank() && !phoneRegex.matcher(phoneNum.replace(" ", "")).matches()
-
-    val allValid =
-        firstName.isNotBlank() &&
-        lastName.isNotBlank()  &&
-        username.isNotBlank()  &&
-        address.isNotBlank()   &&
-        email.isNotBlank()     && !emailFormatInvalid &&
-        phoneNum.isNotBlank()  && !phoneFormatInvalid &&
-        !dobMissing
+    LaunchedEffect(uiState.successMessage) {
+        if (uiState.successMessage != null) {
+            onUserAdded?.invoke()
+        }
+    }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState()),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -124,7 +66,9 @@ fun AddUserPage(
             "mShop",
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 4.dp)
         )
 
         Text(
@@ -135,110 +79,108 @@ fun AddUserPage(
 
         UnderLabelTextField(
             caption = "Ime",
-            value = firstName,
-            onValueChange = { firstName = it },
-            placeholder = "",
-            isError = fnVisited && firstNameEmpty,
-            errorText = if (fnVisited && firstNameEmpty) "Obavezno polje" else null,
-            modifier = Modifier.onFocusChanged { f ->
-                if (f.isFocused) fnHadFocus = true
-                if (!f.isFocused && fnHadFocus) fnVisited = true
+            value = uiState.firstName,
+            onValueChange = viewModel::onFirstNameChange,
+            isError = uiState.fnVisited && uiState.isFirstNameEmpty,
+            errorText = if (uiState.fnVisited && uiState.isFirstNameEmpty) "Obavezno polje" else null,
+            modifier = Modifier.onFocusChanged { focusState ->
+                viewModel.onFocusChange(FocusedField.FIRST_NAME, focusState.isFocused)
             }
         )
         Spacer(Modifier.height(8.dp))
 
         UnderLabelTextField(
             caption = "Prezime",
-            value = lastName,
-            onValueChange = { lastName = it },
-            placeholder = "",
-            isError = lnVisited && lastNameEmpty,
-            errorText = if (lnVisited && lastNameEmpty) "Obavezno polje" else null,
-            modifier = Modifier.onFocusChanged { f ->
-                if (f.isFocused) lnHadFocus = true
-                if (!f.isFocused && lnHadFocus) lnVisited = true
+            value = uiState.lastName,
+            onValueChange = viewModel::onLastNameChange,
+            isError = uiState.lnVisited && uiState.isLastNameEmpty,
+            errorText = if (uiState.lnVisited && uiState.isLastNameEmpty) "Obavezno polje" else null,
+            modifier = Modifier.onFocusChanged { focusState ->
+                viewModel.onFocusChange(FocusedField.LAST_NAME, focusState.isFocused)
             }
         )
         Spacer(Modifier.height(8.dp))
 
         UnderLabelTextField(
             caption = "Korisničko ime",
-            value = username,
-            onValueChange = { username = it },
-            placeholder = "",
-            isError = unVisited && usernameEmpty,
-            errorText = if (unVisited && usernameEmpty) "Obavezno polje" else null,
-            modifier = Modifier.onFocusChanged { f ->
-                if (f.isFocused) unHadFocus = true
-                if (!f.isFocused && unHadFocus) unVisited = true
+            value = uiState.username,
+            onValueChange = viewModel::onUsernameChange,
+            isError = uiState.unVisited && uiState.isUsernameEmpty,
+            errorText = if (uiState.unVisited && uiState.isUsernameEmpty) "Obavezno polje" else null,
+            modifier = Modifier.onFocusChanged { focusState ->
+                viewModel.onFocusChange(FocusedField.USERNAME, focusState.isFocused)
             }
         )
         Spacer(Modifier.height(8.dp))
 
         DateFieldUnderLabel(
             caption = "Datum rođenja",
-            value = dobText,
-            onOpenPicker = { showDatePicker = true },
-            isError = dobVisited && dobMissing,
-            errorText = if (dobVisited && dobMissing) "Obavezno polje" else null
+            value = uiState.dobText,
+            onOpenPicker = viewModel::onOpenDatePicker,
+            isError = uiState.dobVisited && uiState.isDobMissing,
+            errorText = if (uiState.dobVisited && uiState.isDobMissing) "Obavezno polje" else null
         )
         Spacer(Modifier.height(8.dp))
 
         UnderLabelTextField(
             caption = "Adresa",
-            value = address,
-            onValueChange = { address = it },
-            placeholder = "",
-            isError = adVisited && addressEmpty,
-            errorText = if (adVisited && addressEmpty) "Obavezno polje" else null,
-            modifier = Modifier.onFocusChanged { f ->
-                if (f.isFocused) adHadFocus = true
-                if (!f.isFocused && adHadFocus) adVisited = true
+            value = uiState.address,
+            onValueChange = viewModel::onAddressChange,
+            isError = uiState.adVisited && uiState.isAddressEmpty,
+            errorText = if (uiState.adVisited && uiState.isAddressEmpty) "Obavezno polje" else null,
+            modifier = Modifier.onFocusChanged { focusState ->
+                viewModel.onFocusChange(FocusedField.ADDRESS, focusState.isFocused)
             }
         )
         Spacer(Modifier.height(8.dp))
 
         UnderLabelTextField(
             caption = "E-mail",
-            value = email,
-            onValueChange = { email = it },
+            value = uiState.email,
+            onValueChange = viewModel::onEmailChange,
             placeholder = "primjer@domena.com",
-            isError = emVisited && (email.isBlank() || emailFormatInvalid),
+            isError = uiState.emVisited && (uiState.email.isBlank() || uiState.isEmailFormatInvalid),
             errorText = when {
-                emVisited && email.isBlank()     -> "Obavezno polje"
-                emVisited && emailFormatInvalid  -> "Neispravan format e-mail adrese"
+                uiState.emVisited && uiState.email.isBlank() -> "Obavezno polje"
+                uiState.emVisited && uiState.isEmailFormatInvalid -> "Neispravan format e-mail adrese"
                 else -> null
             },
-            modifier = Modifier.onFocusChanged { f ->
-                if (f.isFocused) emHadFocus = true
-                if (!f.isFocused && emHadFocus) emVisited = true
+            modifier = Modifier.onFocusChanged { focusState ->
+                viewModel.onFocusChange(FocusedField.EMAIL, focusState.isFocused)
             }
         )
         Spacer(Modifier.height(8.dp))
 
         UnderLabelTextField(
             caption = "Broj telefona",
-            value = phoneNum,
-            onValueChange = { phoneNum = it },
+            value = uiState.phoneNum,
+            onValueChange = viewModel::onPhoneNumChange,
             placeholder = "+385 98 123 4567",
-            isError = phVisited && (phoneNum.isBlank() || phoneFormatInvalid),
+            isError = uiState.phVisited && (uiState.phoneNum.isBlank() || uiState.isPhoneFormatInvalid),
             errorText = when {
-                phVisited && phoneNum.isBlank()   -> "Obavezno polje"
-                phVisited && phoneFormatInvalid   -> "Neispravan broj telefona"
+                uiState.phVisited && uiState.phoneNum.isBlank() -> "Obavezno polje"
+                uiState.phVisited && uiState.isPhoneFormatInvalid -> "Neispravan broj telefona"
                 else -> null
             },
-            modifier = Modifier.onFocusChanged { f ->
-                if (f.isFocused) phHadFocus = true
-                if (!f.isFocused && phHadFocus) phVisited = true
+            modifier = Modifier.onFocusChanged { focusState ->
+                viewModel.onFocusChange(FocusedField.PHONE, focusState.isFocused)
             }
         )
         Spacer(Modifier.height(16.dp))
 
-        Row(modifier = Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = isAdmin, onCheckedChange = { isAdmin = it })
-            Text("Admin",
+        Row(
+            modifier = Modifier.padding(top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = uiState.isAdmin,
+                onCheckedChange = viewModel::onIsAdminChange
+            )
+            Text(
+                "Admin",
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(start = 4.dp))
+                modifier = Modifier.padding(start = 4.dp)
+            )
         }
 
         Spacer(Modifier.height(16.dp))
@@ -250,46 +192,25 @@ fun AddUserPage(
 
         StyledButton(
             label = if (uiState.loading) "Spremanje..." else "Dodaj",
-            enabled = allValid && !uiState.loading,
-            onClick = {
-                val req = AddUserRequest(
-                    address = address.trim(),
-                    date_of_birth = dobBackend,
-                    email = email.trim(),
-                    first_name = firstName.trim(),
-                    is_admin = isAdmin,
-                    last_name = lastName.trim(),
-                    organisation_uuid = "02f2c243-6c29-4f21-a98c-955372bc6297",
-                    phone_number = phoneNum.trim(),
-                    username = username.trim()
-                )
-                viewModel.addUser(req)
-            },
+            enabled = uiState.isFormValid && !uiState.loading,
+            onClick = viewModel::addUser,
             modifier = Modifier.padding(top = 16.dp)
         )
 
-        uiState.successMessage?.let{
+        uiState.successMessage?.let {
             Spacer(Modifier.height(12.dp))
             Text(
-                "$it",
+                it,
                 color = Color(0xFF2E7D32),
             )
         }
 
-        uiState.errorMessage?.let{
+        uiState.errorMessage?.let {
             Spacer(Modifier.height(12.dp))
             Text(
-                "$it",
+                it,
                 color = MaterialTheme.colorScheme.error
             )
         }
-
-        // Clear message on new typing
-        LaunchedEffect(firstName, lastName, username, address, email, phoneNum) {
-            if (uiState.successMessage != null || uiState.errorMessage != null) {
-                viewModel.clearMessages()
-            }
-        }
-
     }
 }
