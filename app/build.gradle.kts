@@ -1,7 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+}
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
 }
 
 android {
@@ -18,6 +27,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val subdomain = localProperties.getProperty("subdomain")
+        val modelPath = localProperties.getProperty("llm.model.path")
+
+        buildConfigField("String", "SUBDOMAIN", "\"$subdomain\"")
+        buildConfigField("String", "MODEL_PATH", "\"$modelPath\"")
     }
 
     buildTypes {
@@ -38,6 +53,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -60,6 +76,25 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    implementation(platform("androidx.compose:compose-bom:2025.10.01"))
     implementation ("androidx.compose.material:material-icons-extended")
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+
+    // Logging interceptor (za debug)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    //core
+    implementation(project(":core"))
+    implementation(project(":ws"))
+    implementation(project(":image_loader"))
+    implementation(project(":camera_loader"))
+
+    implementation("com.google.mediapipe:tasks-genai:0.10.27")
+
+    implementation(libs.kotlinx.serialization.json)
+
+
 }
