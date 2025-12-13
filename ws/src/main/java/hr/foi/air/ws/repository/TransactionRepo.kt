@@ -14,7 +14,7 @@ import hr.foi.air.ws.models.transaction.TransactionSummary
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class TransactionRepository(
+class TransactionRepo(
     private val api: ITransactionApi
 ): ITransactionRepository {
     override suspend fun createTransaction(

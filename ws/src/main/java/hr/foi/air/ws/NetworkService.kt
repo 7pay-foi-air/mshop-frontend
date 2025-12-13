@@ -1,7 +1,7 @@
 package hr.foi.air.ws
 
-import hr.foi.air.ws.api.AccountApi
-import hr.foi.air.ws.api.ArticleApi
+import hr.foi.air.ws.api.IAccountApi
+import hr.foi.air.ws.api.IArticleApi
 import hr.foi.air.ws.api.ITransactionApi
 import hr.foi.air.ws.data.SessionManager
 import okhttp3.OkHttpClient
@@ -52,8 +52,8 @@ object NetworkService {
         .addConverterFactory(GsonConverterFactory.create())
         .client(client)
         .build()
-    val accountApi: AccountApi = accountRetrofit.create(AccountApi::class.java)
-    val articleApi: ArticleApi = articleRetrofit.create(ArticleApi::class.java)
+    val accountApi: IAccountApi = accountRetrofit.create(IAccountApi::class.java)
+    val articleApi: IArticleApi = articleRetrofit.create(IArticleApi::class.java)
 
     val transactionApi: ITransactionApi by lazy {
         transactionRetrofit.create(ITransactionApi::class.java)
