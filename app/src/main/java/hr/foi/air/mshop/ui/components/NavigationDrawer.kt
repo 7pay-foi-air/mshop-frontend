@@ -113,9 +113,9 @@ fun NavigationDrawer(
                         )
                     }
 
-                    SessionManager.currentUserId.let { userId ->
+                    SessionManager.currentUserRole.let { userRole ->
                         Text(
-                            text = "ID: $userId",
+                            text = "Role: $userRole",
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
