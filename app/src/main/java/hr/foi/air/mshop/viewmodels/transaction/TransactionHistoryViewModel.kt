@@ -3,7 +3,6 @@ package hr.foi.air.mshop.viewmodels.transaction
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.TransactionHistoryRecord
-import hr.foi.air.mshop.core.models.TransactionType
 import hr.foi.air.mshop.core.repository.ITransactionRepository
 import hr.foi.air.ws.NetworkService
 import hr.foi.air.ws.repository.TransactionRepository
@@ -11,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 data class TransactionSummaryUI(
     val id: String,

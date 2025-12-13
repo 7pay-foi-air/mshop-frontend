@@ -58,5 +58,4 @@ object NetworkService {
     val transactionApi: ITransactionApi by lazy {
         transactionRetrofit.create(ITransactionApi::class.java)
     }
-
 }

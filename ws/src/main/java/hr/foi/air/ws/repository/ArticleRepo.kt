@@ -6,7 +6,6 @@ import android.util.Log
 import com.google.gson.Gson
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.repository.IArticleRepository
-import hr.foi.air.ws.BuildConfig
 import hr.foi.air.ws.NetworkService
 import hr.foi.air.ws.NetworkService.ARTICLE_BASE_URL
 import hr.foi.air.ws.models.articleManagement.ArticleResponse
@@ -34,7 +33,6 @@ class ArticleRepo : IArticleRepository {
     private fun buildImagePart(uriStr: String, context: Context): MultipartBody.Part? {
         val uri = Uri.parse(uriStr)
 
-        // stvarni MIME tip slike
         val mimeType = context.contentResolver.getType(uri) ?: return null
 
         val bytes = context.contentResolver.openInputStream(uri)

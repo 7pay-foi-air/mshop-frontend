@@ -1,6 +1,5 @@
 package hr.foi.air.image_loader.interfaces
 
-import android.media.Image
 import android.net.Uri
 
 interface IPhotoListener {

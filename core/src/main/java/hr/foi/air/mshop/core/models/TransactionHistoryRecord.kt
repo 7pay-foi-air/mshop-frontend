@@ -11,5 +11,5 @@ data class TransactionHistoryRecord(
     val currency: String,
     val createdAt: String,
     val type: TransactionType,
-    val refundToTransactionId: String? = null,   // samo za REFUND
+    val refundToTransactionId: String? = null
 )
