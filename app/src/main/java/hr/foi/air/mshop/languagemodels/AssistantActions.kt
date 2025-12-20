@@ -14,51 +14,32 @@ import kotlinx.serialization.json.jsonPrimitive
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-
-val criticalIntents = setOf(
-    "LOGOUT",
-)
-
-val intentRequiresLogin = setOf(
-    "LOGOUT",
-    "VIEW_TRANSACTIONS",
-    "VIEW_TRANSACTIONS_PERIOD",
-    "NEW_TRANSACTION"
-)
-
 fun loginRequiredMessage(intent: String): String {
-    return when (intent) {
-        "LOGOUT" -> "Niste prijavljeni pa Vas ne mogu odjaviti. ⚠️"
-        "VIEW_TRANSACTIONS" -> "Morate biti prijavljeni kako biste mogli vidjeti popis transakcija. ⚠️"
-        "VIEW_TRANSACTIONS_PERIOD" -> "Morate biti prijavljeni kako biste mogli vidjeti popis transakcija. ⚠️"
-        "NEW_TRANSACTION" -> "Morate biti prijavljeni kako biste mogli izraditi novu transakciju. ⚠️"
-        else -> "Morate se prijaviti da biste izvršili tu radnju. ⚠️"
-    }
+    val intentObj = AssistantIntent.fromIntent(intent)
+    return intentObj.requiresLoginMessage ?: "Morate se prijaviti da biste izvršili tu radnju. ⚠️"
 }
 
 fun cancellationTextForIntent(intent: String): String {
-    return when (intent) {
-        "LOGOUT" -> "Odjava otkazana ❌"
-        else -> "Operacija otkazana ❌"
-    }
+    val intentObj = AssistantIntent.fromIntent(intent)
+    return intentObj.cancellationText ?: "Operacija otkazana ❌"
 }
 
 fun userFriendlyMessageForIntent(intent: String, params: JsonObject? = null): String {
-    return when (intent) {
-        "LOGOUT" -> "Pokrenuo sam proces odjave 🚪"
-        "VIEW_TRANSACTIONS" -> "Prebacio sam Vas na stranicu za pregled transakcija. 🧾"
-        "VIEW_TRANSACTIONS_PERIOD" -> "Prebacio sam Vas na stranicu za pregled transakcija i primijenio tražene filtre. 🧾"
-        "NEW_TRANSACTION" -> "Prebacio sam Vas na stranicu za kreiranje nove transakcije. 🧾"
-        "WANTS_INFO" -> {
+    val intentObj = AssistantIntent.fromIntent(intent)
+    return when (intentObj) {
+        AssistantIntent.WANTS_INFO -> {
             val msg = params?.get("message")?.jsonPrimitive?.contentOrNull
             msg ?: "Dogodila se greška, molim Vas pokušajte ponovo."
         }
-        "LLM_UNINITIALIZED" -> "Greška pri inicijalizaciji LLM-a. Ponovo provjerite ADB putanju i zatim ponovo pokrenite aplikaciju."
-        "LLM_ERROR" -> "Dogodila se greška pri generiranju odgovora."
-        "UNKNOWN" -> "Nažalost nisam u potpunosti razumio Vaš zahtjev. 😅 \nLjubazno Vas molim da pokušate ponovo. 😊"
-        else -> "Pokrenuo sam proces... ⚙️"
+        AssistantIntent.VIEW_TRANSACTIONS_PERIOD -> {
+            intentObj.defaultUserFriendlyMessage ?: "Prebacio sam Vas na stranicu za pregled transakcija i primijenio tražene filtre. 🧾"
+        }
+        else -> {
+            intentObj.defaultUserFriendlyMessage ?: "Pokrenuo sam proces... ⚙️"
+        }
     }
 }
+
 
 
 fun getDateRange(value: Int, unit: String): Pair<String, String> {
@@ -81,12 +62,14 @@ fun createAssistantIntentHandler(
 
     Log.d("AssistantActions", "Intent: $intent, Params: $params")
 
-    when (intent) {
-        "VIEW_TRANSACTIONS" -> {
+    val intentObj = AssistantIntent.fromIntent(intent)
+
+    when (intentObj) {
+        AssistantIntent.VIEW_TRANSACTIONS -> {
             navController.navigate(AppRoutes.TRANSACTION_HISTORY)
         }
 
-        "VIEW_TRANSACTIONS_PERIOD" -> {
+        AssistantIntent.VIEW_TRANSACTIONS_PERIOD -> {
             val value = params?.get("value")?.jsonPrimitive?.int
             val unit = params?.get("unit")?.jsonPrimitive?.content
 
@@ -102,14 +85,14 @@ fun createAssistantIntentHandler(
         }
 
 
-        "NEW_TRANSACTION" -> {
+        AssistantIntent.NEW_TRANSACTION -> {
             val amountStr = params?.get("value")?.jsonPrimitive?.content ?: "0"
             val amount = amountStr.replace(",", ".").toDoubleOrNull() ?: 0.0
             val formattedAmount = String.format("%.2f€", amount)
             navController.navigate("payment?amount=${Uri.encode(formattedAmount)}&assistant=true")
         }
 
-        "LOGOUT" -> {
+        AssistantIntent.LOGOUT -> {
             SessionManager.endSession()
             Toast.makeText(context, "Odjavio sam Vas.", Toast.LENGTH_SHORT).show()
             onCloseChatDialog()
@@ -118,8 +101,8 @@ fun createAssistantIntentHandler(
             }
         }
 
-        "WANTS_INFO" ->{
-
+        AssistantIntent.WANTS_INFO ->{
+            //nista
         }
 
         else -> {

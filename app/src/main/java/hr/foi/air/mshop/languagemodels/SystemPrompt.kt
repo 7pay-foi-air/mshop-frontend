@@ -5,16 +5,7 @@ import java.time.format.DateTimeFormatter
 
 object SystemPrompt {
 
-    val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-    val availableIntents = listOf(
-        "VIEW_TRANSACTIONS",
-        "VIEW_TRANSACTIONS_PERIOD",
-        "NEW_TRANSACTION",
-        "LOGOUT",
-        "WANTS_INFO",
-        "UNKNOWN"
-    )
-    private val availableIntentsString = availableIntents.joinToString(", ") { "\"$it\"" }
+    private val availableIntentsString = AssistantIntent.availableIntentsString
 
     val prompt =
         """
@@ -73,20 +64,6 @@ Output: {"intent": "VIEW_TRANSACTIONS_PERIOD", "params": {"value": 1, "unit": "M
 }
 
 /*
-
-
- */
-
-
-/*
-Input: {"prompt:": [Svaki ostali inputi koji nisu u uputama i primjerima]}
-Output: {"intent": "UNKNOWN"}
-*/
-
-
-/*
-
-
 Input: {"prompt:": "Odvedi me na ekran gdje mogu vidjeti sve artikle"}
 Output: {"intent": "VIEW_PRODUCTS"}
  */

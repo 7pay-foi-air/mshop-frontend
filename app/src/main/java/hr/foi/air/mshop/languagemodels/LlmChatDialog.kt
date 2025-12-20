@@ -175,7 +175,7 @@ fun LlmChatDialog(
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
-                        Spacer(modifier = Modifier.weight(1f))  // Gura sve prema dolje
+                        Spacer(modifier = Modifier.weight(1f))
 
                         LazyColumn(
                             state = listState,
@@ -185,7 +185,23 @@ fun LlmChatDialog(
                                 MessageBubble(
                                     message = msg,
                                     isCancellable = (msg.id == pendingMessageId),
-                                    onCancel = { /* … */ }
+                                    onCancel = {
+                                        val intentToCancel = pendingIntent
+
+                                        pendingJob?.cancel(CancellationException("User canceled"))
+                                        pendingJob = null
+
+                                        val idx = messages.indexOfFirst { it.id == pendingMessageId }
+                                        if (idx != -1) {
+                                            val cancelText = intentToCancel?.let { cancellationTextForIntent(it) } ?: "Operacija otkazana ❌"
+                                            messages[idx] = messages[idx].copy(text = cancelText, isLoading = false)
+                                        }
+
+                                        pendingMessageId = null
+                                        pendingIntent = null
+                                        pendingParams = null
+                                    }
+
                                 )
                             }
                         }
@@ -263,14 +279,14 @@ fun LlmChatDialog(
                                 Log.d("LlmChatDialog", "text: $aiText, result: $result")
 
                                 val intent = result.intent
-                                val requiresLoginButNotLogged = intentRequiresLogin.contains(intent) && SessionManager.accessToken == null
+                                val intentObj = AssistantIntent.fromIntent(intent)
+                                val requiresLoginButNotLogged = intentObj.requiresLogin && SessionManager.accessToken == null
 
-                                val displayText = when (intent) {
-                                    "WANTS_INFO" -> userFriendlyMessageForIntent(intent, result.params)
+                                val displayText = when (intentObj) {
+                                    AssistantIntent.WANTS_INFO -> userFriendlyMessageForIntent(intent, result.params)
                                     else -> {
-                                        val requiresLoginButNotLogged = intentRequiresLogin.contains(intent) && SessionManager.accessToken == null
                                         if (requiresLoginButNotLogged) loginRequiredMessage(intent)
-                                        else userFriendlyMessageForIntent(intent)
+                                        else userFriendlyMessageForIntent(intent, result.params)
                                     }
                                 }
 
@@ -283,7 +299,7 @@ fun LlmChatDialog(
                                     messages.add(ChatMessage(id = nextId(), text = displayText, sender = Sender.Bot))
                                 }
 
-                                if (criticalIntents.contains(intent) && !requiresLoginButNotLogged) {
+                                if (intentObj.isCritical && !requiresLoginButNotLogged) {
                                     pendingIntent = intent
                                     pendingParams = result.params
 
@@ -294,7 +310,7 @@ fun LlmChatDialog(
                                     messages.add(
                                         ChatMessage(
                                             id = countdownId,
-                                            text = "Počinjem za $start sek…",
+                                            text = "Počinjem za $start sek.",
                                             sender = Sender.Bot
                                         )
                                     )
@@ -307,7 +323,7 @@ fun LlmChatDialog(
                                                 c--
                                                 val idx2 = messages.indexOfFirst { it.id == countdownId }
                                                 if (idx2 != -1) {
-                                                    messages[idx2] = messages[idx2].copy(text = "Počinjem za $c sek…")
+                                                    messages[idx2] = messages[idx2].copy(text = "Počinjem za $c sek.")
                                                 }
                                             }
                                             assistantHandler(pendingIntent!!, pendingParams)
@@ -321,7 +337,7 @@ fun LlmChatDialog(
                                     }
 
                                 } else {
-                                    if (!criticalIntents.contains(intent)) {
+                                    if (!intentObj.isCritical) {
                                         assistantHandler(intent, result.params)
                                     }
                                 }
@@ -336,7 +352,7 @@ fun LlmChatDialog(
                 }
 
                 if (isSttListening) {
-                    Text("Slušam…", modifier = Modifier.padding(top = 6.dp), fontSize = 12.sp)
+                    Text("Slušam...", modifier = Modifier.padding(top = 6.dp), fontSize = 12.sp)
                 }
 
                 LaunchedEffect(messages.size) {
