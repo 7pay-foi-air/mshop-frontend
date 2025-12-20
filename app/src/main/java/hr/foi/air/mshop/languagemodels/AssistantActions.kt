@@ -118,6 +118,10 @@ fun createAssistantIntentHandler(
             }
         }
 
+        "WANTS_INFO" ->{
+
+        }
+
         else -> {
             Toast.makeText(context, "Nije prepoznat zadatak.", Toast.LENGTH_SHORT).show()
         }
