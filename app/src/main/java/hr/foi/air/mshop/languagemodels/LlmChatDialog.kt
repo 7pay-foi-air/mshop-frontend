@@ -136,74 +136,89 @@ fun LlmChatDialog(
             messages.add(loadingMsg)
 
             scope.launch {
-                val (aiText, result) = assistantViewModel.processMessage(userText)
-                Log.d("LlmChatDialog", "text: $aiText, result: $result")
+                try{
+                    val (aiText, result) = assistantViewModel.processMessage(userText)
+                    Log.d("LlmChatDialog", "text: $aiText, result: $result")
 
-                val intent = result.intent
-                val intentObj = AssistantIntent.fromIntent(intent)
-                val requiresLoginButNotLogged = intentObj.requiresLogin && SessionManager.accessToken == null
+                    val intent = result.intent
+                    val intentObj = AssistantIntent.fromIntent(intent)
+                    val requiresLoginButNotLogged = intentObj.requiresLogin && SessionManager.accessToken == null
 
-                val displayText = when (intentObj) {
-                    AssistantIntent.WANTS_INFO -> userFriendlyMessageForIntent(intent, result.params)
-                    else -> {
-                        if (requiresLoginButNotLogged) loginRequiredMessage(intent)
-                        else userFriendlyMessageForIntent(intent, result.params)
-                    }
-                }
-
-                Log.d("LlmChatDialog", "displayText: $displayText")
-
-                val idx = messages.indexOfFirst { it.id == loadingId }
-                if (idx != -1) {
-                    messages[idx] = messages[idx].copy(text = displayText, isLoading = false)
-                } else {
-                    messages.add(ChatMessage(id = nextId(), text = displayText, sender = Sender.Bot))
-                }
-
-                if (intentObj.isCritical && !requiresLoginButNotLogged) {
-                    pendingIntent = intent
-                    pendingParams = result.params
-
-                    val countdownId = nextId()
-                    pendingMessageId = countdownId
-                    val start = 5
-
-                    messages.add(
-                        ChatMessage(
-                            id = countdownId,
-                            text = "Počinjem za $start sek.",
-                            sender = Sender.Bot
-                        )
-                    )
-
-                    pendingJob = scope.launch {
-                        var c = start
-                        try {
-                            while (c > 0) {
-                                delay(1000)
-                                c--
-                                val idx2 = messages.indexOfFirst { it.id == countdownId }
-                                if (idx2 != -1) {
-                                    messages[idx2] = messages[idx2].copy(text = "Počinjem za $c sek.")
-                                }
-                            }
-                            assistantHandler(pendingIntent!!, pendingParams)
-                        } catch (ex: CancellationException) {
-                        } finally {
-                            pendingJob = null
-                            pendingMessageId = null
-                            pendingIntent = null
-                            pendingParams = null
+                    val displayText = when (intentObj) {
+                        AssistantIntent.WANTS_INFO -> userFriendlyMessageForIntent(intent, result.params)
+                        else -> {
+                            if (requiresLoginButNotLogged) loginRequiredMessage(intent)
+                            else userFriendlyMessageForIntent(intent, result.params)
                         }
                     }
 
-                } else {
-                    if (!intentObj.isCritical) {
-                        assistantHandler(intent, result.params)
+                    Log.d("LlmChatDialog", "displayText: $displayText")
+
+                    val idx = messages.indexOfFirst { it.id == loadingId }
+                    if (idx != -1) {
+                        messages[idx] = messages[idx].copy(text = displayText, isLoading = false)
+                    } else {
+                        messages.add(ChatMessage(id = nextId(), text = displayText, sender = Sender.Bot))
+                    }
+
+                    if (intentObj.isCritical && !requiresLoginButNotLogged) {
+                        pendingIntent = intent
+                        pendingParams = result.params
+
+                        val countdownId = nextId()
+                        pendingMessageId = countdownId
+                        val start = 5
+
+                        messages.add(
+                            ChatMessage(
+                                id = countdownId,
+                                text = "Počinjem za $start sek.",
+                                sender = Sender.Bot
+                            )
+                        )
+
+                        pendingJob = scope.launch {
+                            var c = start
+                            try {
+                                while (c > 0) {
+                                    delay(1000)
+                                    c--
+                                    val idx2 = messages.indexOfFirst { it.id == countdownId }
+                                    if (idx2 != -1) {
+                                        messages[idx2] = messages[idx2].copy(text = "Počinjem za $c sek.")
+                                    }
+                                }
+                                assistantHandler(pendingIntent!!, pendingParams)
+                            } catch (ex: CancellationException) {
+                            } finally {
+                                pendingJob = null
+                                pendingMessageId = null
+                                pendingIntent = null
+                                pendingParams = null
+                            }
+                        }
+
+                    } else {
+                        if (!intentObj.isCritical) {
+                            assistantHandler(intent, result.params)
+                        }
+                    }
+                } catch (e : Exception){
+                    Log.e("LlmChatDialog", "LLM error", e)
+
+                    var lmmErrorMessage = userFriendlyMessageForIntent(AssistantIntent.ERROR.intent)
+
+                    val idx = messages.indexOfFirst { it.id == loadingId }
+                    if (idx != -1) {
+                        messages[idx] = messages[idx].copy(
+                            isLoading = false,
+                            text = lmmErrorMessage
+                        )
                     }
                 }
-
-                isSending = false
+                finally {
+                    isSending = false
+                }
             }
         }
     }
