@@ -120,6 +120,8 @@ fun LlmChatDialog(
     var pendingIntent: String? by remember { mutableStateOf(null) }
     var pendingParams: JsonObject? by remember { mutableStateOf(null) }
 
+    var isDialogOpen by remember { mutableStateOf(true) }
+
     val sendMessage = remember {
         { text : String ->
             if (text.isBlank() || isSending) return@remember
@@ -139,6 +141,8 @@ fun LlmChatDialog(
                 try{
                     val (aiText, result) = assistantViewModel.processMessage(userText)
                     Log.d("LlmChatDialog", "text: $aiText, result: $result")
+
+                    if (!isDialogOpen) return@launch
 
                     val intent = result.intent
                     val intentObj = AssistantIntent.fromIntent(intent)
@@ -178,17 +182,21 @@ fun LlmChatDialog(
                         )
 
                         pendingJob = scope.launch {
-                            var c = start
+                            var countdown = start
                             try {
-                                while (c > 0) {
+                                while (countdown > 0) {
                                     delay(1000)
-                                    c--
+                                    countdown--
                                     val idx2 = messages.indexOfFirst { it.id == countdownId }
                                     if (idx2 != -1) {
-                                        messages[idx2] = messages[idx2].copy(text = "Počinjem za $c sek.")
+                                        messages[idx2] = messages[idx2].copy(text = "Počinjem za $countdown sek.")
                                     }
                                 }
-                                assistantHandler(pendingIntent!!, pendingParams)
+                                pendingIntent?.let { intent ->
+                                    pendingParams?.let { params ->
+                                        assistantHandler(intent, params)
+                                    }
+                                }
                             } catch (ex: CancellationException) {
                             } finally {
                                 pendingJob = null
@@ -261,7 +269,8 @@ fun LlmChatDialog(
     AlertDialog(
         onDismissRequest = {
             sttManager.stopListening()
-            isSttListening = false
+            isDialogOpen = false
+            pendingJob?.cancel(CancellationException("Dialog zatvoren"))
             onDismissRequest()
         },
         title = { Text("Razgovor s AI") },
@@ -376,9 +385,9 @@ fun LlmChatDialog(
                     }
                 }
 
-                if (isSttListening) {
+                /*if (isSttListening) {
                     Text("Slušam...", modifier = Modifier.padding(top = 6.dp), fontSize = 12.sp)
-                }
+                }*/
 
                 LaunchedEffect(messages.size) {
                     if (messages.isNotEmpty()) {
