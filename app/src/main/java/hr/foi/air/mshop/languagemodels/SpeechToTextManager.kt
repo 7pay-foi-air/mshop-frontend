@@ -23,20 +23,33 @@ class SpeechToTextManagerSingle(
     private val mainHandler = Handler(Looper.getMainLooper())
     @Volatile private var _isListening: Boolean = false
 
-    val isListening: Boolean get() = _isListening
+    private var currentLanguage: String = Locale.getDefault().toLanguageTag()
 
-    private val intent: Intent by lazy {
+    private fun createRecognizerIntent(): Intent =
         Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            Log.d("currentLanguage", "$currentLanguage")
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale("hr", "HR"))
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "hr-HR")
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, currentLanguage)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, currentLanguage)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 3000L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 1000L)
-            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 4000L)
+            putExtra(
+                RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,
+                3000L
+            )
+            putExtra(
+                RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS,
+                1000L
+            )
+            putExtra(
+                RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,
+                4000L
+            )
         }
-    }
+
 
     private val listener = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {
@@ -111,14 +124,13 @@ class SpeechToTextManagerSingle(
         }
     }
 
-    /** Start a single-shot listening session. */
     fun startListeningOnce() {
         if (_isListening) return
         ensureRecognizer()
         try {
             _isListening = true
             mainHandler.post { onListeningStateChanged(true) }
-            recognizer?.startListening(intent)
+            recognizer?.startListening(createRecognizerIntent())
         } catch (e: Exception) {
             _isListening = false
             mainHandler.post {
@@ -129,7 +141,6 @@ class SpeechToTextManagerSingle(
         }
     }
 
-    /** Stop listening (if currently listening). */
     fun stopListening() {
         try {
             recognizer?.stopListening()

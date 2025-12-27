@@ -20,29 +20,30 @@ class BackendLLM : ILanguageModel {
     }
 
     override suspend fun getResponseAsync(userPrompt: String): String {
-        return try {
+        try {
+            val completePrompt =
+                "${SystemPrompt.prompt}\n\"$userPrompt\"\n[END OF REAL USER PROMPT]"
 
-            val completePrompt = "${SystemPrompt.prompt}\n\"$userPrompt\"\n[END OF REAL USER PROMPT]"
             val request = PromptRequest(prompt = completePrompt)
             Log.d("LLM", "Šaljem prompt: \"$completePrompt\"")
+
             val response = llmApi.getResponseAsync(request)
 
-            if (response.isSuccessful) {
-                val aiResponse = response.body()
-
-
-                if (aiResponse?.response != null) {
-                    Log.d("LLM", "Generirani tekst: $aiResponse?.response")
-                    aiResponse.response
-                } else {
-                    "Empty response from server."
-                }
-            } else {
-                "Error: ${response.code()} - ${response.message()}"
+            if (!response.isSuccessful) {
+                throw RuntimeException(
+                    "LLM API error ${response.code()}: ${response.message()}"
+                )
             }
+
+            val body = response.body()
+                ?: throw RuntimeException("Empty LLM response body")
+
+            return body.response
+                ?: throw RuntimeException("Empty LLM response text")
+
         } catch (e: Exception) {
-            Log.e("LLM", "Greška pri generiranju sadržaja: ${e.message}")
-            "Greška pri generiranju: ${e.message}"
+            Log.e("LLM", "Greška pri komunikaciji s LLM-om", e)
+            throw e
         }
     }
 
