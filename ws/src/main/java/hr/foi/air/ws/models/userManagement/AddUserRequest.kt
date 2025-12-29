@@ -7,7 +7,7 @@ data class AddUserRequest(
     val first_name: String,
     val is_admin: Boolean,
     val last_name: String,
-    val organisation_uuid: String,
+    val organisation_uuid: String?,
     val phone_number: String,
     val username: String
 )

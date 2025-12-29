@@ -53,6 +53,7 @@ object AppRoutes {
     // USER MANAGEMENT
     const val MANAGE_USERS = "manageUsers"
     const val ADD_USER = "addUser"
+    const val EDIT_USER = "editUser"
     const val REGISTER_ORGANIZATION = "regOrg"
 
     // ARTICLE MANAGEMENT
@@ -159,9 +160,7 @@ fun AppNavHost(
             )
         }
         composable(AppRoutes.MANAGE_USERS) {
-            ManageUsersPage(
-                onAddUser = { navController.navigate(AppRoutes.ADD_USER) }
-            )
+            ManageUsersPage(navController)
         }
         composable(AppRoutes.HOME) {
             Homepage(navController)

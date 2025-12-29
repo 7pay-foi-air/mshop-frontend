@@ -12,6 +12,6 @@ data class User(
     val phoneNum: String,
     val role: String,
     val dateOfBirthMillis: Long? = null,
-    val uuidOrganisation: String,
+    val uuidOrganisation: String? = null,
     val isAdmin: Boolean
 )

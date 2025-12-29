@@ -23,7 +23,7 @@ class UserResponse (
     val role: String,
 
     @SerializedName("date_of_birth")
-    val dateOfBirth: String?, // Backend vjerojatno vraća String, npr. "2002-05-15"
+    val dateOfBirth: String?,
 
     @SerializedName("uuid_organisation")
     val uuidOrganisation: String,
