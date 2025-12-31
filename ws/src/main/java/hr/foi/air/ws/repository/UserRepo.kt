@@ -6,10 +6,16 @@ import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.models.User
 import hr.foi.air.mshop.core.repository.IUserRepository
 import hr.foi.air.ws.NetworkService
+import hr.foi.air.ws.data.SessionManager
+import hr.foi.air.ws.models.MessageResponse
 import hr.foi.air.ws.models.userManagement.AddUserRequest
+import hr.foi.air.ws.models.userManagement.UpdateMyProfileRequest
+import hr.foi.air.ws.models.userManagement.UpdateUserAsAdminRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.json.JSONObject
+import retrofit2.Response
+import kotlin.random.Random
 
 class UserRepo : IUserRepository {
     private val api = NetworkService.accountApi
@@ -82,6 +88,69 @@ class UserRepo : IUserRepository {
         } catch (e: Exception) {
             println("Exception when fetching users: ${e.message}")
             emit(emptyList())
+        }
+    }
+
+    override suspend fun updateUser(user: User, context: Context): Result<String> {
+        val uuidToUpdate = user.uuidUser
+            ?: return Result.failure(Exception("Nedostaje uuid korisnika."))
+
+            return try {
+                val loggedInUserId = SessionManager.currentUserId
+                val loggedInUserRole = SessionManager.currentUserRole
+                val response: Response<MessageResponse>
+
+                val dateOfBirthString = user.dateOfBirthMillis?.let { millis ->
+                    java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date(millis)) }
+
+                if (uuidToUpdate == loggedInUserId) {
+                    val request = UpdateMyProfileRequest(
+                        first_name = user.firstName,
+                        last_name = user.lastName,
+                        address = user.address,
+                        phone_number = user.phoneNum,
+                        date_of_birth = dateOfBirthString
+                    )
+                    response = api.updateMyProfile(request)
+                }
+
+                else if (loggedInUserRole == "admin" || loggedInUserRole == "owner") {
+                    val targetUserRole = user.role
+                    if(targetUserRole == "owner") {
+                        return Result.failure(Exception("Nije moguće mijenjati podatke vlasnika."))
+                    }
+                    if (loggedInUserRole == "admin" && targetUserRole == "admin") {
+                        return Result.failure(Exception("Admin ne može mijenjati drugog admina."))
+                    }
+
+                    val request = UpdateUserAsAdminRequest(
+                        first_name = user.firstName,
+                        last_name = user.lastName,
+                        username = user.username,
+                        email = user.email,
+                        address = user.address,
+                        phone_number = user.phoneNum,
+                        date_of_birth = dateOfBirthString,
+                        is_admin = user.isAdmin,
+                        role = user.role
+                    )
+                    response = api.updateUserAsAdmin(uuidToUpdate, request)
+                }
+
+                else {
+                    return Result.failure(Exception("Nemate ovlasti za ažuriranje ovog korisnika."))
+                }
+
+                if (response.isSuccessful) {
+                    Result.success(response.body()?.message ?: "Uspješno ažurirano")
+                } else {
+                    val errorMsg = extractErrorMessage(response.errorBody()?.string())
+                    Result.failure(Exception(errorMsg))
+                }
+
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
 
