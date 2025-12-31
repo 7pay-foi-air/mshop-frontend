@@ -33,11 +33,13 @@ import hr.foi.air.mshop.navigation.components.transaction.PaymentDonePage
 import hr.foi.air.mshop.navigation.components.transaction.PaymentPage
 import hr.foi.air.mshop.navigation.components.transaction.PaymentProcessingPage
 import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionHistoryPage
+import hr.foi.air.mshop.navigation.components.userManagement.EditUserPage
 import hr.foi.air.mshop.ui.components.DrawerItem
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
 import hr.foi.air.mshop.viewmodels.LoginViewModel
 import hr.foi.air.mshop.viewmodels.transaction.PaymentViewModel
+import hr.foi.air.mshop.viewmodels.userManagement.UserManagementViewModel
 import hr.foi.air.ws.data.SessionManager
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -168,6 +170,21 @@ fun AppNavHost(
         composable(AppRoutes.ADD_USER) {
             AddUserPage()
         }
+        composable(AppRoutes.EDIT_USER) { entry ->
+            val graphEntry = remember(entry) {
+                navController.getBackStackEntry(AppRoutes.MANAGE_USERS)
+            }
+            val userViewModel: UserManagementViewModel = viewModel(graphEntry)
+
+            EditUserPage(
+                userVm = userViewModel,
+                onCancel = { navController.popBackStack() },
+                onUpdatedSuccessfully = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
         composable(AppRoutes.MANAGE_ARTICLES){
             ManageArticlesPage(navController)
         }
@@ -177,7 +194,6 @@ fun AppNavHost(
                 onAddedSuccessfully = { navController.navigateUp() }
             )
         }
-
         composable(AppRoutes.EDIT_ARTICLE) { entry ->
             val graphEntry = remember(entry) {
                 navController.getBackStackEntry(AppRoutes.MANAGE_ARTICLES)

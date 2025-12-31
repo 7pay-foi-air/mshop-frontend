@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.ui.components.textFields
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,9 +26,16 @@ fun UnderLabelTextField(
     isError: Boolean = false,
     errorText: String? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
-    enabled : Boolean = true
+    enabled : Boolean = true,
+    onClick: (() -> Unit)? = null
 ) {
-    Column(modifier = modifier) {
+    val clickModifier = if (onClick != null) {
+        modifier.clickable(onClick = onClick)
+    } else {
+        modifier
+    }
+
+    Column(modifier = clickModifier) {
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
