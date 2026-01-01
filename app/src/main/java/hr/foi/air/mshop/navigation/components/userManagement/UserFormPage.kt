@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
@@ -45,7 +46,8 @@ fun UserFormPage(
     userToEdit: User? = null,
     viewModel: UserFormViewModel = viewModel(),
     onSubmit: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    isProfilePage: Boolean = false
 ) {
     val context = LocalContext.current
 
@@ -62,8 +64,8 @@ fun UserFormPage(
     ) {
         Column(
             modifier = Modifier
-                .weight(1f) // Zauzima sav prostor osim onog za gumbe
-                .verticalScroll(rememberScrollState()) // Samo ovaj dio se pomiče
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 "mShop",
@@ -75,8 +77,9 @@ fun UserFormPage(
             )
 
             Text(
-                if (viewModel.isEditMode) "Ažuriranje korisnika" else "Dodavanje novog artikla",
+                if (viewModel.isEditMode) "Ažuriranje korisnika" else "Dodavanje novog korisnika",
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
@@ -107,7 +110,8 @@ fun UserFormPage(
                 value = viewModel.username,
                 onValueChange = { viewModel.username = it },
                 isError = usernameError != null,
-                errorText = usernameError
+                errorText = usernameError,
+                enabled = !isProfilePage
             )
 
             val dateOfBirthError = viewModel.formErrors[FormField.DATE]
@@ -116,8 +120,7 @@ fun UserFormPage(
                 viewModel.dateOfBirth?.let { millis ->
                     val sdf = SimpleDateFormat(
                         "dd.MM.yyyy.",
-                        java.util.Locale.getDefault()
-                    ).format(Date())
+                        java.util.Locale.getDefault())
                     sdf.format(Date(millis))
                 } ?: ""
             }
@@ -191,33 +194,52 @@ fun UserFormPage(
                 isError = phoneNumError != null,
                 errorText = phoneNumError
             )
-        }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.padding(start = 16.dp)) {
+            Spacer(Modifier.height(16.dp))
 
-                StyledButton(
-                    label = if (viewModel.isEditMode) "SPREMI" else "DODAJ",
-                    onClick = {
-                        viewModel.saveUser(context)
-                        onSubmit()
-                    }
+            Row(
+                modifier = Modifier.padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = viewModel.isAdmin == true,
+                    onCheckedChange = { viewModel.isAdmin = it },
+                    enabled = !isProfilePage
                 )
+                Text(
+                    "Admin",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
 
-                if (viewModel.isEditMode) {
-                    Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.padding(start = 16.dp)) {
+
                     StyledButton(
-                        label = "ODUSTANI",
-                        enabled = true,
-                        onClick = onCancel
+                        label = if (viewModel.isEditMode) "SPREMI" else "DODAJ",
+                        onClick = {
+                            viewModel.saveUser(context)
+                            onSubmit()
+                        }
                     )
+
+                    if (viewModel.isEditMode) {
+                        Spacer(Modifier.height(8.dp))
+                        StyledButton(
+                            label = "ODUSTANI",
+                            enabled = true,
+                            onClick = onCancel
+                        )
+                    }
                 }
             }
         }
-
     }
 }

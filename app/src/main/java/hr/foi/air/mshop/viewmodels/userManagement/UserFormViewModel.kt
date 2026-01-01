@@ -78,6 +78,29 @@ class UserFormViewModel(
             return errors.isEmpty()
         }
 
+        fun fetchAndInitializeLoggedInUser() {
+            val loggedInUserId = hr.foi.air.ws.data.SessionManager.currentUserId
+            if (loggedInUserId == null) {
+                _uiState.value = UIState(errorMessage = "Korisnik nije prijavljen.")
+                return
+            }
+
+            viewModelScope.launch {
+                _uiState.value = UIState(loading = true)
+                val result = userRepo.getUserById(loggedInUserId)
+                if (result.isSuccess) {
+                    val user = result.getOrNull()
+                    initializeState(user)
+                    _uiState.value = UIState(loading = false)
+                } else {
+                    _uiState.value = UIState(
+                        loading = false,
+                        errorMessage = result.exceptionOrNull()?.message ?: "Greška pri dohvaćanju profila."
+                    )
+                }
+            }
+        }
+
         fun saveUser(context: Context) {
             if (!validateForm()) {
                 return

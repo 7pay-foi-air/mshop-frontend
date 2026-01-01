@@ -91,9 +91,27 @@ class UserRepo : IUserRepository {
         }
     }
 
+    override suspend fun getUserById(userId: String): Result<User> {
+        return try {
+            val response = api.getUsers(userId = userId)
+            if (response.isSuccessful) {
+                val userResponse = response.body()?.firstOrNull()
+                if (userResponse != null) {
+                    Result.success(userResponse.toDomainModel())
+                } else {
+                    Result.failure(Exception("Korisnik s ID-em '$userId' nije pronađen."))
+                }
+            } else {
+                val errorMsg = extractErrorMessage(response.errorBody()?.string())
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun updateUser(user: User, context: Context): Result<String> {
-        val uuidToUpdate = user.uuidUser
-            ?: return Result.failure(Exception("Nedostaje uuid korisnika."))
+        val uuidToUpdate = user.uuidUser ?: return Result.failure(Exception("Nedostaje uuid korisnika."))
 
             return try {
                 val loggedInUserId = SessionManager.currentUserId
