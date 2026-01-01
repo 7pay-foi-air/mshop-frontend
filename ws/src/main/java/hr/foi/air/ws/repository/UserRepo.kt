@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.json.JSONObject
 import retrofit2.Response
+import kotlin.math.log
 import kotlin.random.Random
 
 class UserRepo : IUserRepository {
@@ -79,7 +80,11 @@ class UserRepo : IUserRepository {
         try {
             val response = api.getUsers()
             if (response.isSuccessful) {
-                val users = response.body()?.map { it.toDomainModel() } ?: emptyList()
+                val loggedInUserId = SessionManager.currentUserId
+                val users = response.body()
+                    ?.map { it.toDomainModel() }
+                    ?.filter { it.uuidUser != loggedInUserId }
+                    ?: emptyList()
                 emit(users)
             } else {
                 println("Error fetching users: ${response.code()}")
@@ -125,6 +130,7 @@ class UserRepo : IUserRepository {
                     val request = UpdateMyProfileRequest(
                         first_name = user.firstName,
                         last_name = user.lastName,
+                        email = user.email,
                         address = user.address,
                         phone_number = user.phoneNum,
                         date_of_birth = dateOfBirthString
