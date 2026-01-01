@@ -201,7 +201,7 @@ fun AddUserPage(
         StyledButton(
             label = if (uiState.loading) "Spremanje..." else "Dodaj",
             enabled = uiState.isFormValid && !uiState.loading,
-            onClick = viewModel::addUser,
+            onClick = { viewModel.addUser(context) },
             modifier = Modifier.padding(top = 16.dp)
         )
     }
