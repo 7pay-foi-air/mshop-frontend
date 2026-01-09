@@ -49,7 +49,7 @@ class TransactionDetailsViewModel(
                 _details.value = raw?.copy(
                     transactionDate = "${formatDate(raw.transactionDate)} u ${formatTime(raw.transactionDate)}"
                 )
-                UIState() // reset (loading=false, bez error/success)
+                UIState()
             } else {
                 UIState(errorMessage = result.exceptionOrNull()?.message
                     ?: "Greška pri dohvaćanju detalja.")
@@ -60,9 +60,5 @@ class TransactionDetailsViewModel(
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
-
-
-
-
 
 }

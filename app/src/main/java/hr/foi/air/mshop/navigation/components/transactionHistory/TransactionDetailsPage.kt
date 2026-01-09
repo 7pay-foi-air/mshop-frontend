@@ -52,7 +52,6 @@ fun TransactionDetailsPage(
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        // naslov
         Text(
             text = "mShop",
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
@@ -68,7 +67,6 @@ fun TransactionDetailsPage(
             textAlign = TextAlign.Center
         )
 
-        // loading
         if (uiState.loading) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -76,7 +74,6 @@ fun TransactionDetailsPage(
             return
         }
 
-        // error
         uiState.errorMessage?.let { msg ->
             Text(
                 text = msg,
@@ -96,7 +93,6 @@ fun TransactionDetailsPage(
             return
         }
 
-        // summary info
         OutlinedCard(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
