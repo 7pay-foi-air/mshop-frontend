@@ -34,6 +34,7 @@ import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
 import hr.foi.air.mshop.navigation.components.transaction.PaymentDonePage
 import hr.foi.air.mshop.navigation.components.transaction.PaymentPage
 import hr.foi.air.mshop.navigation.components.transaction.PaymentProcessingPage
+import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionDetailsPage
 import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionHistoryPage
 import hr.foi.air.mshop.navigation.components.userManagement.EditUserPage
 import hr.foi.air.mshop.navigation.components.userManagement.ProfilePage
@@ -75,6 +76,11 @@ object AppRoutes {
 
     //TRANSACTION HISTORY
     const val TRANSACTION_HISTORY = "transaction_history?from={from}&to={to}"
+
+    const val TRANSACTION_DETAILS = "transaction_details/{id}"
+    fun transactionDetails(id: String) = "transaction_details/$id"
+
+
 }
 
 // Used for routes where no icons appear in the top left corner
@@ -372,5 +378,19 @@ fun AppNavHost(
                 initialToDate = toDate
             )
         }
+
+        composable(
+            route = AppRoutes.TRANSACTION_DETAILS,
+            arguments = listOf(
+                navArgument("id") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")!!
+            TransactionDetailsPage(
+                navController = navController,
+                transactionId = id
+            )
+        }
+
     }
 }

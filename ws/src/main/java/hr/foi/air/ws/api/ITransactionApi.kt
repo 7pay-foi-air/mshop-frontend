@@ -2,11 +2,13 @@ package hr.foi.air.ws.api
 
 import hr.foi.air.mshop.network.dto.transaction.CreateTransactionRequest
 import hr.foi.air.mshop.network.dto.transaction.TransactionResponse
+import hr.foi.air.ws.models.transaction.TransactionDetailsResponseDto
 import hr.foi.air.ws.models.transaction.TransactionHistoryResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ITransactionApi {
@@ -21,8 +23,7 @@ interface ITransactionApi {
         @Query("end_date") endDate: String? = null
     ): Response<TransactionHistoryResponse>
 
-   /* @GET("transactions/{id}")
-    suspend fun getTransactionDetails(
-        @Path("id") id: String
-    ): TransactionHistoryDetails */
+    @GET("/api/v1/transactions/{id}")
+    suspend fun getTransactionDetails(@Path("id") id: String): Response<TransactionDetailsResponseDto>
+
 }

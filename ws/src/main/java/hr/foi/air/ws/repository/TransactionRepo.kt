@@ -1,8 +1,11 @@
 package hr.foi.air.ws.repository
 
+import android.util.Log
 import hr.foi.air.mshop.core.models.Transaction
+import hr.foi.air.mshop.core.models.TransactionDetails
 import hr.foi.air.mshop.core.models.TransactionHistoryDomain
 import hr.foi.air.mshop.core.models.TransactionHistoryRecord
+import hr.foi.air.mshop.core.models.TransactionItemDetail
 import hr.foi.air.mshop.core.models.TransactionResult
 import hr.foi.air.mshop.core.models.TransactionType
 import hr.foi.air.mshop.core.repository.ITransactionRepository
@@ -10,6 +13,7 @@ import hr.foi.air.mshop.network.dto.transaction.CreateTransactionRequest
 import hr.foi.air.mshop.network.dto.transaction.TransactionItemRequest
 import hr.foi.air.mshop.network.dto.transaction.TransactionResponse
 import hr.foi.air.ws.api.ITransactionApi
+import hr.foi.air.ws.models.transaction.TransactionDetailsResponseDto
 import hr.foi.air.ws.models.transaction.TransactionSummary
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -88,6 +92,7 @@ class TransactionRepo(
                 )
             }
         } catch (e: Exception) {
+            Log.e("TransactionRepo", "getTransactionsForCurrentUser failed", e)
             TransactionHistoryDomain(emptyList(), emptyList())
         }
     }
@@ -104,4 +109,42 @@ class TransactionRepo(
             refundToTransactionId = transaction_refund_id
         )
     }
+
+
+    private fun TransactionDetailsResponseDto.toDomain(): TransactionDetails =
+        TransactionDetails(
+            uuidTransaction = uuid_transaction,
+            transactionType = transaction_type,
+            totalAmount = total_amount,
+            currency = currency,
+            transactionDate = transaction_date,
+            transactionRefundId = transaction_refund_id,
+            paymentMethod = payment_method,
+            items = items.map {
+                TransactionItemDetail(
+                    uuidItem = it.uuid_item,
+                    itemName = it.item_name,
+                    itemPrice = it.item_price,
+                    quantity = it.quantity,
+                    subtotal = it.subtotal
+                )
+            }
+        )
+
+    override suspend fun getTransactionDetails(id: String): Result<TransactionDetails> {
+        return try {
+            val response = api.getTransactionDetails(id)
+            if (!response.isSuccessful) {
+                Result.failure(Exception("HTTP ${response.code()}"))
+            } else {
+                val body = response.body() ?: return Result.failure(Exception("Empty body"))
+                Result.success(body.toDomain())
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
+
 }

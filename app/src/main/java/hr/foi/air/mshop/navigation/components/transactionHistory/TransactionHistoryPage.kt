@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.ui.components.DateFieldUnderLabel
 import hr.foi.air.mshop.ui.screens.PaymentsScreen
 import hr.foi.air.mshop.ui.screens.RefundsScreen
@@ -179,11 +180,13 @@ fun TransactionHistoryPage(
         when (selectedTabIndex) {
             0 -> PaymentsScreen(
                 viewModel = viewModel,
-                onTransactionClick = { id -> /* navController.navigate("${AppRoutes.TRANSACTION_DETAILS}/$id") */ }
+                onTransactionClick = { id ->  navController.navigate(AppRoutes.transactionDetails(id))
+                }
             )
             1 -> RefundsScreen(
                 viewModel = viewModel,
-                onTransactionClick = { id -> /* navController.navigate("${AppRoutes.TRANSACTION_DETAILS}/$id") */ }
+                onTransactionClick = { id -> navController.navigate(AppRoutes.transactionDetails(id))
+                }
             )
         }
     }
