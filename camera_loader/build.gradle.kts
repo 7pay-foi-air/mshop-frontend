@@ -50,5 +50,6 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(project(":image_loader"))
+    implementation("hr.foi.air.image_loader:1.0.1")
     implementation("androidx.compose.material:material-icons-extended")
 }

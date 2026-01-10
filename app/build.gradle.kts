@@ -91,6 +91,7 @@ dependencies {
     implementation(project(":ws"))
     implementation(project(":image_loader"))
     implementation(project(":camera_loader"))
+    implementation("hr.foi.air.image_loader:1.0.1")
 
     implementation("com.google.mediapipe:tasks-genai:0.10.27")
 
