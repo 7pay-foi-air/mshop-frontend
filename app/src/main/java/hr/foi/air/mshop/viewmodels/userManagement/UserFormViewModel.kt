@@ -45,6 +45,8 @@ class UserFormViewModel(
                 address = user.address
                 email = user.email
                 phoneNum = user.phoneNum
+                isAdmin = (user.role == "admin")
+                isActive = user.isActive
             }
         }
 
@@ -107,9 +109,8 @@ class UserFormViewModel(
                 return
             }
 
-            val role = userToEdit?.role ?: "cashier"
             val uuidOrganisation = userToEdit?.uuidOrganisation
-                ?: hr.foi.air.ws.data.SessionManager.currentOrgId?.toString()
+                ?: hr.foi.air.ws.data.SessionManager.currentOrgId
             val isAdminValue = isAdmin ?: false
             val isActiveValue = isActive ?: true
 
@@ -121,7 +122,7 @@ class UserFormViewModel(
                 address = address.trim(),
                 email = email.trim(),
                 phoneNum = phoneNum.trim(),
-                role = if (isAdminValue) "admin" else "cashier",
+                role = if (isAdminValue) "admin" else (userToEdit?.role ?: "cashier"),
                 dateOfBirthMillis = dateOfBirth,
                 uuidOrganisation = uuidOrganisation,
                 isActive = isActiveValue

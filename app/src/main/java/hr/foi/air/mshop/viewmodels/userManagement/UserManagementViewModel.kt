@@ -6,11 +6,13 @@ import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.models.User
 import hr.foi.air.mshop.core.repository.IUserRepository
 import hr.foi.air.ws.repository.UserRepo
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 
 class UserManagementViewModel(
@@ -26,10 +28,12 @@ class UserManagementViewModel(
     private val _userToEdit = MutableStateFlow<User?>(null)
 
     val userToEdit: StateFlow<User?> = _userToEdit.asStateFlow()
+    private val _refreshTrigger = MutableStateFlow(0)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val filteredUsers: StateFlow<List<User>> = combine(
         _searchQuery,
-        userRepository.getAllUsers(),
+        _refreshTrigger.flatMapLatest { userRepository.getAllUsers() },
         _deletedUserIds
     ) { query, users, deletedIds ->
         val usersToShow = users.filter { it.uuidUser !in deletedIds }
@@ -47,6 +51,10 @@ class UserManagementViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    fun refreshUsers() {
+        _refreshTrigger.value++
+    }
 
     fun onSearchQueryChange(newQuery: String) {
         _searchQuery.value = newQuery
