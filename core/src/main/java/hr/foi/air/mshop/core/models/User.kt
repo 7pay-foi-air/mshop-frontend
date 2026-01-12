@@ -13,5 +13,5 @@ data class User(
     val role: String,
     val dateOfBirthMillis: Long? = null,
     val uuidOrganisation: String? = null,
-    val isAdmin: Boolean
+    val isActive: Boolean
 )

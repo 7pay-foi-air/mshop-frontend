@@ -41,7 +41,7 @@ class UserRepo : IUserRepository {
             role = this.role,
             dateOfBirthMillis = dateInMillis,
             uuidOrganisation = this.uuidOrganisation,
-            isAdmin = this.isAdmin
+            isActive = this.isActive
         )
     }
 
@@ -60,7 +60,7 @@ class UserRepo : IUserRepository {
                 phone_number = user.phoneNum,
                 date_of_birth = dateOfBirthString,
                 organisation_uuid = user.uuidOrganisation,
-                is_admin = user.isAdmin
+                is_admin = (user.role == "admin")
             )
 
             val res = api.createUser(req)
@@ -117,7 +117,6 @@ class UserRepo : IUserRepository {
 
     override suspend fun updateUser(user: User, context: Context): Result<String> {
         val uuidToUpdate = user.uuidUser ?: return Result.failure(Exception("Nedostaje uuid korisnika."))
-
             return try {
                 val loggedInUserId = SessionManager.currentUserId
                 val loggedInUserRole = SessionManager.currentUserRole
@@ -127,6 +126,7 @@ class UserRepo : IUserRepository {
                     java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date(millis)) }
 
                 if (uuidToUpdate == loggedInUserId) {
+                    Log.d("UserRepo_Update", "Scenarij: Korisnik ažurira vlastiti profil (updateMyProfile).")
                     val request = UpdateMyProfileRequest(
                         first_name = user.firstName,
                         last_name = user.lastName,
@@ -135,6 +135,7 @@ class UserRepo : IUserRepository {
                         phone_number = user.phoneNum,
                         date_of_birth = dateOfBirthString
                     )
+                    Log.d("UserRepo_Update", "Šaljem UpdateMyProfileRequest: $request")
                     response = api.updateMyProfile(request)
                 }
 
@@ -155,8 +156,8 @@ class UserRepo : IUserRepository {
                         address = user.address,
                         phone_number = user.phoneNum,
                         date_of_birth = dateOfBirthString,
-                        is_admin = user.isAdmin,
-                        role = user.role
+                        role = user.role,
+                        is_active = user.isActive
                     )
                     response = api.updateUserAsAdmin(uuidToUpdate, request)
                 }
