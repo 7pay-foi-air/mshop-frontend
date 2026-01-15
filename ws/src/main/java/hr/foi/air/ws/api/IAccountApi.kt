@@ -11,6 +11,7 @@ import hr.foi.air.ws.models.userManagement.UpdateUserAsAdminRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -26,13 +27,13 @@ interface IAccountApi {
         @Body req: AddUserRequest
     ): Response<MessageResponse>
 
-    @PUT("users/{uuid}")
+    @PATCH("users/{uuid}")
     suspend fun updateUserAsAdmin(
         @Path("uuid") userUuid: String,
         @Body request: UpdateUserAsAdminRequest
     ): Response<MessageResponse>
 
-    @PUT("profile/me")
+    @PATCH("profile")
     suspend fun updateMyProfile(
         @Body request: UpdateMyProfileRequest
     ): Response<MessageResponse>

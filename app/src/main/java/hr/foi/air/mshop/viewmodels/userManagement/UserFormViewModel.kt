@@ -27,6 +27,8 @@ class UserFormViewModel(
         var phoneNum by mutableStateOf("")
         var isAdmin by mutableStateOf<Boolean?>(false)
 
+        var isActive by mutableStateOf<Boolean?>(true)
+
         var formErrors by mutableStateOf<Map<FormField, String>>(emptyMap())
             private set
         private var userToEdit: User? = null
@@ -43,7 +45,8 @@ class UserFormViewModel(
                 address = user.address
                 email = user.email
                 phoneNum = user.phoneNum
-                isAdmin = user.isAdmin
+                isAdmin = (user.role == "admin")
+                isActive = user.isActive
             }
         }
 
@@ -106,10 +109,10 @@ class UserFormViewModel(
                 return
             }
 
-            val role = userToEdit?.role ?: "cashier"
             val uuidOrganisation = userToEdit?.uuidOrganisation
-                ?: hr.foi.air.ws.data.SessionManager.currentOrgId?.toString()
+                ?: hr.foi.air.ws.data.SessionManager.currentOrgId
             val isAdminValue = isAdmin ?: false
+            val isActiveValue = isActive ?: true
 
             val user = User(
                 uuidUser = userToEdit?.uuidUser,
@@ -119,10 +122,10 @@ class UserFormViewModel(
                 address = address.trim(),
                 email = email.trim(),
                 phoneNum = phoneNum.trim(),
-                role = role,
+                role = if (isAdminValue) "admin" else (userToEdit?.role ?: "cashier"),
                 dateOfBirthMillis = dateOfBirth,
                 uuidOrganisation = uuidOrganisation,
-                isAdmin = isAdminValue
+                isActive = isActiveValue
             )
 
             viewModelScope.launch {

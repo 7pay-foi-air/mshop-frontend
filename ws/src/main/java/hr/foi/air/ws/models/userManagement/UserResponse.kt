@@ -28,6 +28,6 @@ class UserResponse (
     @SerializedName("uuid_organisation")
     val uuidOrganisation: String,
 
-    @SerializedName("is_admin")
-    val isAdmin: Boolean
+    @SerializedName("is_active")
+    val isActive: Boolean,
 )

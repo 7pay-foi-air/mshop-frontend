@@ -155,10 +155,10 @@ class AddUserViewModel(
                 address = uiState.address.trim(),
                 email = uiState.email.trim(),
                 phoneNum = uiState.phoneNum.trim(),
-                role = "cashier",
+                role = if (uiState.isAdmin == true) "admin" else "cashier",
                 dateOfBirthMillis = uiState.dateOfBirthMillis,
                 uuidOrganisation = SessionManager.currentOrgId.toString(),
-                isAdmin = uiState.isAdmin
+                isActive = true
             )
 
             val result = repo.addUser(userToCreate, context)
