@@ -49,12 +49,13 @@ class TransactionRepo(
         payment_method = "card_payment",
         currency = this.currency,
         description = this.description,
+        total_amount = this.totalAmount,
         items = this.items.map {
             TransactionItemRequest(
                 uuid_item = it.uuidItem,
                 item_name = it.name,
                 item_price = it.price,
-                quantity = it.quantity
+                quantity = it.quantity,
             )
         }
     )
