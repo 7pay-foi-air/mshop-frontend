@@ -132,22 +132,48 @@ fun TransactionDetailsPage(
 
         Spacer(Modifier.height(16.dp))
 
-        Text(
-            text = "Stavke",
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+        if (d.items.isNotEmpty()) {
+            Text(
+                text = "Stavke",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(d.items) { item ->
-                TransactionItemRow(
-                    itemName = item.itemName,
-                    qty = item.quantity,
-                    price = item.itemPrice,
-                    subtotal = item.subtotal
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(d.items) { item ->
+                    TransactionItemRow(
+                        itemName = item.itemName,
+                        qty = item.quantity,
+                        price = item.itemPrice,
+                        subtotal = item.subtotal
+                    )
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "\uD83E\uDD16",
+                    style = MaterialTheme.typography.displayLarge
+                )
+                Text(
+                    text = "AI inicirana transakcija",
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+                Text(
+                    text = "Ova transakcija je automatski generirana i nema artikala.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
         }
