@@ -1,42 +1,48 @@
 package hr.foi.air.mshop.navigation.components.userManagement
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import hr.foi.air.mshop.navigation.AppRoutes
-import hr.foi.air.mshop.ui.components.buttons.StyledButton
-import hr.foi.air.mshop.ui.components.listItems.ArticleManagementListItem
 import hr.foi.air.mshop.ui.components.listItems.UserManagementListItem
 import hr.foi.air.mshop.ui.components.textFields.SearchField
-import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 import hr.foi.air.mshop.viewmodels.userManagement.UserManagementViewModel
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ManageUsersPage(
     navController: NavHostController,
     viewModel: UserManagementViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val query by viewModel.searchQuery.collectAsState()
     val filteredUsers by viewModel.filteredUsers.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.toastMessage.collectLatest { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -98,7 +104,9 @@ fun ManageUsersPage(
                         viewModel.onStartEditUser(user)
                         navController.navigate(AppRoutes.EDIT_USER)
                     },
-                    onDeleteClicked = { }
+                    onDeleteClicked = {
+                        viewModel.onDeleteUser(user)
+                    }
                 )
             }
         }

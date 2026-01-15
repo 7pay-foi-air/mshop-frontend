@@ -1,7 +1,6 @@
 package hr.foi.air.ws.api
 
 import hr.foi.air.ws.models.MessageResponse
-import hr.foi.air.ws.models.articleManagement.AllArticlesResponse
 import hr.foi.air.ws.models.userManagement.AddUserRequest
 import hr.foi.air.ws.models.login.LoginRequest
 import hr.foi.air.ws.models.login.LoginResponse
@@ -10,10 +9,10 @@ import hr.foi.air.ws.models.userManagement.UpdateMyProfileRequest
 import hr.foi.air.ws.models.userManagement.UpdateUserAsAdminRequest
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -31,6 +30,11 @@ interface IAccountApi {
     suspend fun updateUserAsAdmin(
         @Path("uuid") userUuid: String,
         @Body request: UpdateUserAsAdminRequest
+    ): Response<MessageResponse>
+
+    @DELETE("users/{uuid}")
+    suspend fun deleteUser(
+        @Path("uuid") userUuid: String
     ): Response<MessageResponse>
 
     @PATCH("profile")
