@@ -26,6 +26,15 @@ import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.core.models.CardPaymentData
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.graphics.Color
+import hr.foi.air.mshop.BuildConfig
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 
 @Composable
 fun PaymentPage(
@@ -74,6 +83,35 @@ fun PaymentPage(
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.padding(bottom = 32.dp)
             )
+
+            if (BuildConfig.DEBUG) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(bottom = 24.dp)
+                        .clickable {
+                            cardNumber = "4242 4242 4242 4242"
+                            expiry = "12/26"
+                            cvv = "123"
+                        }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.AutoFixHigh,
+                        contentDescription = "Automatski popuni",
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                        modifier = Modifier.size(16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    Text(
+                        text = "Automatski popuni",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                    )
+                }
+            }
+
 
             UnderLabelTextField(
                 caption = "Broj kartice",

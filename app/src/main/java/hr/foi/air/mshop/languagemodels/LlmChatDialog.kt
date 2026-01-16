@@ -193,9 +193,7 @@ fun LlmChatDialog(
                                     }
                                 }
                                 pendingIntent?.let { intent ->
-                                    pendingParams?.let { params ->
-                                        assistantHandler(intent, params)
-                                    }
+                                    assistantHandler(intent, pendingParams)
                                 }
                             } catch (ex: CancellationException) {
                             } finally {
