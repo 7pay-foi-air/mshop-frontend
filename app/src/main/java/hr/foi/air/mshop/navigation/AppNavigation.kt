@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Groups3
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,6 +30,8 @@ import hr.foi.air.mshop.navigation.components.login.LoginUsername
 import hr.foi.air.mshop.navigation.components.articleManagement.ManageArticlesPage
 import hr.foi.air.mshop.navigation.components.userManagement.ManageUsersPage
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
+import hr.foi.air.mshop.navigation.components.login.FirstLoginPassword
+import hr.foi.air.mshop.navigation.components.login.FirstLoginRecoveryToken
 import hr.foi.air.mshop.navigation.components.transaction.PaymentDonePage
 import hr.foi.air.mshop.navigation.components.transaction.PaymentPage
 import hr.foi.air.mshop.navigation.components.transaction.PaymentProcessingPage
@@ -53,6 +54,8 @@ object AppRoutes {
     const val LOGIN_GRAPH = "login"
     const val LOGIN_USERNAME = "logUsername"
     const val LOGIN_PASSWORD = "logPassword"
+    const val FIRST_LOGIN_PASSWORD = "firstLoginPassword"
+    const val FIRST_LOGIN_RECOVERY = "firstLoginRecovery"
 
     // HOME
     const val HOME = "home"
@@ -84,7 +87,7 @@ object AppRoutes {
 }
 
 // Used for routes where no icons appear in the top left corner
-val authRoutes = setOf(AppRoutes.LOGIN_USERNAME, AppRoutes.LOGIN_PASSWORD)
+val authRoutes = setOf(AppRoutes.LOGIN_USERNAME, AppRoutes.LOGIN_PASSWORD, AppRoutes.FIRST_LOGIN_PASSWORD, AppRoutes.FIRST_LOGIN_RECOVERY)
 
 val drawerItems: List<DrawerItem>
     get(){
@@ -141,7 +144,6 @@ fun AppNavHost(
             route = AppRoutes.LOGIN_GRAPH
         ){
             composable(AppRoutes.LOGIN_USERNAME) { backStackEntry ->
-                // Get the NavGraph's backStackEntry and create the ViewModel
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(AppRoutes.LOGIN_GRAPH)
                 }
@@ -153,7 +155,6 @@ fun AppNavHost(
                 )
             }
             composable(AppRoutes.LOGIN_PASSWORD) { backStackEntry ->
-                // Do the same for the password screen
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(AppRoutes.LOGIN_GRAPH)
                 }
@@ -164,9 +165,42 @@ fun AppNavHost(
                     onForgotPassword = { /* TODO */ },
                     onLoginSuccess = {
                         navController.navigate(AppRoutes.HOME) {
-                            popUpTo(AppRoutes.LOGIN_GRAPH) {
-                                inclusive = true
-                            }
+                            popUpTo(AppRoutes.LOGIN_GRAPH) { inclusive = true }
+                        }
+                    },
+                    onFirstLogin = {
+                        navController.navigate(AppRoutes.FIRST_LOGIN_PASSWORD) {
+                            popUpTo(AppRoutes.LOGIN_USERNAME) { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable(AppRoutes.FIRST_LOGIN_PASSWORD) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(AppRoutes.LOGIN_GRAPH)
+                }
+                val loginViewModel: LoginViewModel = viewModel(parentEntry)
+
+                FirstLoginPassword(
+                    viewModel = loginViewModel,
+                    onNext = {
+                        navController.navigate(AppRoutes.FIRST_LOGIN_RECOVERY) {
+                            popUpTo(AppRoutes.FIRST_LOGIN_PASSWORD) { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable(AppRoutes.FIRST_LOGIN_RECOVERY) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(AppRoutes.LOGIN_GRAPH)
+                }
+                val loginViewModel: LoginViewModel = viewModel(parentEntry)
+
+                FirstLoginRecoveryToken(
+                    viewModel = loginViewModel,
+                    onFinish = {
+                        navController.navigate(AppRoutes.HOME) {
+                            popUpTo(AppRoutes.LOGIN_GRAPH) { inclusive = true }
                         }
                     }
                 )

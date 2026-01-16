@@ -22,6 +22,8 @@ class LoginViewModel : ViewModel() {
 
     var username by mutableStateOf("")
     var password by mutableStateOf("")
+    var newPassword by mutableStateOf("")
+    var confirmNewPassword by mutableStateOf("")
 
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
     val loginState: StateFlow<LoginState> = _loginState
@@ -31,6 +33,9 @@ class LoginViewModel : ViewModel() {
 
     var showForgottenPasswordDialog by mutableStateOf(false)
         private set
+
+    var recoveryToken by mutableStateOf("")
+    var recoveryTokenLocation by mutableStateOf("")
 
     fun login() {
         viewModelScope.launch {
@@ -49,8 +54,24 @@ class LoginViewModel : ViewModel() {
                     if (loginResponse.error == null && loginResponse.accessToken != null) {
                         val token = loginResponse.accessToken
                         SessionManager.startSession(token)
-                        _loginState.value = LoginState.Success(loginResponse)
 
+                        // LOGGING: Check what exactly the backend is sending
+                        Log.d("LoginViewModel", "Access Token: $token")
+                        Log.d("LoginViewModel", "Recovery Token from Response: ${loginResponse.recoveryToken}")
+
+                        // Assign to the ViewModel property
+                        recoveryToken = loginResponse.recoveryToken ?: ""
+
+                        Log.d("LoginViewModel", "Stored recoveryToken variable: ${recoveryToken}")
+
+                        // Use the stored property for the check
+                        if (recoveryToken.isNotBlank()) {
+                            Log.d("LoginViewModel", "First login detected. Navigating to setup.")
+                            _loginState.value = LoginState.FirstLoginRequired(recoveryToken)
+                        } else {
+                            Log.d("LoginViewModel", "Normal login detected. Navigating to Home.")
+                            _loginState.value = LoginState.Success(loginResponse)
+                        }
                     } else {
                         _loginState.value =
                             LoginState.Error(loginResponse.error ?: "Nepoznata greška")
@@ -95,6 +116,10 @@ class LoginViewModel : ViewModel() {
 
     fun resetState() {
         _loginState.value = LoginState.Idle
+        newPassword = ""
+        confirmNewPassword = ""
+        recoveryToken = ""
+        recoveryTokenLocation = ""
     }
 
     fun onProceedToPassword(onSuccess: () -> Unit) {
@@ -104,6 +129,43 @@ class LoginViewModel : ViewModel() {
             }
         } else {
             onSuccess()
+        }
+    }
+
+    fun onProceedToRecovery(onSuccess: () -> Unit) {
+        if (newPassword.isBlank() || confirmNewPassword.isBlank()) {
+            viewModelScope.launch {
+                _toastMessage.emit("Popunite sva polja.")
+            }
+        } else if (newPassword != confirmNewPassword) {
+            viewModelScope.launch {
+                _toastMessage.emit("Lozinke se ne podudaraju.")
+            }
+        } else {
+            Log.d("LoginViewModel", "Stored recoveryToken variable: ${recoveryToken}")
+            onSuccess()
+        }
+    }
+
+    fun saveRecoveryToken(context: android.content.Context, onComplete: () -> Unit) {
+        if (recoveryTokenLocation.isBlank()) {
+            viewModelScope.launch {
+                _toastMessage.emit("Molimo unesite gdje ste spremili kod.")
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val data = "Storage Location: $recoveryTokenLocation"
+                context.openFileOutput("recovery_info.txt", android.content.Context.MODE_PRIVATE).use {
+                    it.write(data.toByteArray())
+                }
+                resetState()
+                onComplete()
+            } catch (e: Exception) {
+                _toastMessage.emit("Greška pri spremanju datoteke.")
+            }
         }
     }
 }
