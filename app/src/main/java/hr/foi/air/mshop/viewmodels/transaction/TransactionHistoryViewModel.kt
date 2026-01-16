@@ -16,7 +16,8 @@ data class TransactionSummaryUI(
     val amountText: String,
     val dateText: String,
     val timeText: String,
-    val isSuccessful: Boolean
+    val isSuccessful: Boolean,
+    val isRefunded: Boolean
 )
 
 data class RefundSummaryUI(
@@ -78,7 +79,8 @@ class TransactionHistoryViewModel(
             amountText = "$totalAmount $currency",
             dateText = date,
             timeText = time,
-            isSuccessful = true
+            isSuccessful = true,
+            isRefunded = refundToTransactionId != null
         )
     }
 

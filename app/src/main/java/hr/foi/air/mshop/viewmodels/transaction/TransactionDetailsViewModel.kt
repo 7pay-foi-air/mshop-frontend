@@ -57,6 +57,31 @@ class TransactionDetailsViewModel(
         }
     }
 
+    fun refundTransaction(
+        description: String = "Refund transaction",
+        onComplete: (success: Boolean) -> Unit
+    ) {
+        val transactionId = details.value?.uuidTransaction ?: return
+
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(loading = true)
+
+            val result = repository.refundTransaction(
+                transactionId = transactionId,
+                description = description
+            )
+
+            _uiState.value = if (result.isSuccess) {
+                onComplete(true)  // refund uspješan
+                UIState()
+            } else {
+                onComplete(false) // refund nije uspio
+                UIState(errorMessage = result.exceptionOrNull()?.message)
+            }
+        }
+    }
+
+
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }

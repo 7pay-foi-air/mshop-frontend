@@ -1,6 +1,7 @@
 package hr.foi.air.ws.repository
 
 import android.util.Log
+import hr.foi.air.mshop.core.models.RefundTransactionResponse
 import hr.foi.air.mshop.core.models.Transaction
 import hr.foi.air.mshop.core.models.TransactionDetails
 import hr.foi.air.mshop.core.models.TransactionHistoryDomain
@@ -13,6 +14,7 @@ import hr.foi.air.mshop.network.dto.transaction.CreateTransactionRequest
 import hr.foi.air.mshop.network.dto.transaction.TransactionItemRequest
 import hr.foi.air.mshop.network.dto.transaction.TransactionResponse
 import hr.foi.air.ws.api.ITransactionApi
+import hr.foi.air.ws.models.transaction.RefundTransactionRequest
 import hr.foi.air.ws.models.transaction.TransactionDetailsResponseDto
 import hr.foi.air.ws.models.transaction.TransactionSummary
 import java.time.LocalDate
@@ -68,7 +70,10 @@ class TransactionRepo(
             isSuccessful = this.is_successful
         )
 
-    override suspend fun getTransactionsForCurrentUser(startDate: LocalDate?, endDate: LocalDate?): TransactionHistoryDomain {
+    override suspend fun getTransactionsForCurrentUser(
+        startDate: LocalDate?,
+        endDate: LocalDate?
+    ): TransactionHistoryDomain {
         return try {
             val formatter = DateTimeFormatter.ISO_DATE
             val startStr = startDate?.format(formatter)
@@ -84,7 +89,15 @@ class TransactionRepo(
                 val paymentsDto = body.successfulTransactions
                 val refundsDto = body.refundedTransactions ?: emptyList()
 
-                val payments = paymentsDto.map { it.toDomain(TransactionType.PAYMENT) }
+                val refundedTransactionIds = refundsDto.mapNotNull { it.transaction_refund_id }.toSet()
+
+                val payments = paymentsDto.map { dto ->
+                    val isRefunded = refundedTransactionIds.contains(dto.uuid_transaction)
+                    dto.toDomain(TransactionType.PAYMENT).copy(
+                        refundToTransactionId = if (isRefunded) dto.uuid_transaction else null
+                    )
+                }
+
                 val refunds = refundsDto.map { it.toDomain(TransactionType.REFUND) }
 
                 TransactionHistoryDomain(
@@ -97,6 +110,7 @@ class TransactionRepo(
             TransactionHistoryDomain(emptyList(), emptyList())
         }
     }
+
 
     private fun TransactionSummary.toDomain(
         type: TransactionType
@@ -146,6 +160,33 @@ class TransactionRepo(
         }
     }
 
+    override suspend fun refundTransaction(
+        transactionId: String,
+        description: String?
+    ): Result<RefundTransactionResponse> {
+        return try {
+            val request = RefundTransactionRequest(
+                uuidTransaction = transactionId,
+                description = description ?: "Refund transaction"
+            )
+
+            val response = api.refundTransaction(request)
+
+            if (!response.isSuccessful) {
+                return Result.failure(Exception("HTTP ${response.code()} ${response.message()}"))
+            }
+
+            val body = response.body() ?: return Result.failure(Exception("Empty body"))
+            Result.success(
+                RefundTransactionResponse(
+                    refundTransactionId = body.transaction_refund_id ?: "unknown"
+                )
+            )
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
 
 }

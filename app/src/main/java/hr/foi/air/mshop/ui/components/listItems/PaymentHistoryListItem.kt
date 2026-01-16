@@ -32,6 +32,15 @@ fun PaymentHistoryListItem(
                 Text("ID: ${transaction.id}", fontWeight = FontWeight.Bold)
                 Text("Iznos: ${transaction.amountText}")
                 Text("Vrijeme: ${transaction.dateText} ${transaction.timeText}")
+
+                if (transaction.isRefunded) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Refundirano",
+                        fontWeight = FontWeight.Bold,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.error
+                    )
+                }
             }
 
             Icon(
