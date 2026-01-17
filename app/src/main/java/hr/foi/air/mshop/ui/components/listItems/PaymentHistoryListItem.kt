@@ -18,25 +18,13 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private fun shortId(id: String): String =
-    if (id.length <= 10) id else "${id.take(8)}…"
 
 @Composable
 fun PaymentHistoryListItem(
     transaction: TransactionSummaryUI,
     onClick: () -> Unit
 ) {
-    val (statusText, statusColor) = when {
-        transaction.isRefunded -> "Refundirano" to MaterialTheme.colorScheme.error
-        transaction.isSuccessful -> "Uspješno" to MaterialTheme.colorScheme.primary
-        else -> "U tijeku" to MaterialTheme.colorScheme.tertiary
-    }
-
-    val leadingIcon = when {
-        transaction.isRefunded -> Icons.Default.CheckCircle
-        transaction.isSuccessful -> Icons.Default.CheckCircle
-        else -> Icons.Default.Schedule
-    }
+    val statusText = if (transaction.isRefunded) "Refundirano" else ""
 
     val inputFormatter = remember { DateTimeFormatter.ISO_LOCAL_DATE }
     val outputFormatter = remember { DateTimeFormatter.ofPattern("dd.MM.yyyy.", Locale("hr", "HR")) }
@@ -61,9 +49,9 @@ fun PaymentHistoryListItem(
         ListItem(
             leadingContent = {
                 Icon(
-                    imageVector = leadingIcon,
+                    imageVector = Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = statusColor
+                    tint = MaterialTheme.colorScheme.primary
                 )
             },
             headlineContent = {
@@ -93,7 +81,7 @@ fun PaymentHistoryListItem(
                     )
                     Text(
                         text = statusText,
-                        color = statusColor,
+                        color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold
                     )
