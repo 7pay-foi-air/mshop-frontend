@@ -47,16 +47,13 @@ fun LoginPassword(
             is LoginState.Success -> {
                 Toast.makeText(context, "Prijava uspješna!", Toast.LENGTH_SHORT).show()
                 onLoginSuccess()
-                //viewModel.resetState()
             }
             is LoginState.FirstLoginRequired -> {
                 onFirstLogin()
-                //viewModel.resetState()
             }
             is LoginState.Error -> {
                 val errorMessage = state.message
                 Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
-                //viewModel.resetState()
             }
             else -> {}
         }

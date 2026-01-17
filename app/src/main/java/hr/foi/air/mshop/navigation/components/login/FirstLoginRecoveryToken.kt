@@ -15,6 +15,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,6 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.data.LoginState
+import hr.foi.air.mshop.ui.components.FullScreenLoadingIndicator
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
 import hr.foi.air.mshop.viewmodels.LoginViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -32,6 +36,7 @@ fun FirstLoginRecoveryToken(
     viewModel: LoginViewModel
 ) {
     val context = LocalContext.current
+    val loginState by viewModel.loginState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collectLatest { message ->
@@ -88,5 +93,9 @@ fun FirstLoginRecoveryToken(
                 viewModel.saveRecoveryToken(context, onFinish)
             }
         )
+    }
+
+    if (loginState is LoginState.Loading){
+        FullScreenLoadingIndicator()
     }
 }

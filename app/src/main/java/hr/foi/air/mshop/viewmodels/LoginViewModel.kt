@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.mshop.data.LoginState
+import hr.foi.air.ws.models.login.ChangePasswordRequest
 import hr.foi.air.ws.repository.LoginRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,16 +56,13 @@ class LoginViewModel : ViewModel() {
                         val token = loginResponse.accessToken
                         SessionManager.startSession(token)
 
-                        // LOGGING: Check what exactly the backend is sending
                         Log.d("LoginViewModel", "Access Token: $token")
                         Log.d("LoginViewModel", "Recovery Token from Response: ${loginResponse.recoveryToken}")
 
-                        // Assign to the ViewModel property
                         recoveryToken = loginResponse.recoveryToken ?: ""
 
                         Log.d("LoginViewModel", "Stored recoveryToken variable: ${recoveryToken}")
 
-                        // Use the stored property for the check
                         if (recoveryToken.isNotBlank()) {
                             Log.d("LoginViewModel", "First login detected. Navigating to setup.")
                             _loginState.value = LoginState.FirstLoginRequired(recoveryToken)
@@ -98,7 +96,7 @@ class LoginViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 val errorMessage = when (e) {
-                    is UnknownHostException, is SocketTimeoutException, is ConnectException -> "Nije moguće uspostaviti vezu s poslužiteljem. Provjerite internetsku vezu."
+                    is UnknownHostException, is SocketTimeoutException, is ConnectException -> "Nije moguće uspostaviti vezu s poslužiteljem."
                     else -> "Došlo je do neočekivane pogreške."
                 }
                 _loginState.value = LoginState.Error(errorMessage)
@@ -156,15 +154,29 @@ class LoginViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
+            _loginState.value = LoginState.Loading
             try {
-                val data = "Storage Location: $recoveryTokenLocation"
-                context.openFileOutput("recovery_info.txt", android.content.Context.MODE_PRIVATE).use {
-                    it.write(data.toByteArray())
+                val changeReq = ChangePasswordRequest(
+                    newPassword = newPassword,
+                    recoveryToken = recoveryToken
+                )
+
+                val response = repository.changePassword(changeReq)
+                if (response.isSuccessful){
+                    val data = "Storage Location: $recoveryTokenLocation"
+                    context.openFileOutput("recovery_info.txt", android.content.Context.MODE_PRIVATE).use {
+                        it.write(data.toByteArray())
+                    }
+                    resetState()
+                    onComplete()
+                } else {
+                    _loginState.value = LoginState.Idle
+                    val errorMsg = response.message() ?: "Greška pri promjeni lozinke."
+                    _toastMessage.emit(errorMsg)
                 }
-                resetState()
-                onComplete()
             } catch (e: Exception) {
-                _toastMessage.emit("Greška pri spremanju datoteke.")
+                _loginState.value = LoginState.Idle
+                _toastMessage.emit("Greška u komunikaciji s poslužiteljem.")
             }
         }
     }
