@@ -59,6 +59,7 @@ fun TransactionDetailsPage(
         vm.loadTransactionDetails(transactionId)
     }
 
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -112,6 +113,7 @@ fun TransactionDetailsPage(
         val matchingRefund = remember(d, refunds) {
             refunds.find { it.originalTransactionId == d.uuidTransaction }
         }
+
 
         OutlinedCard(
             modifier = Modifier.fillMaxWidth(),

@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.viewmodels.transaction
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.TransactionDetails
@@ -43,19 +44,38 @@ class TransactionDetailsViewModel(
             _uiState.value = UIState(loading = true)
 
             val result = repository.getTransactionDetails(id)
-
-            _uiState.value = if (result.isSuccess) {
-                val raw = result.getOrNull()
-                _details.value = raw?.copy(
-                    transactionDate = "${formatDate(raw.transactionDate)} u ${formatTime(raw.transactionDate)}"
-                )
-                UIState()
-            } else {
-                UIState(errorMessage = result.exceptionOrNull()?.message
-                    ?: "Greška pri dohvaćanju detalja.")
+            if (result.isFailure) {
+                _uiState.value = UIState(errorMessage =
+                    result.exceptionOrNull()?.message ?: "Greška pri dohvaćanju detalja.")
+                return@launch
             }
+
+            val raw = result.getOrNull()
+            if (raw == null) {
+                _details.value = null
+                _uiState.value = UIState()
+                return@launch
+            }
+
+            val refundFormatted = raw.copy(
+                transactionDate = "${formatDate(raw.transactionDate)} u ${formatTime(raw.transactionDate)}"
+            )
+
+            val finalDetails =
+                if (refundFormatted.transactionType == "Refund" && !refundFormatted.transactionRefundId.isNullOrBlank()) {
+                    val originalResult = repository.getTransactionDetails(refundFormatted.transactionRefundId!!)
+                    val original = originalResult.getOrNull()
+
+                    if (original != null) {
+                        refundFormatted.copy(items = original.items)
+                    } else refundFormatted
+                } else refundFormatted
+
+            _details.value = finalDetails
+            _uiState.value = UIState()
         }
     }
+
 
     fun refundTransaction(
         description: String = "Refund transaction",
