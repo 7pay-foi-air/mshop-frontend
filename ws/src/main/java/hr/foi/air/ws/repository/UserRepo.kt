@@ -8,6 +8,7 @@ import hr.foi.air.ws.NetworkService
 import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.ws.models.MessageResponse
 import hr.foi.air.ws.models.userManagement.AddUserRequest
+import hr.foi.air.ws.models.userManagement.ChangePasswordRequest
 import hr.foi.air.ws.models.userManagement.UpdateMyProfileRequest
 import hr.foi.air.ws.models.userManagement.UpdateUserAsAdminRequest
 import kotlinx.coroutines.flow.Flow
@@ -184,6 +185,22 @@ class UserRepo : IUserRepository {
             val response = api.deleteUser(userId)
             if (response.isSuccessful) {
                 Result.success(response.body()?.message ?: "Korisnik uspješno obrisan")
+            } else {
+                val errorJson = response.errorBody()?.string()
+                val msg = extractErrorMessage(errorJson)
+                Result.failure(Exception(msg))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun changePassword(recoveryToken: String, newPassword: String): Result<String> {
+        return try {
+            val request = ChangePasswordRequest(recoveryToken, newPassword)
+            val response = api.changePassword(request)
+            if (response.isSuccessful) {
+                Result.success(response.body()?.message ?: "Lozinka uspješno promijenjena")
             } else {
                 val errorJson = response.errorBody()?.string()
                 val msg = extractErrorMessage(errorJson)
