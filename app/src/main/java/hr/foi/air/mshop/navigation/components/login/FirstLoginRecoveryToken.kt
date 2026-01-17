@@ -1,13 +1,16 @@
 package hr.foi.air.mshop.navigation.components.login
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.data.LoginState
 import hr.foi.air.mshop.ui.components.FullScreenLoadingIndicator
@@ -46,56 +50,100 @@ fun FirstLoginRecoveryToken(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
-        Text(text = "mShop", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold))
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Kod za oporavak", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
-
-        Text(
-            text = "Zapišite ovaj kod na sigurno mjesto. On je jedini način da vratite račun ako zaboravite lozinku.",
-            modifier = Modifier.padding(vertical = 16.dp)
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = viewModel.recoveryToken, style = MaterialTheme.typography.headlineMedium.copy(fontFamily = FontFamily.Monospace))
-        }
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                text = "mShop",
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+            )
 
-        OutlinedTextField(
-            value = viewModel.recoveryTokenLocation,
-            onValueChange = { viewModel.recoveryTokenLocation = it },
-            label = { Text("Gdje ste pohranili kod?") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3
-        )
+            Text(
+                text = "Kod za oporavak",
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-        Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "Zapišite ovaj kod na sigurno mjesto. On je jedini način da vratite račun ako zaboravite lozinku.",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
 
-        NextArrow(
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(bottom = 32.dp),
-            size = 64.dp,
-            onClick = {
-                viewModel.saveRecoveryToken(context, onFinish)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = viewModel.recoveryToken,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                OutlinedTextField(
+                    value = viewModel.recoveryTokenLocation,
+                    onValueChange = { viewModel.recoveryTokenLocation = it },
+                    label = { Text("Gdje ste pohranili kod?") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3,
+                    shape = RoundedCornerShape(12.dp)
+                )
             }
-        )
+
+            NextArrow(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .offset(y = (-30).dp)
+                    .padding(bottom = 32.dp),
+                size = 64.dp,
+                onClick = {
+                    viewModel.saveRecoveryToken(context, onFinish)
+                }
+            )
+        }
     }
 
     if (loginState is LoginState.Loading){
         FullScreenLoadingIndicator()
     }
+}
+
+
+@SuppressLint("ViewModelConstructorInComposable")
+@Preview(showBackground = true)
+@Composable
+fun FirstLoginRecoveryTokenPreview() {
+    val mockViewModel = LoginViewModel().apply {
+        recoveryToken = "ABCD-1234-EFGH-5678"
+        recoveryTokenLocation = "Spremljeno u sefu"
+    }
+    FirstLoginRecoveryToken(
+        onFinish = {},
+        viewModel = mockViewModel
+    )
 }

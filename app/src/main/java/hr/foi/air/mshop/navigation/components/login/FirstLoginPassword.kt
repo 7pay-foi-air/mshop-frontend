@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.navigation.components.login
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelPasswordField
@@ -104,4 +106,18 @@ fun FirstLoginPassword(
             )
         }
     }
+}
+
+@SuppressLint("ViewModelConstructorInComposable")
+@Preview(showBackground = true)
+@Composable
+fun FirstLoginPasswordPreview() {
+    val mockViewModel = LoginViewModel().apply {
+        newPassword = ""
+        confirmNewPassword = ""
+    }
+    FirstLoginPassword(
+        onNext = {},
+        viewModel = mockViewModel
+    )
 }
