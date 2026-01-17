@@ -54,6 +54,22 @@ fun getDateRange(value: Int, unit: String): Pair<String, String> {
     return Pair(startDate.format(formatter), today.format(formatter))
 }
 
+private fun readRecoveryHint(context: Context): String {
+    return try {
+        context.openFileInput("recovery_info.txt").bufferedReader().use { reader ->
+            val text = reader.readText()
+            val prefix = "Storage Location: "
+            if (text.startsWith(prefix)) {
+                text.removePrefix(prefix).trimStart()
+            } else {
+                text
+            }
+        }
+    } catch (e: Exception) {
+        "Nema informacije o lokaciji koda."
+    }
+}
+
 fun createAssistantIntentHandler(
     navController: NavController,
     context: Context,
@@ -99,6 +115,11 @@ fun createAssistantIntentHandler(
             navController.navigate(AppRoutes.LOGIN_GRAPH) {
                 popUpTo(0) { inclusive = true }
             }
+        }
+
+        AssistantIntent.RECOVERY_HINT_GET -> {
+            val hintMessage = readRecoveryHint(context)
+            Toast.makeText(context, hintMessage, Toast.LENGTH_LONG).show()
         }
 
         AssistantIntent.WANTS_INFO ->{
