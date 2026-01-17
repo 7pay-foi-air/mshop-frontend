@@ -24,12 +24,28 @@ fun cancellationTextForIntent(intent: String): String {
     return intentObj.cancellationText ?: "Operacija otkazana ❌"
 }
 
-fun userFriendlyMessageForIntent(intent: String, params: JsonObject? = null): String {
+fun userFriendlyMessageForIntent(intent: String, params: JsonObject? = null, context: Context? = null): String {
     val intentObj = AssistantIntent.fromIntent(intent)
     return when (intentObj) {
         AssistantIntent.WANTS_INFO -> {
             val msg = params?.get("message")?.jsonPrimitive?.contentOrNull
             msg ?: "Dogodila se greška, molim Vas pokušajte ponovo."
+        }
+        AssistantIntent.RECOVERY_HINT_GET -> {
+            context?.let { ctx ->
+                val locationOrNull = try {
+                    ctx.openFileInput("recovery_info.txt").bufferedReader().use { reader ->
+                        reader.readText().let { raw ->
+                            val prefix = "Storage Location: "
+                            val cleaned = if (raw.startsWith(prefix)) raw.removePrefix(prefix).trimStart() else raw.trim()
+                            if (cleaned.isNotEmpty()) cleaned else null
+                        }
+                    }
+                } catch (e: Exception) {
+                    null
+                }
+                locationOrNull?.let { "Lokacija Vašeg koda za oporavak:\n$it" }
+            } ?: intentObj.defaultUserFriendlyMessage ?: "Nema informacije o lokaciji koda."
         }
         AssistantIntent.VIEW_TRANSACTIONS_PERIOD -> {
             intentObj.defaultUserFriendlyMessage ?: "Prebacio sam Vas na stranicu za pregled transakcija i primijenio tražene filtre. 🧾"
@@ -52,22 +68,6 @@ fun getDateRange(value: Int, unit: String): Pair<String, String> {
     }
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     return Pair(startDate.format(formatter), today.format(formatter))
-}
-
-private fun readRecoveryHint(context: Context): String {
-    return try {
-        context.openFileInput("recovery_info.txt").bufferedReader().use { reader ->
-            val text = reader.readText()
-            val prefix = "Storage Location: "
-            if (text.startsWith(prefix)) {
-                text.removePrefix(prefix).trimStart()
-            } else {
-                text
-            }
-        }
-    } catch (e: Exception) {
-        "Nema informacije o lokaciji koda."
-    }
 }
 
 fun createAssistantIntentHandler(
@@ -118,12 +118,11 @@ fun createAssistantIntentHandler(
         }
 
         AssistantIntent.RECOVERY_HINT_GET -> {
-            val hintMessage = readRecoveryHint(context)
-            Toast.makeText(context, hintMessage, Toast.LENGTH_LONG).show()
+            // handled elsewhere
         }
 
         AssistantIntent.WANTS_INFO ->{
-            //nista
+            // handled elsewhere
         }
 
         else -> {
