@@ -35,6 +35,7 @@ enum class AssistantIntent(
         defaultUserFriendlyMessage = "Pokrenuo sam proces odjave 🚪"
     ),
     WANTS_INFO("WANTS_INFO", defaultUserFriendlyMessage = null),
+    RECOVERY_HINT_GET("RECOVERY_HINT_GET", defaultUserFriendlyMessage = null),
     UNKNOWN("UNKNOWN", defaultUserFriendlyMessage = "Nažalost nisam u potpunosti razumio Vaš zahtjev. 😅"),
     ERROR("LLM_ERROR", defaultUserFriendlyMessage = "❌ Greška u vezi s AI servisom.\nProvjerite vezu i pokušajte ponovno.")
     ;

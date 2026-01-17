@@ -36,6 +36,7 @@ import hr.foi.air.mshop.viewmodels.LoginViewModel
 fun LoginPassword(
     onForgotPassword: () -> Unit,
     onLoginSuccess: () -> Unit,
+    onFirstLogin: () -> Unit,
     viewModel: LoginViewModel
 ) {
     val context = LocalContext.current
@@ -46,15 +47,15 @@ fun LoginPassword(
             is LoginState.Success -> {
                 Toast.makeText(context, "Prijava uspješna!", Toast.LENGTH_SHORT).show()
                 onLoginSuccess()
-                viewModel.resetState()
+            }
+            is LoginState.FirstLoginRequired -> {
+                onFirstLogin()
             }
             is LoginState.Error -> {
                 val errorMessage = state.message
                 Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
-                viewModel.resetState()
             }
-            else -> {
-            }
+            else -> {}
         }
     }
 
@@ -156,5 +157,7 @@ fun LoginPassword(
 @Preview(showBackground = true)
 @Composable
 fun LoginPasswordPreview(){
-    LoginPassword(onForgotPassword = {}, onLoginSuccess = {}, viewModel = LoginViewModel())
+    LoginPassword(
+        onForgotPassword = {}, onLoginSuccess = {}, viewModel = LoginViewModel(), onFirstLogin = {},
+    )
 }

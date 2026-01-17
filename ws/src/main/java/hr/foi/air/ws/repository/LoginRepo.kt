@@ -1,6 +1,7 @@
 package hr.foi.air.ws.repository
 
 import hr.foi.air.ws.NetworkService
+import hr.foi.air.ws.models.login.ChangePasswordRequest
 import hr.foi.air.ws.models.login.LoginRequest
 
 class LoginRepo {
@@ -8,4 +9,7 @@ class LoginRepo {
 
     suspend fun loginUser(username: String, password: String) =
         api.loginUser(LoginRequest(username, password))
+
+    suspend fun changePassword(request: ChangePasswordRequest) =
+        api.changePassword(request)
 }
