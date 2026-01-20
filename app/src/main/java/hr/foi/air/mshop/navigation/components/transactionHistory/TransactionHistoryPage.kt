@@ -27,6 +27,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import java.time.ZoneOffset
@@ -48,8 +49,10 @@ fun TransactionHistoryPage(
     val selectedTabIndex by viewModel.selectedTabIndex.collectAsState()
     val tabTitles = listOf("Plaćanja", "Povrati")
 
+    var initialArgsConsumed by rememberSaveable { mutableStateOf(false) }
+
     LaunchedEffect(initialFromDate, initialToDate) {
-        if (initialFromDate != null || initialToDate != null) {
+        if (!initialArgsConsumed && (initialFromDate != null || initialToDate != null)) {
             viewModel.setFilters(
                 from = initialFromDate,
                 to = initialToDate,
@@ -57,6 +60,7 @@ fun TransactionHistoryPage(
                 maxAmount = viewModel.maxAmount.value,
                 sort = viewModel.sortOption.value
             )
+            initialArgsConsumed = true
         }
     }
 
