@@ -29,12 +29,13 @@ import java.util.Locale
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import java.time.ZoneOffset
 
-fun LocalDate.toEpochMillis(): Long =
-    this.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+fun LocalDate.toUtcEpochMillis(): Long =
+    this.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
-fun Long.toLocalDate(): LocalDate =
-    Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+fun Long.utcMillisToLocalDate(): LocalDate =
+    Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDate()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -128,20 +129,32 @@ fun TransactionHistoryPage(
     }
 
     if (showFromPicker) {
+        val fromSelectableDates = remember(draftTo) {
+            object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    val picked = utcTimeMillis.utcMillisToLocalDate()
+                    return draftTo == null || !picked.isAfter(draftTo)
+                }
+            }
+        }
+
         val fromPickerState = rememberDatePickerState(
-            initialSelectedDateMillis = draftFrom?.toEpochMillis()
+            initialSelectedDateMillis = draftFrom?.toUtcEpochMillis(),
+            selectableDates = fromSelectableDates
         )
+
         DatePickerDialog(
             onDismissRequest = { showFromPicker = false },
             confirmButton = {
-                TextButton(onClick = {
-                    draftFrom = fromPickerState.selectedDateMillis?.toLocalDate()
-                    showFromPicker = false
-                }) { Text("OK") }
+                TextButton(
+                    enabled = fromPickerState.selectedDateMillis != null,
+                    onClick = {
+                        draftFrom = fromPickerState.selectedDateMillis?.utcMillisToLocalDate()
+                        showFromPicker = false
+                    }
+                ) { Text("OK") }
             },
-            dismissButton = {
-                TextButton(onClick = { showFromPicker = false }) { Text("Odustani") }
-            },
+            dismissButton = { TextButton(onClick = { showFromPicker = false }) { Text("Odustani") } },
             properties = DialogProperties()
         ) {
             DatePicker(state = fromPickerState)
@@ -149,20 +162,32 @@ fun TransactionHistoryPage(
     }
 
     if (showToPicker) {
+        val toSelectableDates = remember(draftFrom) {
+            object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    val picked = utcTimeMillis.utcMillisToLocalDate()
+                    return draftFrom == null || !picked.isBefore(draftFrom)
+                }
+            }
+        }
+
         val toPickerState = rememberDatePickerState(
-            initialSelectedDateMillis = draftTo?.toEpochMillis()
+            initialSelectedDateMillis = draftTo?.toUtcEpochMillis(),
+            selectableDates = toSelectableDates
         )
+
         DatePickerDialog(
             onDismissRequest = { showToPicker = false },
             confirmButton = {
-                TextButton(onClick = {
-                    draftTo = toPickerState.selectedDateMillis?.toLocalDate()
-                    showToPicker = false
-                }) { Text("OK") }
+                TextButton(
+                    enabled = toPickerState.selectedDateMillis != null,
+                    onClick = {
+                        draftTo = toPickerState.selectedDateMillis?.utcMillisToLocalDate()
+                        showToPicker = false
+                    }
+                ) { Text("OK") }
             },
-            dismissButton = {
-                TextButton(onClick = { showToPicker = false }) { Text("Odustani") }
-            },
+            dismissButton = { TextButton(onClick = { showToPicker = false }) { Text("Odustani") } },
             properties = DialogProperties()
         ) {
             DatePicker(state = toPickerState)

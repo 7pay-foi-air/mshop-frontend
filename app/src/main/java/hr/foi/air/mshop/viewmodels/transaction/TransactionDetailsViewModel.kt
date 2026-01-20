@@ -28,15 +28,12 @@ class TransactionDetailsViewModel(
     val details: StateFlow<TransactionDetails?> = _details.asStateFlow()
 
     private fun formatDate(iso: String): String {
-        return DateTimeFormatter.ofPattern("dd.MM.yyyy")
-            .withZone(ZoneId.systemDefault())
-            .format(Instant.parse(iso))
+        val parts = iso.substring(0, 10).split("-")
+        return "${parts[2]}.${parts[1]}.${parts[0]}"
     }
 
     private fun formatTime(iso: String): String {
-        return DateTimeFormatter.ofPattern("HH:mm")
-            .withZone(ZoneId.systemDefault())
-            .format(Instant.parse(iso))
+        return if (iso.length >= 16) iso.substring(11, 16) else ""
     }
 
     fun loadTransactionDetails(id: String) {

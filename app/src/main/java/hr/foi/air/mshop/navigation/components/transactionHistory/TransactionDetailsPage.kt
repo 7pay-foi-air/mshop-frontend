@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.*
@@ -13,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -281,7 +279,7 @@ fun TransactionDetailsPage(
                                             containerColor = MaterialTheme.colorScheme.primary,
                                             contentColor = MaterialTheme.colorScheme.onPrimary
                                         )
-                                    ) { Text("Izvrši refund") }
+                                    ) { Text("Izvrši povrat") }
                                 }
 
                             } else {
@@ -314,7 +312,7 @@ fun TransactionDetailsPage(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Text(
-                                text = "Potvrdi refund",
+                                text = "Potvrdi povrat",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
@@ -338,7 +336,6 @@ fun TransactionDetailsPage(
                                         vm.refundTransaction { success ->
                                             if (success) {
                                                 historyVm.loadTransactions()
-                                                navController.popBackStack()
                                             } else {
                                                 Toast.makeText(
                                                     navController.context,
