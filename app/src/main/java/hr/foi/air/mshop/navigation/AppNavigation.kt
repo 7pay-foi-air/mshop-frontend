@@ -39,6 +39,7 @@ import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionHist
 import hr.foi.air.mshop.navigation.components.userManagement.EditUserPage
 import hr.foi.air.mshop.navigation.components.userManagement.ProfilePage
 import hr.foi.air.mshop.ui.components.DrawerItem
+import hr.foi.air.mshop.ui.screens.ChangePasswordScreen
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
 import hr.foi.air.mshop.viewmodels.LoginViewModel
@@ -53,6 +54,7 @@ object AppRoutes {
     const val LOGIN_GRAPH = "login"
     const val LOGIN_USERNAME = "logUsername"
     const val LOGIN_PASSWORD = "logPassword"
+    const val CHANGE_PASSWORD = "changePassword"
 
     // HOME
     const val HOME = "home"
@@ -79,12 +81,10 @@ object AppRoutes {
 
     const val TRANSACTION_DETAILS = "transaction_details/{id}"
     fun transactionDetails(id: String) = "transaction_details/$id"
-
-
 }
 
 // Used for routes where no icons appear in the top left corner
-val authRoutes = setOf(AppRoutes.LOGIN_USERNAME, AppRoutes.LOGIN_PASSWORD)
+val authRoutes = setOf(AppRoutes.LOGIN_USERNAME, AppRoutes.LOGIN_PASSWORD, AppRoutes.CHANGE_PASSWORD)
 
 val drawerItems: List<DrawerItem>
     get(){
@@ -161,7 +161,9 @@ fun AppNavHost(
 
                 LoginPassword(
                     viewModel = loginViewModel,
-                    onForgotPassword = { /* TODO */ },
+                    onForgotPassword = {
+                        navController.navigate(AppRoutes.CHANGE_PASSWORD)
+                    },
                     onLoginSuccess = {
                         navController.navigate(AppRoutes.HOME) {
                             popUpTo(AppRoutes.LOGIN_GRAPH) {
@@ -169,6 +171,11 @@ fun AppNavHost(
                             }
                         }
                     }
+                )
+            }
+            composable(AppRoutes.CHANGE_PASSWORD) {
+                ChangePasswordScreen(
+                    viewModel = viewModel()
                 )
             }
         }
@@ -204,7 +211,7 @@ fun AppNavHost(
         composable(AppRoutes.PROFILE_USER) {
             ProfilePage(navController)
         }
-        
+
         composable(AppRoutes.MANAGE_ARTICLES){
             ManageArticlesPage(navController)
         }
@@ -257,11 +264,8 @@ fun AppNavHost(
             val chargeAmountState = homepageViewModel.chargeAmountUIState.collectAsState().value
 
             val amountFromArguments = backStackEntry.arguments?.getString("amount")
-            //Log.d("AppNavHost", "amountFromArguments: $amountFromArguments")
             val assistantFromArgumentsString = backStackEntry.arguments?.getString("assistant")
-            //Log.d("AppNavHost", "assistantFromArgumentsString: $assistantFromArgumentsString")
             val assistantFromArguments = assistantFromArgumentsString?.toBooleanStrictOrNull() ?: false
-            //Log.d("AppNavHost", "assistantFromArguments: $assistantFromArguments")
 
             var finalTotalAmount: String = chargeAmountState.text
             if(assistantFromArguments && amountFromArguments != null){
@@ -270,7 +274,7 @@ fun AppNavHost(
 
             PaymentPage(
                 totalAmount = finalTotalAmount,
-                onPay = { cardData -> //cardData se ne salje na backend
+                onPay = { cardData ->
                     if(!assistantFromArguments){
                         val transaction = homepageViewModel.buildTransaction()
 
@@ -279,11 +283,9 @@ fun AppNavHost(
                             paymentViewModel.processPayment(
                                 transaction = transaction,
                                 onSuccess = { transactionId ->
-                                    // Kad backend završi s success idemo na DONE page s ID-em
                                     navController.navigate("${AppRoutes.PAYMENT_DONE}/$transactionId") {
                                         popUpTo(AppRoutes.PAYMENT_PROCESSING) { inclusive = true }
                                     }
-                                    //ocisti kosaricu
                                     homepageViewModel.clearSelection()
                                 },
                                 onError = { errorMsg ->
@@ -334,7 +336,6 @@ fun AppNavHost(
                     else{
                         Toast.makeText(context, "Košarica je prazna!", Toast.LENGTH_SHORT).show()
                     }
-
                 }
             )
         }
@@ -391,6 +392,5 @@ fun AppNavHost(
                 transactionId = id
             )
         }
-
     }
 }

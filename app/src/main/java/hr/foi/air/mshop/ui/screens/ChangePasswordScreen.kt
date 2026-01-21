@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,11 +17,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import hr.foi.air.mshop.ui.components.buttons.NextArrowButton
 import hr.foi.air.mshop.ui.components.DialogMessage
+import hr.foi.air.mshop.ui.components.buttons.NextArrow
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelPasswordField
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.viewmodels.userManagement.ChangePasswordViewModel
@@ -41,7 +41,11 @@ fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel()) {
         DialogMessage(
             title = dialogTitle,
             message = dialogMessage,
-            onDismiss = { showDialog = false }
+            onDismiss = { showDialog = false },
+            visible = showDialog,
+            confirmText = "U redu",
+            dismissText = "Izadi",
+            onConfirm = { showDialog = false }
         )
     }
 
@@ -58,11 +62,22 @@ fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel()) {
             UnderLabelTextField(
                 value = recoveryCode,
                 onValueChange = { recoveryCode = it },
-                label = "Kod za oporavak",
-                keyboardType = KeyboardType.Text
+                caption = "Kod za oporavak",
+                placeholder = "Unesite kod za oporavak",
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default,
+                isError = false,
+                errorText = null,
+                trailingIcon = null,
+                enabled = true,
+                onClick = null
             )
             Spacer(modifier = Modifier.height(16.dp))
-            NextArrowButton(onClick = { step = 2 }, modifier = Modifier.align(Alignment.End))
+            NextArrow(
+                onClick = { step = 2 },
+                modifier = Modifier.align(Alignment.End)
+            )
         } else {
             Text(text = "Promjena lozinke")
             Spacer(modifier = Modifier.height(8.dp))
@@ -71,16 +86,20 @@ fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel()) {
             UnderLabelPasswordField(
                 value = password,
                 onValueChange = { password = it },
-                label = "Unesite lozinku"
+                modifier = Modifier.fillMaxWidth(),
+                caption = "Unesite lozinku",
+                placeholder = "Nova lozinka"
             )
             Spacer(modifier = Modifier.height(16.dp))
             UnderLabelPasswordField(
                 value = repeatPassword,
                 onValueChange = { repeatPassword = it },
-                label = "Ponovite lozinku"
+                modifier = Modifier.fillMaxWidth(),
+                caption = "Ponovite lozinku",
+                placeholder = "Ponovite novu lozinku"
             )
             Spacer(modifier = Modifier.height(16.dp))
-            NextArrowButton(
+            NextArrow(
                 onClick = {
                     if (password == repeatPassword) {
                         viewModel.changePassword(recoveryCode, password)
