@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -31,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.mshop.navigation.drawerItems
+import hr.foi.air.mshop.ui.theme.WarmBackground
 import kotlinx.coroutines.launch
 
 data class DrawerItem(
@@ -56,11 +59,17 @@ fun NavigationDrawer(
         drawerState = drawerState,
         gesturesEnabled = currentRoute in drawerItems.map {it.route},
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .background(MaterialTheme.colorScheme.background),
+                drawerContainerColor = MaterialTheme.colorScheme.background
+            ) {
                 Column(modifier = Modifier.fillMaxHeight()) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background)
                             .padding(64.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -83,9 +92,7 @@ fun NavigationDrawer(
                             },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                             colors = NavigationDrawerItemDefaults.colors(
-                                selectedContainerColor = MaterialTheme.colorScheme.tertiary.copy(
-                                    alpha = 0.20f
-                                ),
+                                selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary
                             )
@@ -106,7 +113,7 @@ fun NavigationDrawer(
                             icon = { Icon(imageVector = Icons.Default.PowerSettingsNew, contentDescription = "Odjava") },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
                             colors = NavigationDrawerItemDefaults.colors(
-                                selectedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f),
+                                selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary
                             )
@@ -128,14 +135,21 @@ fun NavigationDrawer(
         },
         content = {
             Scaffold(
+                containerColor = MaterialTheme.colorScheme.background,
                 topBar = {
                     TopAppBar(
                         title = { },
-                        navigationIcon = navigationIcon
+                        navigationIcon = navigationIcon,
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.background
+                        )
                     )
+
                 }
             ) { paddingValues ->
-                content(Modifier.padding(paddingValues))
+                content(Modifier
+                    .padding(paddingValues)
+                    .background(MaterialTheme.colorScheme.background))
             }
         }
     )

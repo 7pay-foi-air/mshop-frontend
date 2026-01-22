@@ -40,7 +40,7 @@ fun ProductListItem(
             Box(
                 modifier = Modifier
                     .background(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = MaterialTheme.shapes.small
                     )
             ) {

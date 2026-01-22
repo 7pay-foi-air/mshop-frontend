@@ -52,8 +52,8 @@ fun UnderLabelPasswordField(
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
-            focusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f),
-            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             cursorColor = MaterialTheme.colorScheme.primary
         ),
         supportingText = {

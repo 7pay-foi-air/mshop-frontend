@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.ui.components.listItems
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,16 +30,19 @@ fun BaseListItem(
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .padding(12.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (leadingContent != null) {
-                Box(modifier = Modifier.size(50.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.size(50.dp).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
                     leadingContent()
                 }
             }
@@ -60,6 +65,7 @@ fun BaseListItemPreview() {
             Box(
                 modifier = Modifier
                     .size(40.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .border(width = 1.dp, color = androidx.compose.ui.graphics.Color.Gray)
             )
         },
@@ -68,6 +74,7 @@ fun BaseListItemPreview() {
                 modifier = Modifier
                     .weight(1f)
                     .size(20.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .border(width = 1.dp, color = androidx.compose.ui.graphics.Color.Gray)
             )
         },
@@ -75,6 +82,7 @@ fun BaseListItemPreview() {
             Box(
                 modifier = Modifier
                     .size(20.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .border(width = 1.dp, color = androidx.compose.ui.graphics.Color.Gray)
             )
         }

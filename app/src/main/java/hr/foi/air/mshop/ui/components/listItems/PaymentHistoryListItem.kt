@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.ui.components.listItems
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -39,6 +40,7 @@ fun PaymentHistoryListItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(horizontal = 4.dp),
         onClick = onClick,
         colors = CardDefaults.cardColors(

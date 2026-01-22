@@ -44,7 +44,7 @@ fun ArticleManagementListItem(
                 modifier = Modifier
                     .size(50.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = MaterialTheme.shapes.small
                     ),
                 contentAlignment = Alignment.Center
