@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.theme.MShopTextField
 
 @Composable
 fun SearchField(
@@ -30,19 +31,13 @@ fun SearchField(
         singleLine = true,
         keyboardOptions = keyboardOptions,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        shape = MShopTextField.shape,
         leadingIcon = {
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = "Search Icon"
             )
         },
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            cursorColor = MaterialTheme.colorScheme.primary
-        )
+        colors = MShopTextField.colors()
     )
 }

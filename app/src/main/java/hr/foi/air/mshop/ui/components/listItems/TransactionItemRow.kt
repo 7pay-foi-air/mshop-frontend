@@ -7,7 +7,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.mshop.ui.theme.MShopCard
 
 @Composable
 fun TransactionItemRow(
@@ -17,23 +18,19 @@ fun TransactionItemRow(
     subtotal: Double,
     modifier: Modifier = Modifier
 ) {
-    // Bijeli, “filled” card (bez outline looka)
     ElevatedCard(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
-    ) {
+        modifier = Modifier.fillMaxWidth(),
+        colors = MShopCard.elevatedColors(),
+        shape = MShopCard.shape,
+        elevation = MShopCard.elevatedElevation()
+    )  {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(horizontal = Dimens.lg, vertical = Dimens.md),
+            verticalArrangement = Arrangement.spacedBy(Dimens.sm)
         ) {
             Text(
                 text = itemName,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

@@ -8,8 +8,6 @@ val RedTertiary = Color(0xFFFFCDD2)
 
 
 val WarmBackground = Color(0xFFFFFAF5)   // topla skoro-bijela (ivory)
-val WarmSurface = Color(0xFFFFF4EA)      // malo tamnije, cozy
-val WarmSurfaceVariant = Color(0xFFF7E9DC) // "paper" / card feel
 val WarmOutline = Color(0xFFEAD5C5)      // bež outline (nije sivo)
 
 val OnWarm = Color(0xFF2A1F1B)           // tamno smeđe (toplije od crne)

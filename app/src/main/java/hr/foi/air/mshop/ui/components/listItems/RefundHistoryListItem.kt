@@ -3,13 +3,10 @@ package hr.foi.air.mshop.ui.components.listItems
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -19,11 +16,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.mshop.ui.theme.MShopCard
 import hr.foi.air.mshop.viewmodels.transaction.RefundSummaryUI
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 
 @Composable
 fun RefundHistoryListItem(
@@ -37,18 +37,15 @@ fun RefundHistoryListItem(
     val hrDate = runCatching { LocalDate.parse(refund.dateText, inputFormatter).format(outputFormatter) }
         .getOrElse { refund.dateText }
 
-    val leadingIcon = if (refund.originalTransactionId.isNotEmpty()) Icons.Default.Replay else Icons.Default.Warning
+    val leadingIcon =
+        if (refund.originalTransactionId.isNotEmpty()) Icons.Default.Replay else Icons.Default.Warning
 
-    val rowHeight = 100.dp
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp),
-        onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        colors = MShopCard.elevatedColors(),
+        shape = MShopCard.shape,
+        elevation = MShopCard.elevatedElevation()
+    )  {
         ListItem(
             leadingContent = {
                 Icon(
@@ -62,14 +59,16 @@ fun RefundHistoryListItem(
                     text = "Povrat",
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.SemiBold
+                    style = MaterialTheme.typography.titleMedium
                 )
             },
             supportingContent = {
                 Text(
                     text = "$hrDate • ${refund.timeText}",
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             trailingContent = {
@@ -81,7 +80,7 @@ fun RefundHistoryListItem(
                     )
                 }
             },
-            modifier = Modifier.height(rowHeight),
+            modifier = Modifier.height(Dimens.historyRowHeight)
         )
     }
 }

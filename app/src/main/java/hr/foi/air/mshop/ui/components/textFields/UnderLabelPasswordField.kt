@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.theme.MShopTextField
 
 @Composable
 fun UnderLabelPasswordField(
@@ -40,7 +41,7 @@ fun UnderLabelPasswordField(
         visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        shape = MShopTextField.shape,
         trailingIcon = {
             IconButton(onClick = { visible = !visible }) {
                 Icon(
@@ -49,13 +50,7 @@ fun UnderLabelPasswordField(
                 )
             }
         },
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            cursorColor = MaterialTheme.colorScheme.primary
-        ),
+        colors = MShopTextField.colors(),
         supportingText = {
             Text(
                 text = caption,

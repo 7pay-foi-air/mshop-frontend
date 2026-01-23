@@ -1,39 +1,21 @@
 package hr.foi.air.mshop.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PowerSettingsNew
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.mshop.navigation.drawerItems
-import hr.foi.air.mshop.ui.theme.WarmBackground
+import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.ws.data.SessionManager
 import kotlinx.coroutines.launch
 
 data class DrawerItem(
@@ -57,24 +39,43 @@ fun NavigationDrawer(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = currentRoute in drawerItems.map {it.route},
+        gesturesEnabled = currentRoute in drawerItems.map { it.route },
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .background(MaterialTheme.colorScheme.background),
+                modifier = Modifier.fillMaxHeight(),
                 drawerContainerColor = MaterialTheme.colorScheme.background
             ) {
                 Column(modifier = Modifier.fillMaxHeight()) {
-                    Box(
+
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
-                            .padding(64.dp),
-                        contentAlignment = Alignment.Center
+                            .padding(top = Dimens.xxxl, bottom = Dimens.lg),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = "mShop", style = MaterialTheme.typography.headlineLarge)
+                        Text(
+                            text = "mShop",
+                            style = MaterialTheme.typography.displayLarge,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.height(Dimens.md))
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = Dimens.xl),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        Spacer(Modifier.height(Dimens.lg))
                     }
+
+                    val itemColors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
                     items.forEach { item ->
                         NavigationDrawerItem(
@@ -84,22 +85,13 @@ fun NavigationDrawer(
                                 onItemClick(item)
                                 scope.launch { drawerState.close() }
                             },
-                            icon = {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = item.title
-                                )
-                            },
+                            icon = { Icon(item.icon, contentDescription = item.title) },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = NavigationDrawerItemDefaults.colors(
-                                selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary
-                            )
+                            colors = itemColors
                         )
                     }
 
-                    Spacer(modifier = Modifier.weight(1f) )
+                    Spacer(modifier = Modifier.weight(1f))
 
                     if (onLogout != null) {
                         NavigationDrawerItem(
@@ -110,26 +102,25 @@ fun NavigationDrawer(
                                 scope.launch { drawerState.close() }
                                 onLogout()
                             },
-                            icon = { Icon(imageVector = Icons.Default.PowerSettingsNew, contentDescription = "Odjava") },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.PowerSettingsNew,
+                                    contentDescription = "Odjava"
+                                )
+                            },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                            colors = NavigationDrawerItemDefaults.colors(
-                                selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary
-                            )
+                            colors = itemColors
                         )
                     }
 
-                    SessionManager.currentUserRole.let { userRole ->
-                        Text(
-                            text = "Role: $userRole",
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        )
-                    }
+                    Text(
+                        text = "Role: ${SessionManager.currentUserRole}",
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Dimens.lg)
+                    )
                 }
             }
         },
@@ -144,12 +135,13 @@ fun NavigationDrawer(
                             containerColor = MaterialTheme.colorScheme.background
                         )
                     )
-
                 }
             ) { paddingValues ->
-                content(Modifier
-                    .padding(paddingValues)
-                    .background(MaterialTheme.colorScheme.background))
+                content(
+                    Modifier
+                        .padding(paddingValues)
+                        .background(MaterialTheme.colorScheme.background)
+                )
             }
         }
     )
@@ -158,19 +150,13 @@ fun NavigationDrawer(
 @Composable
 fun MenuIconButton(onClick: () -> Unit) {
     IconButton(onClick = onClick) {
-        Icon(
-            imageVector = Icons.Default.Menu,
-            contentDescription = "Izbornik"
-        )
+        Icon(imageVector = Icons.Default.Menu, contentDescription = "Izbornik")
     }
 }
 
 @Composable
 fun BackArrowButton(onClick: () -> Unit) {
     IconButton(onClick = onClick) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Natrag"
-        )
+        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Natrag")
     }
 }

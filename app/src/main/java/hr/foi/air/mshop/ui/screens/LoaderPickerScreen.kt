@@ -1,26 +1,15 @@
 package hr.foi.air.mshop.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import hr.foi.air.image_loader.interfaces.IImageLoader
 import hr.foi.air.mshop.imageloader.ImageLoaderManager
+import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.mshop.ui.theme.MShopCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,26 +21,27 @@ fun LoaderPickerScreen(
     val sheetState = rememberModalBottomSheetState()
 
     ModalBottomSheet(
-        onDismiss,
+        onDismissRequest = onDismiss,
         sheetState = sheetState
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp, top = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = Dimens.screenPadding)
+                .padding(top = Dimens.lg, bottom = Dimens.xxl),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Dimens.lg)
         ) {
             Text(
-                "Odabir slike",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 24.dp)
+                text = "Odabir slike",
+                style = MaterialTheme.typography.titleMedium
             )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.spacedBy(Dimens.lg, Alignment.CenterHorizontally)
             ) {
-                for (module in imageLoaderManager.imageLoaders) {
+                imageLoaderManager.imageLoaders.forEach { module ->
                     LoaderModuleItem(
                         module = module,
                         onClick = {
@@ -72,29 +62,30 @@ private fun LoaderModuleItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        onClick = onClick,
-        modifier = modifier
-            .size(width = 100.dp, height = 100.dp)
-    ){
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        colors = MShopCard.elevatedColors(),
+        shape = MShopCard.shape,
+        elevation = MShopCard.elevatedElevation()
+    )  {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(PaddingValues(8.dp)),
+                .fillMaxSize()
+                .padding(Dimens.md),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
                 imageVector = module.icon,
                 contentDescription = module.name,
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(Dimens.pickerIconSize),
                 tint = MaterialTheme.colorScheme.primary
             )
+            Spacer(Modifier.height(Dimens.sm))
             Text(
                 text = module.name,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp)
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center
             )
         }
     }

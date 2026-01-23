@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
@@ -28,6 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import hr.foi.air.mshop.viewmodels.LLM.AssistantViewModel
 import hr.foi.air.ws.data.SessionManager
@@ -54,37 +58,48 @@ fun MessageBubble(
     onCancel: (() -> Unit)? = null
 ) {
     val isUser = message.sender == Sender.User
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 280.dp)
-                .background(
-                    color = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .padding(10.dp)
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+            tonalElevation = if (isUser) 0.dp else 2.dp,
+            shadowElevation = 0.dp,
+            modifier = Modifier.widthIn(max = 420.dp)
         ) {
-            if (message.isLoading) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Razmišlja...", fontSize = 14.sp)
-                }
-            } else {
-                Column {
+            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+                if (message.isLoading) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Razmišlja…",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
                     Text(
                         text = message.text,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     if (isCancellable && onCancel != null) {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
                             TextButton(onClick = onCancel) {
                                 Text("Odustani")
                             }
@@ -95,6 +110,7 @@ fun MessageBubble(
         }
     }
 }
+
 
 
 @Composable
@@ -124,7 +140,7 @@ fun LlmChatDialog(
     var isDialogOpen by remember { mutableStateOf(true) }
 
     val sendMessage = remember {
-        { text : String ->
+        { text: String ->
             if (text.isBlank() || isSending) return@remember
 
             focusManager.clearFocus(force = true)
@@ -139,7 +155,7 @@ fun LlmChatDialog(
             messages.add(loadingMsg)
 
             scope.launch {
-                try{
+                try {
                     val (aiText, result) = assistantViewModel.processMessage(userText)
                     Log.d("LlmChatDialog", "text: $aiText, result: $result")
 
@@ -157,8 +173,6 @@ fun LlmChatDialog(
                             else userFriendlyMessageForIntent(intent, result.params)
                         }
                     }
-
-                    Log.d("LlmChatDialog", "displayText: $displayText")
 
                     val idx = messages.indexOfFirst { it.id == loadingId }
                     if (idx != -1) {
@@ -194,10 +208,8 @@ fun LlmChatDialog(
                                         messages[idx2] = messages[idx2].copy(text = "Počinjem za $countdown sek.")
                                     }
                                 }
-                                pendingIntent?.let { intent ->
-                                    assistantHandler(intent, pendingParams)
-                                }
-                            } catch (ex: CancellationException) {
+                                pendingIntent?.let { assistantHandler(it, pendingParams) }
+                            } catch (_: CancellationException) {
                             } finally {
                                 pendingJob = null
                                 pendingMessageId = null
@@ -205,45 +217,36 @@ fun LlmChatDialog(
                                 pendingParams = null
                             }
                         }
-
                     } else {
                         if (!intentObj.isCritical) {
                             assistantHandler(intent, result.params)
                         }
                     }
-                } catch (e : Exception){
+                } catch (e: Exception) {
                     Log.e("LlmChatDialog", "LLM error", e)
-
-                    var lmmErrorMessage = userFriendlyMessageForIntent(AssistantIntent.ERROR.intent)
+                    val lmmErrorMessage = userFriendlyMessageForIntent(AssistantIntent.ERROR.intent)
 
                     val idx = messages.indexOfFirst { it.id == loadingId }
                     if (idx != -1) {
-                        messages[idx] = messages[idx].copy(
-                            isLoading = false,
-                            text = lmmErrorMessage
-                        )
+                        messages[idx] = messages[idx].copy(isLoading = false, text = lmmErrorMessage)
                     }
-                }
-                finally {
+                } finally {
                     isSending = false
                 }
             }
         }
     }
 
-
     val sttManager = remember {
         SpeechToTextManagerSingle(
             context = context,
-            onPartialResult = { partial ->
-                userInput = partial
-            },
+            onPartialResult = { partial -> userInput = partial },
             onResult = { result ->
                 isSttListening = false
                 userInput = ""
                 sendMessage(result)
             },
-            onError = { err ->
+            onError = {
                 isSttListening = false
             }
         )
@@ -261,143 +264,183 @@ fun LlmChatDialog(
     }
 
     DisposableEffect(Unit) {
-        onDispose {
-            sttManager.destroy()
-        }
+        onDispose { sttManager.destroy() }
     }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = {
             sttManager.stopListening()
             isDialogOpen = false
             pendingJob?.cancel(CancellationException("Dialog zatvoren"))
             onDismissRequest()
         },
-        title = { Text("Razgovor s AI") },
-        text = {
+        properties = DialogProperties(
+            dismissOnClickOutside = true,
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 2.dp,
+            modifier = Modifier
+                .fillMaxWidth(0.94f)          // ✅ širina dijaloga (probaj 0.98f)
+                .heightIn(min = 460.dp, max = 560.dp) // ✅ visina
+        ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 400.dp, max = 600.dp)
+                    .fillMaxSize()
+                    .padding(12.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        Spacer(modifier = Modifier.weight(1f))
 
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            items(messages, key = { it.id }) { msg ->
-                                MessageBubble(
-                                    message = msg,
-                                    isCancellable = (msg.id == pendingMessageId),
-                                    onCancel = {
-                                        val intentToCancel = pendingIntent
-
-                                        pendingJob?.cancel(CancellationException("User canceled"))
-                                        pendingJob = null
-
-                                        val idx = messages.indexOfFirst { it.id == pendingMessageId }
-                                        if (idx != -1) {
-                                            val cancelText = intentToCancel?.let { cancellationTextForIntent(it) } ?: "Operacija otkazana ❌"
-                                            messages[idx] = messages[idx].copy(text = cancelText, isLoading = false)
-                                        }
-
-                                        pendingMessageId = null
-                                        pendingIntent = null
-                                        pendingParams = null
-                                    }
-
-                                )
-                            }
-                        }
-                    }
-                }
-
+                // Header
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    OutlinedTextField(
-                        value = userInput,
-                        onValueChange = { userInput = it },
-                        modifier = Modifier
-                            .weight(1f)
-                            .heightIn(min = 56.dp, max = 160.dp),
-                        label = { Text("Upišite poruku") },
-                        singleLine = false,
-                        maxLines = 6,
-                        trailingIcon = {
-                            IconButton(onClick = {
-                                if (isSttListening) {
-                                    sttManager.stopListening()
-                                    isSttListening = false
-                                } else {
-                                    val hasPermission = ContextCompat.checkSelfPermission(
-                                        context, Manifest.permission.RECORD_AUDIO
-                                    ) == PackageManager.PERMISSION_GRANTED
+                    Column {
+                        Text(
+                            text = "Razgovor s AI",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "mShop asistent",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
 
-                                    if (!hasPermission) {
-                                        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                                    } else {
-                                        isSttListening = true
-                                        sttManager.startListeningOnce()
-                                    }
-                                }
-                            }) {
-                                if (isSttListening) {
-                                    Icon(
-                                        imageVector = Icons.Default.Mic,
-                                        contentDescription = "Slušam...",
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Mic,
-                                        contentDescription = "Mikrofon"
-                                    )
-                                }
-                            }
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    IconButton(
-                        onClick = {
-                            val text = userInput.trim()
-                            userInput = ""
-                            sendMessage(text)
-                        },
-                        enabled = !isSending
-                    ) {
-                        Icon(imageVector = Icons.Default.Send, contentDescription = "Pošalji")
+                    IconButton(onClick = {
+                        sttManager.stopListening()
+                        isDialogOpen = false
+                        pendingJob?.cancel(CancellationException("Dialog zatvoren"))
+                        onDismissRequest()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Cancel,
+                            contentDescription = "Zatvori",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
 
-                /*if (isSttListening) {
-                    Text("Slušam...", modifier = Modifier.padding(top = 6.dp), fontSize = 12.sp)
-                }*/
+                Spacer(Modifier.height(6.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.primary) // ✅ ako želiš crvenu liniju
+                Spacer(Modifier.height(6.dp))
 
+                // Messages
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentPadding = PaddingValues(vertical = 6.dp)
+                ) {
+                    items(messages, key = { it.id }) { msg ->
+                        MessageBubble(
+                            message = msg,
+                            isCancellable = (msg.id == pendingMessageId),
+                            onCancel = {
+                                val intentToCancel = pendingIntent
+
+                                pendingJob?.cancel(CancellationException("User canceled"))
+                                pendingJob = null
+
+                                val idx = messages.indexOfFirst { it.id == pendingMessageId }
+                                if (idx != -1) {
+                                    val cancelText = intentToCancel?.let { cancellationTextForIntent(it) }
+                                        ?: "Operacija otkazana ❌"
+                                    messages[idx] = messages[idx].copy(text = cancelText, isLoading = false)
+                                }
+
+                                pendingMessageId = null
+                                pendingIntent = null
+                                pendingParams = null
+                            }
+                        )
+                    }
+                }
+
+                // Auto-scroll
                 LaunchedEffect(messages.size) {
                     if (messages.isNotEmpty()) {
                         listState.animateScrollToItem(messages.size - 1)
                     }
                 }
+
+                Spacer(Modifier.height(10.dp))
+
+                // Composer (input)
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    tonalElevation = 1.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = userInput,
+                            onValueChange = { userInput = it },
+                            modifier = Modifier
+                                .weight(1f)
+                                .heightIn(min = 52.dp, max = 140.dp),
+                            placeholder = { Text("Upišite poruku") },
+                            singleLine = false,
+                            maxLines = 5,
+                            shape = RoundedCornerShape(14.dp),
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    if (isSttListening) {
+                                        sttManager.stopListening()
+                                        isSttListening = false
+                                    } else {
+                                        val hasPermission = ContextCompat.checkSelfPermission(
+                                            context, Manifest.permission.RECORD_AUDIO
+                                        ) == PackageManager.PERMISSION_GRANTED
+
+                                        if (!hasPermission) {
+                                            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                        } else {
+                                            isSttListening = true
+                                            sttManager.startListeningOnce()
+                                        }
+                                    }
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Mic,
+                                        contentDescription = "Mikrofon",
+                                        tint = if (isSttListening) MaterialTheme.colorScheme.error
+                                        else MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                        )
+
+                        Spacer(Modifier.width(8.dp))
+
+                        FilledIconButton(
+                            onClick = {
+                                val text = userInput.trim()
+                                userInput = ""
+                                sendMessage(text)
+                            },
+                            enabled = !isSending && userInput.isNotBlank()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Send,
+                                contentDescription = "Pošalji"
+                            )
+                        }
+                    }
+                }
             }
-        },
-        confirmButton = {  },
-        dismissButton = {  },
-        properties = DialogProperties(dismissOnClickOutside = true)
-    )
+        }
+    }
 }

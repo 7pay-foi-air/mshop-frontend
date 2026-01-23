@@ -4,13 +4,11 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,16 +19,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import hr.foi.air.mshop.R
 import hr.foi.air.mshop.data.LoginState
 import hr.foi.air.mshop.ui.components.DialogMessage
 import hr.foi.air.mshop.ui.components.FullScreenLoadingIndicator
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelPasswordField
+import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.viewmodels.LoginViewModel
 
 @Composable
@@ -49,93 +52,87 @@ fun LoginPassword(
                 Toast.makeText(context, "Prijava uspješna!", Toast.LENGTH_SHORT).show()
                 onLoginSuccess()
             }
-            is LoginState.FirstLoginRequired -> {
-                onFirstLogin()
-            }
-            is LoginState.Error -> {
-                val errorMessage = state.message
-                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
-            }
+            is LoginState.FirstLoginRequired -> onFirstLogin()
+            is LoginState.Error -> Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
             else -> {}
         }
     }
 
-    Box(
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 24.dp, vertical = 16.dp)
-    ){
+            .padding(horizontal = Dimens.screenHPadding, vertical = Dimens.screenVPadding),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(Dimens.xl))
+
+        Text(
+            text = "mShop",
+            style = MaterialTheme.typography.displayLarge,
+            modifier = Modifier.padding(top = Dimens.lg, bottom = Dimens.lg)
+        )
+
+        Text(
+            text = "Prijava",
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(bottom = Dimens.xxl)
+        )
+
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
             Text(
-                text = "mShop",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
-            )
-
-            Text(
-                text = "Prijava",
+                text = "Dobrodošli natrag",
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(bottom = 32.dp)
+                modifier = Modifier.padding(bottom = Dimens.xxl)
             )
 
-            Column(
+            Text(
+                text = "Unesite Vašu lozinku",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(bottom = Dimens.xxl)
+            )
+
+            UnderLabelPasswordField(
+                caption = "Lozinka",
+                value = viewModel.password,
+                onValueChange = { viewModel.password = it },
+                placeholder = ""
+            )
+
+            Text(
+                text = "Zaboravili ste lozinku?",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Unesite lozinku",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(bottom = 32.dp)
-                )
-
-                UnderLabelPasswordField(
-                    caption = "Lozinka",
-                    value = viewModel.password,
-                    onValueChange = { viewModel.password = it },
-                    placeholder = ""
-                )
-
-                Text(
-                    text = "Zaboravili ste lozinku?",
-                    modifier = Modifier
-                        .padding(top = 16.dp)
-                        .clickable { viewModel.onForgotPasswordClick() },
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.primary,
-                        textDecoration = TextDecoration.Underline
-                    ),
-                    textAlign = TextAlign.Center,
-                )
-            }
-
-            NextArrow(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .offset(y = (-30).dp)
-                    .padding(bottom = 32.dp),
-                size = 64.dp,
-                onClick = {
-                    if(viewModel.password.isBlank()){
-                        Toast.makeText(
-                            context,
-                            "Unesite lozinku!",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else {
-                        viewModel.login()
-                    }
-                }
+                    .padding(top = Dimens.md)
+                    .clickable { viewModel.onForgotPasswordClick() },
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                    textDecoration = TextDecoration.Underline
+                ),
+                textAlign = TextAlign.Center
             )
         }
+
+
+        NextArrow(
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(end = 16.dp, bottom = 96.dp),
+            size = Dimens.fab,
+            onClick = {
+                if (viewModel.password.isBlank()) {
+                    Toast.makeText(context, "Unesite lozinku!", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.login()
+                }
+            }
+        )
     }
 
     DialogMessage(
@@ -158,8 +155,11 @@ fun LoginPassword(
 
 @Preview(showBackground = true)
 @Composable
-fun LoginPasswordPreview(){
+fun LoginPasswordPreview() {
     LoginPassword(
-        onForgotPassword = {}, onLoginSuccess = {}, viewModel = LoginViewModel(), onFirstLogin = {},
+        onForgotPassword = {},
+        onLoginSuccess = {},
+        onFirstLogin = {},
+        viewModel = LoginViewModel()
     )
 }

@@ -27,6 +27,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import hr.foi.air.mshop.R
 import hr.foi.air.mshop.core.models.Article
+import hr.foi.air.mshop.ui.theme.Dimens
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 
 
 @Composable
@@ -42,10 +45,10 @@ fun ArticleManagementListItem(
         leadingContent = {
             Box(
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(Dimens.listThumb)
                     .background(
                         color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = MaterialTheme.shapes.small
+                        shape = RoundedCornerShape(Dimens.radiusInput)
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -79,7 +82,7 @@ fun ArticleManagementListItem(
             }
         },
         trailingContent = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Dimens.sm)) {
                 IconButton(onClick = onEditClicked) {
                     Icon(
                         imageVector = Icons.Default.Edit,
