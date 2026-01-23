@@ -39,8 +39,9 @@ fun Homepage(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Dimens.screenPadding, vertical = Dimens.lg),
-            verticalArrangement = Arrangement.spacedBy(Dimens.md),
+                .padding(horizontal = Dimens.screenPadding)
+                .padding(top = Dimens.sm, bottom = Dimens.sm),
+            verticalArrangement = Arrangement.spacedBy(Dimens.sm),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -94,7 +95,9 @@ fun Homepage(
 
             TabRow(
                 selectedTabIndex = selectedTabIndex,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Dimens.xs)
             ) {
                 tabTitles.forEachIndexed { index, title ->
                     Tab(

@@ -18,7 +18,7 @@ fun LoaderPickerScreen(
     onDismiss: () -> Unit,
     onModuleSelected: (IImageLoader) -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -39,11 +39,13 @@ fun LoaderPickerScreen(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Dimens.lg, Alignment.CenterHorizontally)
+                horizontalArrangement = Arrangement.spacedBy(Dimens.lg),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 imageLoaderManager.imageLoaders.forEach { module ->
                     LoaderModuleItem(
                         module = module,
+                        modifier = Modifier.weight(1f),
                         onClick = {
                             onModuleSelected(module)
                             onDismiss()
@@ -63,14 +65,15 @@ private fun LoaderModuleItem(
     modifier: Modifier = Modifier
 ) {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        modifier = modifier,
         colors = MShopCard.elevatedColors(),
         shape = MShopCard.shape,
         elevation = MShopCard.elevatedElevation()
-    )  {
+    ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(Dimens.md),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -90,3 +93,4 @@ private fun LoaderModuleItem(
         }
     }
 }
+

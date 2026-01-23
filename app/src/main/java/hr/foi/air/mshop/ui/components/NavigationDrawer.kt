@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.ui.components
 
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import hr.foi.air.mshop.navigation.drawerItems
 import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.ws.data.SessionManager
 import kotlinx.coroutines.launch
+
 
 data class DrawerItem(
     val icon: ImageVector,
@@ -36,6 +38,8 @@ fun NavigationDrawer(
     content: @Composable (Modifier) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val layoutDirection = LocalLayoutDirection.current
+
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -126,24 +130,32 @@ fun NavigationDrawer(
         },
         content = {
             Scaffold(
-                containerColor = MaterialTheme.colorScheme.background,
-                topBar = {
-                    TopAppBar(
-                        title = { },
-                        navigationIcon = navigationIcon,
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.background
-                        )
-                    )
-                }
+                containerColor = MaterialTheme.colorScheme.background
             ) { paddingValues ->
-                content(
-                    Modifier
-                        .padding(paddingValues)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
-                )
+                        .padding(paddingValues)
+                ) {
+                    content(
+                        Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.background)
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .statusBarsPadding()
+                            .padding(start = Dimens.sm, top = Dimens.xs)
+                            .align(Alignment.TopStart)
+                    ) {
+                        navigationIcon()
+                    }
+                }
             }
         }
+
     )
 }
 
