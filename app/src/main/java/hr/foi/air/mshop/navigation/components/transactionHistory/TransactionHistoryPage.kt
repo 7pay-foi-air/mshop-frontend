@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.navigation.components.transactionHistory
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -478,7 +479,10 @@ fun TransactionHistoryPage(
             when (selectedTabIndex) {
                 0 -> PaymentsScreen(
                     viewModel = viewModel,
-                    onTransactionClick = { id -> navController.navigate(AppRoutes.transactionDetails(id)) }
+                    onTransactionClick = { id ->
+                        Log.d("TX_CLICK", "clicked id=$id")
+                        navController.navigate(AppRoutes.transactionDetails(id))
+                    }
                 )
                 1 -> RefundsScreen(
                     viewModel = viewModel,

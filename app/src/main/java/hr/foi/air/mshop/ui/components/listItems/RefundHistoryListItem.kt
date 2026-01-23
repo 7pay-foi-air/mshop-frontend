@@ -42,6 +42,7 @@ fun RefundHistoryListItem(
 
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
         colors = MShopCard.elevatedColors(),
         shape = MShopCard.shape,
         elevation = MShopCard.elevatedElevation()
