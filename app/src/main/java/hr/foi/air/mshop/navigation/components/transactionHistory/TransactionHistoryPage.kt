@@ -390,17 +390,21 @@ fun TransactionHistoryPage(
 
     Scaffold(
         topBar = {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+            ) {
                 Text(
                     text = "mShop",
                     style = MaterialTheme.typography.displayLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = Dimens.lg, bottom = Dimens.sm)
+                        .padding(top = Dimens.sm, bottom = Dimens.xs)
                 )
 
                 CenterAlignedTopAppBar(
+                    modifier = Modifier.height(48.dp),
                     title = {
                         Text(
                             text = "Povijest transakcija",

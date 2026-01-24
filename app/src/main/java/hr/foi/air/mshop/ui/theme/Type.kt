@@ -22,12 +22,21 @@ val Typography = Typography(
         letterSpacing = 1.4.sp
     ),
 
+
     displayMedium = TextStyle(
         fontFamily = BrandFont,
         fontWeight = FontWeight.Normal,
         fontSize = 36.sp,
         lineHeight = 40.sp,
         letterSpacing = 1.4.sp
+    ),
+
+    displaySmall = TextStyle(
+        fontFamily = BrandFont,
+        fontWeight = FontWeight.Normal,
+        fontSize = 20.sp,
+        lineHeight = 26.sp,
+        letterSpacing = 0.8.sp
     ),
 
 

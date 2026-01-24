@@ -66,11 +66,14 @@ fun LoginPassword(
             .padding(horizontal = Dimens.screenHPadding, vertical = Dimens.screenVPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(Dimens.xl))
+        Spacer(modifier = Modifier.height(Dimens.xxxl))
 
         Text(
             text = "mShop",
-            style = MaterialTheme.typography.displayLarge,
+            style = MaterialTheme.typography.displayLarge.copy(
+                fontSize = 48.sp,
+                lineHeight = 52.sp
+            ),
             modifier = Modifier.padding(top = Dimens.lg, bottom = Dimens.lg)
         )
 

@@ -60,17 +60,14 @@ fun TransactionDetailsPage(
                         .padding(top = Dimens.lg, bottom = Dimens.sm)
                 )
 
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = "Detalji transakcije",
-                            style = MaterialTheme.typography.titleLarge,
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                Text(
+                    text = "Detalji transakcije",
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = Dimens.lg)
                 )
+
             }
         }
     ) { innerPadding ->
