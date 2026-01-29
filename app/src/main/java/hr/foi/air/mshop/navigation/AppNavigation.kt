@@ -297,10 +297,22 @@ fun AppNavHost(
             val assistantFromArguments = assistantFromArgumentsString?.toBooleanStrictOrNull() ?: false
             //Log.d("AppNavHost", "assistantFromArguments: $assistantFromArguments")
 
-            var finalTotalAmount: String = chargeAmountState.text
-            if(assistantFromArguments && amountFromArguments != null){
-                finalTotalAmount = amountFromArguments
-            }
+            val finalTotalAmount: Double =
+                if (assistantFromArguments && amountFromArguments != null) {
+                    amountFromArguments
+                        .replace("€", "")
+                        .replace(".", "")
+                        .replace(",", ".")
+                        .trim()
+                        .toDoubleOrNull() ?: 0.0
+                } else {
+                    chargeAmountState.text
+                        .replace("€", "")
+                        .replace(".", "")
+                        .replace(",", ".")
+                        .trim()
+                        .toDoubleOrNull() ?: 0.0
+                }
 
             PaymentPage(
                 totalAmount = finalTotalAmount,

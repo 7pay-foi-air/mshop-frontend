@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import hr.foi.air.mshop.utils.toHrCurrency
 import java.time.ZoneOffset
 
 fun LocalDate.toUtcEpochMillis(): Long =
@@ -114,12 +115,15 @@ fun TransactionHistoryPage(
         }
     }
 
-    val amountFilterText = remember(minAmount, maxAmount) {
+    val min = minAmount
+    val max = maxAmount
+
+    val amountFilterText = remember(min, max) {
         when {
-            minAmount == null && maxAmount == null -> null
-            minAmount != null && maxAmount == null -> "≥ $minAmount"
-            minAmount == null && maxAmount != null -> "≤ $maxAmount"
-            else -> "$minAmount – $maxAmount"
+            min == null && max == null -> null
+            min != null && max == null -> "≥ ${min.toHrCurrency()}"
+            min == null && max != null -> "≤ ${max.toHrCurrency()}"
+            else -> "${min!!.toHrCurrency()} – ${max!!.toHrCurrency()}"
         }
     }
 

@@ -27,6 +27,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import hr.foi.air.mshop.R
 import hr.foi.air.mshop.core.models.Article
+import hr.foi.air.mshop.utils.toHrCurrency
 
 
 @Composable
@@ -72,7 +73,7 @@ fun ArticleManagementListItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "€${String.format("%.2f", article.price)}",
+                    text = "${article.price.toHrCurrency()} €",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Normal
                 )

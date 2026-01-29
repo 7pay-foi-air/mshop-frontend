@@ -20,6 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.ui.components.listItems.TransactionItemRow
+import hr.foi.air.mshop.utils.toHrCurrency
 import hr.foi.air.mshop.viewmodels.transaction.TransactionDetailsViewModel
 import hr.foi.air.mshop.viewmodels.transaction.TransactionHistoryViewModel
 
@@ -153,7 +154,7 @@ fun TransactionDetailsPage(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                         Text(
-                                            text = "%.2f".format(d.totalAmount) + " " + d.currency,
+                                            text = d.totalAmount.toHrCurrency() + " " + d.currency,
                                             style = MaterialTheme.typography.headlineSmall,
                                             fontWeight = FontWeight.ExtraBold
                                         )

@@ -35,10 +35,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import hr.foi.air.mshop.utils.toHrCurrency
 
 @Composable
 fun PaymentPage(
-    totalAmount: String,
+    totalAmount: Double,
     onPay: (CardPaymentData) -> Unit
 ) {
     var cardNumber by remember { mutableStateOf("") }
@@ -155,7 +156,7 @@ fun PaymentPage(
             Spacer(Modifier.height(32.dp))
 
             Text(
-                text = "UKUPNO: $totalAmount",
+                text = "UKUPNO: ${totalAmount.toHrCurrency()} €",
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Start
