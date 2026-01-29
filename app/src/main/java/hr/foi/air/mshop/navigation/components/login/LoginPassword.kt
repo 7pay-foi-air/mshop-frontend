@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -159,6 +160,6 @@ fun LoginPassword(
 @Composable
 fun LoginPasswordPreview(){
     LoginPassword(
-        onForgotPassword = {}, onLoginSuccess = {}, viewModel = LoginViewModel(), onFirstLogin = {},
+        onForgotPassword = {}, onLoginSuccess = {}, viewModel = remember { LoginViewModel() }, onFirstLogin = {},
     )
 }
