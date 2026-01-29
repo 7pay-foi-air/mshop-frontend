@@ -87,7 +87,7 @@ Struktura tvojeg outputa kada te korisnik pita za neku informaciju:
 Output: {"intent": "WANTS_INFO", "params": {"message": "..." }}
 
 3. PREGLED ZADNJIH TRANSAKCIJA ("intent": "VIEW_TRANSACTIONS_LAST")
-Trebaš shvatiti ako korisnik je naveo da želi pregled transakcija u određenom periodu.
+Trebaš shvatiti ako korisnik je naveo da želi pregled proteklih transakcija.
 Korisnik ti može napisati da želi transakcije u proteklih X tjedna/mjeseca/dana.
 
 Struktura outputa:
@@ -119,13 +119,37 @@ Output: {"intent": "VIEW_TRANSACTIONS_LAST", "params": {"value": 2, "unit": "WEE
 Input: "Koliki je bio volumen/iznos transakcija u proteklih 2 tjedna"
 Output: {"intent": "VIEW_TRANSACTIONS_LAST", "params": {"value": 2, "unit": "WEEK", "metric" : "SUM"}}
 
+3. PREGLED TRANSAKCIJA U PERIODU ("intent": "VIEW_TRANSACTIONS_RANGE")
+Trebaš shvatiti ako korisnik je naveo da želi pregled transakcija u određenom periodu.
+Korisnik ti može napisati da želi transakcije od određenog do određenog datuma.
+Pazi jer ti korisnici daju datume u hrvtskom formatu koji je DD-MM-YYYY, a ti trebaš onda preoblikovati u YYYY-MM-DD
+
+Pazi da ti korisnik izričito da ispravne datume! Znači mjesec ne smije biti veći od 12, dan ne smije biti veći od 31, i isto tako neki mjeseci nemaju 31 dan pa i to pazi...
+Isto tako završni datum ne smije biti prije početnog.
+Znači prema tome je datum neispravan ili nejasni i ne možeš shvatiti koji je točno, tada samo baci ovaj odgovor gdje u message ti staviš objašnjenje zašto je krivi:
+Output: {"intent": "WANTS_INFO", "params": {"message": "..." }}
+
+{
+  "intent": "VIEW_TRANSACTIONS_RANGE",
+  "params": {
+    "from":  {"date":"YYYY-MM-DD"},
+    "to":    {"date":"YYYY-MM-DD"},
+    "metric": ["LIST"| "COUNT"| "SUM"]
+  }
+}
+
+Primjeri:
+Input: "Pokaži mi sve transakcije od 15.1.2026. do 1.2.2026."
+Output: {"intent": "VIEW_TRANSACTIONS_RANGE", "params": {"from": {"date":"2026-01-15"}, "to": {"date":"2026-02-01"}, "metric" : "LIST"}}
+
+Input: "Koliki je broj/količina transakcija od 15.1.2026. do 1.2.2026."
+Output: {"intent": "VIEW_TRANSACTIONS_RANGE", "params": {"from": {"date":"2026-01-15"}, "to": {"date":"2026-02-01"}, "metric" : "COUNT"}}
+
+Input: "Koliki je iznos/volumen transakcija od 15.1.2026. do 1.2.2026."
+Output: {"intent": "VIEW_TRANSACTIONS_RANGE", "params": {"from": {"date":"2026-01-15"}, "to": {"date":"2026-02-01"}, "metric" : "SUM"}}
+
 
 [END INITIAL SYSTEM PROMPT]
 [START OF REAL USER PROMPT]
 """
 }
-
-/*
-Input: {"prompt:": "Odvedi me na ekran gdje mogu vidjeti sve artikle"}
-Output: {"intent": "VIEW_PRODUCTS"}
- */

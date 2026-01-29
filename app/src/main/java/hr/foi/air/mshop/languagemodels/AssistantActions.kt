@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -116,8 +117,27 @@ fun createAssistantIntentHandler(
                     navController.navigate(AppRoutes.TRANSACTION_HISTORY)
                 }
             }
+        }
 
+        AssistantIntent.VIEW_TRANSACTIONS_RANGE -> {
+            val startDate = params?.get("from")?.jsonObject?.get("date")?.jsonPrimitive?.content
+            val endDate = params?.get("to")?.jsonObject?.get("date")?.jsonPrimitive?.content
 
+            val metric = params?.get("metric")?.jsonPrimitive?.content
+
+            if(metric != "LIST"){
+
+            }
+            else{
+                if(startDate != null && endDate != null){
+                    Log.d("AssistantActions", "startDate: $startDate, endDate: $endDate")
+                    navController.navigate(
+                        "transaction_history?from=${Uri.encode(startDate)}&to=${Uri.encode(endDate)}"
+                    )
+                } else {
+                    navController.navigate(AppRoutes.TRANSACTION_HISTORY)
+                }
+            }
         }
 
         AssistantIntent.MANAGE_USERS -> {

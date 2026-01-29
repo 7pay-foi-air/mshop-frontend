@@ -24,6 +24,13 @@ enum class AssistantIntent(
         defaultUserFriendlyMessage = "Prebacio sam Vas na stranicu za pregled transakcija i primijenio tražene filtre. 🧾"
     ),
 
+    VIEW_TRANSACTIONS_RANGE(
+        "VIEW_TRANSACTIONS_RANGE",
+        requiresLogin = true,
+        requiresLoginMessage = "Morate biti prijavljeni kako biste mogli pregledati transakcije. ⚠️",
+        defaultUserFriendlyMessage = "Prebacio sam Vas na stranicu za pregled transakcija i primijenio tražene filtre. 🧾"
+    ),
+
     MANAGE_USERS(
         "MANAGE_USERS",
         requiresLogin = true,

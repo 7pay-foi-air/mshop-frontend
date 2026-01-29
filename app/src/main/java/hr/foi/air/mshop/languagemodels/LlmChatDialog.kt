@@ -37,7 +37,9 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.time.LocalDate
 import kotlin.coroutines.cancellation.CancellationException
 
 enum class Sender { User, Bot }
@@ -134,27 +136,83 @@ fun LlmChatDialog(
         repo: TransactionRepo?
     ): Pair<String, suspend (JsonObject) -> String>? {
         if (repo == null) return null
-        if (intentObj != AssistantIntent.VIEW_TRANSACTIONS_LAST) return null
+        if (intentObj != AssistantIntent.VIEW_TRANSACTIONS_LAST && intentObj != AssistantIntent.VIEW_TRANSACTIONS_RANGE) return null
         val metric = params?.get("metric")?.jsonPrimitive?.contentOrNull ?: return null
 
         return when (metric.uppercase()) {
             "COUNT" -> Pair("Računam broj transakcija...") { p ->
-                val value = p["value"]?.jsonPrimitive?.int ?: return@Pair "Neispravni parametri."
-                val unit = p["unit"]?.jsonPrimitive?.content ?: return@Pair "Neispravni parametri."
-                val (startDate, endDate) = getDateRange(value, unit)
-                val count = try {
+                val fromDateStr = p["from"]?.jsonObject["date"]?.jsonPrimitive?.content
+                val toDateStr = p["to"]?.jsonObject["date"]?.jsonPrimitive?.content
+
+                val value = p["value"]?.jsonPrimitive?.int
+                val unit = p["unit"]?.jsonPrimitive?.content
+
+                var count: Int? = null
+                var startDate: String? = null
+                var endDate: String? = null
+
+                if(fromDateStr != null && toDateStr != null){
+                    val fromDate = LocalDate.parse(fromDateStr)
+                    val toDate = LocalDate.parse(toDateStr)
+
+                    if(fromDate.isAfter(toDate)) return@Pair "Neispravni parametri."
+
+                    startDate = fromDateStr
+                    endDate = toDateStr
+
+                }else if(value != null && unit != null){
+                    val (startDateTemp, endDateTemp) = getDateRange(value, unit)
+                    startDate = startDateTemp
+                    endDate = endDateTemp
+                }
+                else{
+                    return@Pair "Neispravni parametri."
+                }
+
+                count = try {
                     repo.getTransactionsCountPeriod(startDate, endDate)
                 } catch (e: Exception) {
                     null
                 }
+
                 if (count != null) "Broj transakcija: $count" else "Nisam uspio dohvatiti broj transakcija."
             }
 
             "SUM" -> Pair("Računam iznos transakcija...") { p ->
-                val value = p["value"]?.jsonPrimitive?.int ?: return@Pair "Neispravni parametri."
-                val unit = p["unit"]?.jsonPrimitive?.content ?: return@Pair "Neispravni parametri."
-                val (startDate, endDate) = getDateRange(value, unit)
-                val total = try {
+
+                val fromDateStr = p["from"]?.jsonObject["date"]?.jsonPrimitive?.content
+                val toDateStr = p["to"]?.jsonObject["date"]?.jsonPrimitive?.content
+
+                val value = p["value"]?.jsonPrimitive?.int
+                val unit = p["unit"]?.jsonPrimitive?.content
+
+                var total: Double? = null
+                var startDate: String? = null
+                var endDate: String? = null
+
+
+                if(fromDateStr != null && toDateStr != null){
+                    val fromDate = LocalDate.parse(fromDateStr)
+                    val toDate = LocalDate.parse(toDateStr)
+
+                    if(fromDate.isAfter(toDate)) return@Pair "Neispravni parametri."
+
+                    Log.d("AssistantActionsDate", "fromDate: $fromDate, toDate: $toDate")
+
+
+                    startDate = fromDateStr
+                    endDate = toDateStr
+
+                }else if(value != null && unit != null){
+                    val (startDateTemp, endDateTemp) = getDateRange(value, unit)
+                    startDate = startDateTemp
+                    endDate = endDateTemp
+                }
+                else{
+                    return@Pair "Neispravni parametri."
+                }
+
+                total = try {
                     repo.getTransactionsSumPeriod(startDate, endDate)
                 } catch (e: Exception) {
                     null
@@ -216,7 +274,30 @@ fun LlmChatDialog(
                         return@launch
                     }
 
+                    if(intentObj == AssistantIntent.VIEW_TRANSACTIONS_RANGE){
+                        val fromDateStr = result.params?.get("from")?.jsonObject["date"]?.jsonPrimitive?.content
+                        val toDateStr = result.params?.get("to")?.jsonObject["date"]?.jsonPrimitive?.content
+
+                        if(fromDateStr != null && toDateStr != null){
+                            val fromDate = LocalDate.parse(fromDateStr)
+                            val toDate = LocalDate.parse(toDateStr)
+
+                            if(fromDate.isAfter(toDate)){
+                                val msg = "Nažalost ne mogu prikazati transakcije za određeni period. Početni datum ne smije biti kasnije od završnog datuma. ⚠️"
+                                if (idxLoading != -1) {
+                                    messages[idxLoading] = messages[idxLoading].copy(text = msg, isLoading = false)
+                                } else {
+                                    messages.add(ChatMessage(id = nextId(), text = msg, sender = Sender.Bot))
+                                }
+
+                                return@launch
+                            }
+                        }
+                    }
+
                     val asyncPair = getAsyncHandlerIfAny(intentObj, result.params, transactionRepo)
+
+                    Log.d("AssistantActionsDate", "asyncPair: $asyncPair")
 
                     if (asyncPair != null) {
 
