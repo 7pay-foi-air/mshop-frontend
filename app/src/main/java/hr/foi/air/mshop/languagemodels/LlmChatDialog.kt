@@ -148,12 +148,17 @@ fun LlmChatDialog(
                     val intent = result.intent
                     val intentObj = AssistantIntent.fromIntent(intent)
                     val requiresLoginButNotLogged = intentObj.requiresLogin && SessionManager.accessToken == null
+                    val requiresAdminButNotAdmin = intentObj.requiresAdmin && SessionManager.currentUserRole == "cashier"
+
+                    Log.d("LlmChatDialog", "requiresLoginButNotLogged: $requiresLoginButNotLogged")
+                    Log.d("LlmChatDialog", "requiresAdminButNotAdmin: $requiresAdminButNotAdmin")
 
                     val displayText = when (intentObj) {
                         AssistantIntent.WANTS_INFO -> userFriendlyMessageForIntent(intent, result.params)
                         AssistantIntent.RECOVERY_HINT_GET -> userFriendlyMessageForIntent(intent, result.params, context)
                         else -> {
                             if (requiresLoginButNotLogged) loginRequiredMessage(intent)
+                            else if (requiresAdminButNotAdmin) adminRequiredMessage(intent)
                             else userFriendlyMessageForIntent(intent, result.params)
                         }
                     }
@@ -167,7 +172,12 @@ fun LlmChatDialog(
                         messages.add(ChatMessage(id = nextId(), text = displayText, sender = Sender.Bot))
                     }
 
-                    if (intentObj.isCritical && !requiresLoginButNotLogged) {
+                    if(requiresLoginButNotLogged || requiresAdminButNotAdmin){
+                        return@launch
+                    }
+
+
+                    if (intentObj.isCritical) {
                         pendingIntent = intent
                         pendingParams = result.params
 

@@ -3,9 +3,11 @@ package hr.foi.air.mshop.languagemodels
 enum class AssistantIntent(
     val intent: String,
     val requiresLogin: Boolean = false,
+    val requiresAdmin: Boolean = false,
     val isCritical: Boolean = false,
     val cancellationText: String? = null,
     val requiresLoginMessage: String? = null,
+    val requiresAdminMessage: String? = null,
     val defaultUserFriendlyMessage: String? = null
 ) {
     VIEW_TRANSACTIONS(
@@ -20,6 +22,33 @@ enum class AssistantIntent(
         requiresLoginMessage = "Morate biti prijavljeni kako biste mogli vidjeti popis transakcija. ⚠️",
         defaultUserFriendlyMessage = "Prebacio sam Vas na stranicu za pregled transakcija i primijenio tražene filtre. 🧾"
     ),
+
+    MANAGE_USERS(
+        "MANAGE_USERS",
+        requiresLogin = true,
+        requiresAdmin = true,
+        requiresLoginMessage = "Morate biti prijavljeni kako biste mogli upravljati korisnicima. ⚠️",
+        requiresAdminMessage = "Morate imati administratorske ovlasti kako bi mogli upravljati korisnicima. 🔒",
+        defaultUserFriendlyMessage = "Prebacio sam Vas na stranicu za upravljanje korisnicima. 👩‍💼‍👨‍💼"
+    ),
+
+    MANAGE_ITEMS(
+        "MANAGE_ITEMS",
+        requiresLogin = true,
+        requiresAdmin = true,
+        requiresLoginMessage = "Morate biti prijavljeni kako biste mogli upravljati artiklima. ⚠️",
+        requiresAdminMessage = "Morate imati administratorske ovlasti kako bi mogli upravljati artiklima. 🔒",
+        defaultUserFriendlyMessage = "Prebacio sam Vas na stranicu za upravljanje artiklima. 📦"
+    ),
+
+    EDIT_PROFILE(
+        "EDIT_PROFILE",
+        requiresLogin = true,
+        requiresLoginMessage = "Morate biti prijavljeni kako biste mogli uređivati svoj korisnički račun. ⚠️",
+        defaultUserFriendlyMessage = "Prebacio sam Vas na stranicu za uređivativanje svog korisničkog račun. 📦"
+    ),
+
+
     NEW_TRANSACTION(
         "NEW_TRANSACTION",
         requiresLogin = true,

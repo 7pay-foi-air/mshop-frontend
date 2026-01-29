@@ -19,6 +19,13 @@ fun loginRequiredMessage(intent: String): String {
     return intentObj.requiresLoginMessage ?: "Morate se prijaviti da biste izvršili tu radnju. ⚠️"
 }
 
+fun adminRequiredMessage(intent: String): String {
+    val intentObj = AssistantIntent.fromIntent(intent)
+    return intentObj.requiresAdminMessage ?: "Samo administratori mogu izvršiti tu radnju. ⚠️"
+}
+
+
+
 fun cancellationTextForIntent(intent: String): String {
     val intentObj = AssistantIntent.fromIntent(intent)
     return intentObj.cancellationText ?: "Operacija otkazana ❌"
@@ -47,9 +54,6 @@ fun userFriendlyMessageForIntent(intent: String, params: JsonObject? = null, con
                 locationOrNull?.let { "Lokacija Vašeg koda za oporavak:\n$it" }
             } ?: intentObj.defaultUserFriendlyMessage ?: "Nema informacije o lokaciji koda."
         }
-        AssistantIntent.VIEW_TRANSACTIONS_PERIOD -> {
-            intentObj.defaultUserFriendlyMessage ?: "Prebacio sam Vas na stranicu za pregled transakcija i primijenio tražene filtre. 🧾"
-        }
         else -> {
             intentObj.defaultUserFriendlyMessage ?: "Pokrenuo sam proces... ⚙️"
         }
@@ -61,7 +65,7 @@ fun userFriendlyMessageForIntent(intent: String, params: JsonObject? = null, con
 fun getDateRange(value: Int, unit: String): Pair<String, String> {
     val today = LocalDate.now()
     val startDate = when (unit.uppercase()) {
-        "DAYS" -> today.minusDays(value.toLong())
+        "DAY", "DAYS" -> today.minusDays(value.toLong())
         "WEEK", "WEEKS" -> today.minusWeeks(value.toLong())
         "MONTH", "MONTHS" -> today.minusMonths(value.toLong())
         else -> today.minusDays(value.toLong()) // default fallback
@@ -98,6 +102,18 @@ fun createAssistantIntentHandler(
             } else {
                 navController.navigate(AppRoutes.TRANSACTION_HISTORY)
             }
+        }
+
+        AssistantIntent.MANAGE_USERS -> {
+            navController.navigate(AppRoutes.MANAGE_USERS)
+        }
+
+        AssistantIntent.MANAGE_ITEMS -> {
+            navController.navigate(AppRoutes.MANAGE_ARTICLES)
+        }
+
+        AssistantIntent.EDIT_PROFILE -> {
+            navController.navigate(AppRoutes.PROFILE_USER)
         }
 
 
