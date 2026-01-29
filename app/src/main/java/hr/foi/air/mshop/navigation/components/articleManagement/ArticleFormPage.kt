@@ -1,7 +1,6 @@
 package hr.foi.air.mshop.navigation.components.articleManagement
 
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,6 +39,8 @@ import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.imageloader.ImageLoaderManager
 import hr.foi.air.image_loader.interfaces.IPhotoListener
 import hr.foi.air.image_loader.interfaces.IImageLoader
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextFieldMultiline
@@ -67,7 +68,7 @@ fun ArticleFormPage(
                 viewModel.onImageSelected(imageUri)
             }
             override fun onFailure(message: String) {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                AppMessageManager.show(message, AppMessageType.ERROR)
             }
         }
     }

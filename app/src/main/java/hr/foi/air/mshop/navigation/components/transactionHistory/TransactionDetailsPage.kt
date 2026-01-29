@@ -1,6 +1,5 @@
 package hr.foi.air.mshop.navigation.components.transactionHistory
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +18,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import hr.foi.air.mshop.navigation.AppRoutes
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.listItems.TransactionItemRow
 import hr.foi.air.mshop.utils.toHrCurrency
 import hr.foi.air.mshop.viewmodels.transaction.TransactionDetailsViewModel
@@ -338,11 +339,7 @@ fun TransactionDetailsPage(
                                             if (success) {
                                                 historyVm.loadTransactions()
                                             } else {
-                                                Toast.makeText(
-                                                    navController.context,
-                                                    "Refund nije uspio!",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
+                                                AppMessageManager.show("Refund nije uspio!", AppMessageType.ERROR)
                                             }
                                         }
                                     },

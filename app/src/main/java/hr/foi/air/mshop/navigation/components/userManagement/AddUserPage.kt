@@ -1,6 +1,5 @@
 package hr.foi.air.mshop.navigation.components.userManagement
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,6 +13,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.DateFieldUnderLabel
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
@@ -52,12 +53,12 @@ fun AddUserPage(
 
     LaunchedEffect(uiState.successMessage, uiState.errorMessage) {
         if (uiState.successMessage != null) {
-            Toast.makeText(context, uiState.successMessage, Toast.LENGTH_LONG).show()
+            AppMessageManager.show(uiState.successMessage, AppMessageType.SUCCESS)
             onUserAdded?.invoke()
             viewModel.onMessageShown()
         }
         if (uiState.errorMessage != null) {
-            Toast.makeText(context, uiState.errorMessage, Toast.LENGTH_LONG).show()
+            AppMessageManager.show(uiState.errorMessage, AppMessageType.ERROR)
             viewModel.onMessageShown()
         }
     }

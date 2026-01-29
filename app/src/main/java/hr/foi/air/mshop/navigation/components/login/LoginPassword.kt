@@ -26,6 +26,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.data.LoginState
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.DialogMessage
 import hr.foi.air.mshop.ui.components.FullScreenLoadingIndicator
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
@@ -45,15 +47,14 @@ fun LoginPassword(
     LaunchedEffect(loginState) {
         when (val state = loginState) {
             is LoginState.Success -> {
-                Toast.makeText(context, "Prijava uspješna!", Toast.LENGTH_SHORT).show()
+                AppMessageManager.show("Prijava uspješna!", AppMessageType.SUCCESS)
                 onLoginSuccess()
             }
             is LoginState.FirstLoginRequired -> {
                 onFirstLogin()
             }
             is LoginState.Error -> {
-                val errorMessage = state.message
-                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+                AppMessageManager.show("Prijava neuspješna!", AppMessageType.ERROR)
             }
             else -> {}
         }

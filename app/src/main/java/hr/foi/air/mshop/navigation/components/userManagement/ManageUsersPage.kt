@@ -1,6 +1,5 @@
 package hr.foi.air.mshop.navigation.components.userManagement
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import hr.foi.air.mshop.navigation.AppRoutes
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.listItems.UserManagementListItem
 import hr.foi.air.mshop.ui.components.textFields.SearchField
 import hr.foi.air.mshop.viewmodels.userManagement.UserManagementViewModel
@@ -40,7 +41,7 @@ fun ManageUsersPage(
 
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collectLatest { message ->
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            AppMessageManager.show(message, AppMessageType.ERROR)
         }
     }
 

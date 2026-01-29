@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.ui.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -11,12 +12,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import hr.foi.air.mshop.MainActivity
@@ -27,9 +32,12 @@ import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.navigation.authRoutes
 import hr.foi.air.mshop.navigation.drawerItems
 import hr.foi.air.mshop.navigation.menuRoutes
+import hr.foi.air.mshop.utils.AppMessage
+import hr.foi.air.mshop.utils.AppMessageManager
 import hr.foi.air.mshop.ui.components.BackArrowButton
 import hr.foi.air.mshop.ui.components.MenuIconButton
 import hr.foi.air.mshop.ui.components.NavigationDrawer
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -70,44 +78,69 @@ fun MainScreen() {
             }
         }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
-            if (showNavigationUI) {
-                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
 
-                NavigationDrawer(
-                    drawerState = drawerState,
-                    items = drawerItems,
-                    currentRoute = currentRoute,
-                    onItemClick = { item ->
-                        if (currentRoute != item.route) {
-                            navController.navigate(item.route) {
-                                launchSingleTop = true
-                                restoreState = true
+
+            Column(modifier = Modifier.padding(paddingValues)) {
+                if (showNavigationUI) {
+                    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+                    NavigationDrawer(
+                        drawerState = drawerState,
+                        items = drawerItems,
+                        currentRoute = currentRoute,
+                        onItemClick = { item ->
+                            if (currentRoute != item.route) {
+                                navController.navigate(item.route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        onLogout = {
+                            navController.navigate(AppRoutes.LOGIN_GRAPH) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        },
+                        navigationIcon = {
+                            when (currentRoute) {
+                                in menuRoutes -> MenuIconButton { scope.launch { drawerState.open() } }
+                                else -> BackArrowButton { navController.navigateUp() }
                             }
                         }
-                    },
-                    onLogout = {
-                        navController.navigate(AppRoutes.LOGIN_GRAPH) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    },
-                    navigationIcon = {
-                        when (currentRoute) {
-                            in menuRoutes -> MenuIconButton { scope.launch { drawerState.open() } }
-                            else -> BackArrowButton { navController.navigateUp() }
-                        }
+                    ) { modifier ->
+                        AppNavHost(
+                            navController = navController,
+                            modifier = modifier.fillMaxSize()
+                        )
                     }
-                ) { modifier ->
+                } else {
                     AppNavHost(
                         navController = navController,
-                        modifier = modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
-            } else {
-                AppNavHost(
-                    navController = navController,
-                    modifier = Modifier.fillMaxSize()
+            }
+
+            val message by AppMessageManager.message.collectAsState()
+
+            message?.let {
+                AppMessage(
+                    message = it.text,
+                    type = it.type,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 24.dp)
                 )
+
+                LaunchedEffect(it) {
+                    delay(3000)
+                    AppMessageManager.clear()
+                }
             }
         }
     }

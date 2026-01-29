@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.mshop.navigation.drawerItems
+import hr.foi.air.mshop.utils.userRoleToHrLabel
 import kotlinx.coroutines.launch
 
 data class DrawerItem(
@@ -115,7 +116,7 @@ fun NavigationDrawer(
 
                     SessionManager.currentUserRole.let { userRole ->
                         Text(
-                            text = "Role: $userRole",
+                            text = "Uloga: ${userRoleToHrLabel(SessionManager.currentUserRole)}",
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,
                             modifier = Modifier

@@ -1,7 +1,6 @@
 package hr.foi.air.mshop.navigation.components.login
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelPasswordField
 import hr.foi.air.mshop.viewmodels.LoginViewModel
@@ -36,7 +37,7 @@ fun FirstLoginPassword(
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collectLatest { message ->
             if (message.isNotBlank()) {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                AppMessageManager.show(message, AppMessageType.ERROR)
             }
         }
     }

@@ -1,10 +1,8 @@
 package hr.foi.air.mshop.languagemodels
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import java.util.concurrent.atomic.AtomicLong
@@ -29,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.AlertDialog
 import androidx.core.content.ContextCompat
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.viewmodels.LLM.AssistantViewModel
 import hr.foi.air.ws.data.SessionManager
 import kotlinx.coroutines.Job
@@ -256,7 +256,7 @@ fun LlmChatDialog(
             isSttListening = true
             sttManager.startListeningOnce()
         } else {
-            Toast.makeText(context, "Record audio permission required", Toast.LENGTH_SHORT).show()
+            AppMessageManager.show("Potrebno je dopuštenje za snimanje zvuka.", AppMessageType.INFO)
         }
     }
 

@@ -1,7 +1,6 @@
 package hr.foi.air.mshop.navigation
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Groups3
@@ -39,6 +38,8 @@ import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionDeta
 import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionHistoryPage
 import hr.foi.air.mshop.navigation.components.userManagement.EditUserPage
 import hr.foi.air.mshop.navigation.components.userManagement.ProfilePage
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.DrawerItem
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
@@ -334,11 +335,7 @@ fun AppNavHost(
                                 },
                                 onError = { errorMsg ->
                                     navController.popBackStack()
-                                    Toast.makeText(
-                                        context,
-                                        errorMsg ?: "Dogodila se greška!",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    AppMessageManager.show("Dogodila se greška!", AppMessageType.ERROR)
                                 }
                             )
                         }
@@ -369,16 +366,12 @@ fun AppNavHost(
                             },
                             onError = { errorMsg ->
                                 navController.popBackStack()
-                                Toast.makeText(
-                                    context,
-                                    errorMsg ?: "Dogodila se greška!",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                                AppMessageManager.show("Dogodila se greška!", AppMessageType.ERROR)
                             }
                         )
                     }
                     else{
-                        Toast.makeText(context, "Košarica je prazna!", Toast.LENGTH_SHORT).show()
+                        AppMessageManager.show("Košarica je prazna!", AppMessageType.INFO)
                     }
 
                 }
