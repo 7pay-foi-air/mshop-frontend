@@ -35,6 +35,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import hr.foi.air.mshop.utils.randomCardNumber
+import hr.foi.air.mshop.utils.randomCvc
+import hr.foi.air.mshop.utils.randomExpiry
 import hr.foi.air.mshop.utils.toHrCurrency
 
 @Composable
@@ -91,9 +94,9 @@ fun PaymentPage(
                     modifier = Modifier
                         .padding(bottom = 24.dp)
                         .clickable {
-                            cardNumber = "4242 4242 4242 4242"
-                            expiry = "12/26"
-                            cvv = "123"
+                            cardNumber = randomCardNumber()
+                            expiry = randomExpiry()
+                            cvv = randomCvc()
                         }
                 ) {
                     Icon(
