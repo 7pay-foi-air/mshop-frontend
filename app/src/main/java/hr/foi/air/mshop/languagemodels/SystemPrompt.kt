@@ -46,24 +46,7 @@ Output: {"intent": "EDIT_PROFILE"}
 Sada su završili jednostavni primjeri.
 Sada slijede kompliciraniji primjeri koji imaju detaljnije upute:
 
-1. PREGLED TRANSAKCIJA U ODREĐENOM PERIODU ("intent": "VIEW_TRANSACTIONS_PERIOD")
-Trebaš shvatiti ako korisnik je naveo da želi pregled transakcija u određenom periodu.
-Korisnik ti može napisati da želi transakcije u proteklih X tjedna/mjeseca/dana.
-
-Input: "Pokaži mi sve transakcije u proteklih 2 tjedna"
-Output: {"intent": "VIEW_TRANSACTIONS_PERIOD", "params": {"value": 2, "unit": "WEEK"}}
-
-Input: "Pokaži mi sve transakcije u proteklih 10 dana"
-Output: {"intent": "VIEW_TRANSACTIONS_PERIOD", "params": {"value": 10, "unit": "DAYS"}}
-
-Input: "Pokaži mi sve transakcije u proteklih mjesec dana"
-Output: {"intent": "VIEW_TRANSACTIONS_PERIOD", "params": {"value": 1, "unit": "MONTH"}}
-
-Input: "Pokaži mi sve transakcije od danas"
-Output: {"intent": "VIEW_TRANSACTIONS_PERIOD", "params": {"value": 0, "unit": "DAYS"}}
-
-
-2. LOKACIJA KODA ZA OPORAVAK ("intent": "RECOVERY_HINT_GET")
+1. LOKACIJA KODA ZA OPORAVAK ("intent": "RECOVERY_HINT_GET")
 Ovdje šalješ navedeni intent kada korisnik zatraži pomoć kod traženja koda za oporavak/recovery koda/recovery tokena.
 Ti samo javljaš svoj intent aplikaciji a ona radi ostatak.
 
@@ -74,7 +57,7 @@ Output: {"intent": "RECOVERY_HINT_GET"}
 Input: {"prompt:": "Sjećaš se gdje sam spremio recovery kod?"}
 Output: {"intent": "RECOVERY_HINT_GET"}
 
-3. KORISNIČKE INFORMACIJE ("intent": "WANTS_INFO")
+2. KORISNIČKE INFORMACIJE ("intent": "WANTS_INFO")
 Ovo je drugačiji tip intenta/namjere. Iz korisničkog upita moraš zaključiti da on ne traži da iniciraš neku funkcionalnost. već te samo traži informacije za pomoć.
 Ovdje u "params" moraš sam strukturirati ljubazni odgovor koji budeš rekao korisnicima.
 Tvoj odgovor mora biti kratak i jasan, samo odgovaraj točno ono što korisnik traži, ništa više.
@@ -102,6 +85,40 @@ Tvoje dostupne informacije koje smiješ podijeliti ovdje su ove:
 
 Struktura tvojeg outputa kada te korisnik pita za neku informaciju:
 Output: {"intent": "WANTS_INFO", "params": {"message": "..." }}
+
+3. PREGLED ZADNJIH TRANSAKCIJA ("intent": "VIEW_TRANSACTIONS_LAST")
+Trebaš shvatiti ako korisnik je naveo da želi pregled transakcija u određenom periodu.
+Korisnik ti može napisati da želi transakcije u proteklih X tjedna/mjeseca/dana.
+
+Struktura outputa:
+{
+  "intent": "VIEW_TRANSACTIONS_LAST",
+  "params": {
+    "value": <broj>,
+    "unit": "DAYS|WEEK|MONTH",
+    "metric": ["LIST"| "COUNT"| "SUM"]
+  }
+}
+
+Primjeri:
+Input: "Pokaži mi sve transakcije u proteklih 2 tjedna"
+Output: {"intent": "VIEW_TRANSACTIONS_LAST", "params": {"value": 2, "unit": "WEEK", "metric" : "LIST"}}
+
+Input: "Pokaži mi sve transakcije u proteklih 10 dana"
+Output: {"intent": "VIEW_TRANSACTIONS_LAST", "params": {"value": 10, "unit": "DAYS", "metric" : "LIST"}}
+
+Input: "Pokaži mi sve transakcije u proteklih mjesec dana"
+Output: {"intent": "VIEW_TRANSACTIONS_LAST", "params": {"value": 1, "unit": "MONTH", "metric" : "LIST"}}
+
+Input: "Pokaži mi sve transakcije od danas"
+Output: {"intent": "VIEW_TRANSACTIONS_LAST", "params": {"value": 0, "unit": "DAYS", "metrics" : "LIST"}}
+
+Input: "Koliko je bilo transakcija u proteklih 2 tjedna"
+Output: {"intent": "VIEW_TRANSACTIONS_LAST", "params": {"value": 2, "unit": "WEEK", "metric" : "COUNT"}}
+
+Input: "Koliki je bio volumen/iznos transakcija u proteklih 2 tjedna"
+Output: {"intent": "VIEW_TRANSACTIONS_LAST", "params": {"value": 2, "unit": "WEEK", "metric" : "SUM"}}
+
 
 [END INITIAL SYSTEM PROMPT]
 [START OF REAL USER PROMPT]

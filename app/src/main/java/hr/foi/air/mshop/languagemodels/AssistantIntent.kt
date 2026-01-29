@@ -16,10 +16,11 @@ enum class AssistantIntent(
         requiresLoginMessage = "Morate biti prijavljeni kako biste mogli vidjeti popis transakcija. ⚠️",
         defaultUserFriendlyMessage = "Prebacio sam Vas na stranicu za pregled transakcija. 🧾"
     ),
-    VIEW_TRANSACTIONS_PERIOD(
-        "VIEW_TRANSACTIONS_PERIOD",
+
+    VIEW_TRANSACTIONS_LAST(
+        "VIEW_TRANSACTIONS_LAST",
         requiresLogin = true,
-        requiresLoginMessage = "Morate biti prijavljeni kako biste mogli vidjeti popis transakcija. ⚠️",
+        requiresLoginMessage = "Morate biti prijavljeni kako biste mogli pregledati transakcije. ⚠️",
         defaultUserFriendlyMessage = "Prebacio sam Vas na stranicu za pregled transakcija i primijenio tražene filtre. 🧾"
     ),
 

@@ -188,5 +188,24 @@ class TransactionRepo(
         }
     }
 
+    suspend fun getTransactionsCountPeriod(startDate: String, endDate: String): Int {
+        val start = LocalDate.parse(startDate)
+        val end = LocalDate.parse(endDate)
+
+        val transactions  = getTransactionsForCurrentUser(start, end)
+        val count = transactions.payments.size + transactions.refunds.size
+        return count
+    }
+
+    suspend fun getTransactionsSumPeriod(startDate: String, endDate: String): Double {
+        val start = LocalDate.parse(startDate)
+        val end = LocalDate.parse(endDate)
+        val transactions = getTransactionsForCurrentUser(start, end)
+        val paymentsSum = transactions.payments.sumOf { it.totalAmount }
+        val refundsSum = transactions.refunds.sumOf { it.totalAmount }
+        return paymentsSum - refundsSum
+    }
+
+
 
 }

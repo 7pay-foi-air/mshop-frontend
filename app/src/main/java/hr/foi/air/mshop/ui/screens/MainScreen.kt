@@ -30,6 +30,7 @@ import hr.foi.air.mshop.navigation.menuRoutes
 import hr.foi.air.mshop.ui.components.BackArrowButton
 import hr.foi.air.mshop.ui.components.MenuIconButton
 import hr.foi.air.mshop.ui.components.NavigationDrawer
+import hr.foi.air.ws.repository.RepositoryProvider
 import kotlinx.coroutines.launch
 
 @Composable
@@ -55,7 +56,8 @@ fun MainScreen() {
         LlmChatDialog(
             onDismissRequest = { showDialog = false },
             assistantViewModel = assistantVm,
-            assistantHandler = assistantHandler
+            assistantHandler = assistantHandler,
+            transactionRepo = RepositoryProvider.transactionRepo
         )
     }
 
