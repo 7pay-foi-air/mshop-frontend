@@ -203,7 +203,7 @@ fun UserFormPage(
             Checkbox(
                 checked = viewModel.isAdmin == true,
                 onCheckedChange = { viewModel.isAdmin = it },
-                enabled = !isProfilePage
+                enabled = !isProfilePage && (userToEdit?.role != "owner")
             )
             Text(
                 text = "Admin",
