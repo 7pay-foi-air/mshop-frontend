@@ -117,6 +117,14 @@ class UserRepo : IUserRepository {
     override suspend fun updateUser(user: User, context: Context): Result<String> {
         val uuidToUpdate =
             user.uuidUser ?: return Result.failure(Exception("Nedostaje uuid korisnika."))
+
+        val originalUserStateResult = getUserById(uuidToUpdate)
+        if (originalUserStateResult.isFailure) {
+            return Result.failure(Exception("Nije moguće provjeriti ovlasti."))
+        }
+        val originalUser = originalUserStateResult.getOrNull()
+            ?: return Result.failure(Exception("Korisnik kojeg pokušavate ažurirati ne postoji."))
+
         return try {
             val loggedInUserId = SessionManager.currentUserId
             val loggedInUserRole = SessionManager.currentUserRole
@@ -128,10 +136,6 @@ class UserRepo : IUserRepository {
             }
 
             if (uuidToUpdate == loggedInUserId) {
-                Log.d(
-                    "UserRepo_Update",
-                    "Scenarij: Korisnik ažurira vlastiti profil (updateMyProfile)."
-                )
                 val request = UpdateMyProfileRequest(
                     first_name = user.firstName,
                     last_name = user.lastName,
@@ -140,10 +144,9 @@ class UserRepo : IUserRepository {
                     phone_number = user.phoneNum,
                     date_of_birth = dateOfBirthString
                 )
-                Log.d("UserRepo_Update", "Šaljem UpdateMyProfileRequest: $request")
                 response = api.updateMyProfile(request)
             } else if (loggedInUserRole == "admin" || loggedInUserRole == "owner") {
-                val targetUserRole = user.role
+                val targetUserRole = originalUser.role
                 if (targetUserRole == "owner") {
                     return Result.failure(Exception("Nije moguće mijenjati podatke vlasnika."))
                 }
@@ -159,7 +162,7 @@ class UserRepo : IUserRepository {
                     address = user.address,
                     phone_number = user.phoneNum,
                     date_of_birth = dateOfBirthString,
-                    role = user.role,
+                    role = if(user.role == "owner") "owner" else user.role,
                     is_active = user.isActive
                 )
                 response = api.updateUserAsAdmin(uuidToUpdate, request)

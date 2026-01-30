@@ -28,6 +28,7 @@ fun EditUserPage(
             AppMessageManager.show(msg, AppMessageType.SUCCESS)
             editVm.clearMessages()
             userVm.onFinishEditUser()
+            userVm.refreshUsers()
             onUpdatedSuccessfully()
         }
 
