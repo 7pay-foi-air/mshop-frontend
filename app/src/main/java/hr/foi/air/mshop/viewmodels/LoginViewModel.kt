@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.mshop.data.LoginState
 import hr.foi.air.ws.models.login.ChangePasswordRequest
 import hr.foi.air.ws.repository.LoginRepo
@@ -49,29 +48,6 @@ class LoginViewModel : ViewModel() {
                     val loginResponse = response.body()!!
                     Log.d("LoginViewModel", "Successful Response Body: $loginResponse")
 
-//                    if (loginResponse.error == null && loginResponse.accessToken != null) {
-//                        val token = loginResponse.accessToken
-//                        SessionManager.startSession(token)
-//
-//                        Log.d("LoginViewModel", "Access Token: $token")
-//                        Log.d("LoginViewModel", "Recovery Token from Response: ${loginResponse.recoveryToken}")
-//
-//                        recoveryToken = loginResponse.recoveryToken ?: ""
-//
-//                        Log.d("LoginViewModel", "Stored recoveryToken variable: ${recoveryToken}")
-//
-//                        if (recoveryToken.isNotBlank()) {
-//                            Log.d("LoginViewModel", "First login detected. Navigating to setup.")
-//                            _loginState.value = LoginState.FirstLoginRequired(recoveryToken)
-//                        } else {
-//                            Log.d("LoginViewModel", "Normal login detected. Navigating to Home.")
-//                            _loginState.value = LoginState.Success(loginResponse)
-//                        }
-//                    } else {
-//                        _loginState.value =
-//                            LoginState.Error(loginResponse.error ?: "Nepoznata greška")
-//
-//                    }
                     if (loginResponse.error != null) {
                         _loginState.value = LoginState.Error(loginResponse.error!!)
                         return@launch
@@ -85,23 +61,6 @@ class LoginViewModel : ViewModel() {
                         _loginState.value = LoginState.Success(loginResponse)
                     }
                 } else {
-//                    val errorBody = response.errorBody()?.string()
-//                    Log.e(
-//                        "LoginViewModel",
-//                        "Login failed: Code=${response.code()}, Message=${response.message()}, Error Body: $errorBody"
-//                    )
-//
-//                    when (response.code()) {
-//                        400 -> _loginState.value =
-//                            LoginState.Error("Loš zahtjev.")
-//
-//                        401 -> _loginState.value =
-//                            LoginState.Error("Pogrešno korisničko ime ili lozinka.")
-//
-//                        else -> _loginState.value =
-//                            LoginState.Error("Prijava nije uspjela (Kod: ${response.code()})")
-//
-//                    }
                     val message = when (response.code()) {
                         400 -> "Loš zahtjev."
                         401 -> "Pogrešno korisničko ime ili lozinka."
