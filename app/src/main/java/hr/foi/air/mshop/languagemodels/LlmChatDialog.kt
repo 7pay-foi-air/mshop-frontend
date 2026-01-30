@@ -61,8 +61,6 @@ data class ChatMessage(
     val isLoading: Boolean = false
 )
 
-
-
 @Composable
 fun MessageBubble(
     message: ChatMessage,
@@ -247,15 +245,30 @@ fun LlmChatDialog(
                 if(needsMailSending != null && needsMailSending){
                     Pair("Šaljem transakcijski izvještaj na email...") { p ->
 
+                        if(SessionManager.currentUserId == null){
+                            return@Pair "Nema prijavljenog korisnika."
+                        }
+
                         val fromDateStr = p["from"]?.jsonObject["date"]?.jsonPrimitive?.content
                         val toDateStr = p["to"]?.jsonObject["date"]?.jsonPrimitive?.content
 
-                        if(fromDateStr == null || toDateStr == null){
-                            return@Pair "Neispravni parametri."
-                        }
+                        val value = p["value"]?.jsonPrimitive?.int
+                        val unit = p["unit"]?.jsonPrimitive?.content
 
-                        if(SessionManager.currentUserId == null){
-                            return@Pair "Nema prijavljenog korisnika."
+                        var startDate: String? = null
+                        var endDate: String? = null
+
+                        if(fromDateStr != null && toDateStr != null){
+                            startDate = fromDateStr
+                            endDate = toDateStr
+                        }
+                        else if(value != null && unit != null) {
+                            val (startDateTemp, endDateTemp) = getDateRange(value, unit)
+                            startDate = startDateTemp
+                            endDate = endDateTemp
+                        }
+                        else{
+                            return@Pair "Neispravni parametri."
                         }
 
                         val result = userRepo.getUserById(SessionManager.currentUserId!!)
@@ -263,11 +276,12 @@ fun LlmChatDialog(
                             val user = result.getOrNull() ?: return@Pair "Nema prijavljenog korisnika."
 
                             val email = user.email
-                            val result = transactionRepo.postEmailReport(fromDateStr, toDateStr, email)
+                            val result = transactionRepo.postEmailReport(startDate, endDate, email)
 
                             if(result) return@Pair "Poslan je transakcijski izvještaj na email: $email"
 
                         }
+
 
                         return@Pair "Dogodila se greška pri slanju izvještaja. Molimo pokušajte ponovo."
                     }
