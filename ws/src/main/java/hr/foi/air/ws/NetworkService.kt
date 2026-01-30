@@ -1,12 +1,18 @@
 package hr.foi.air.ws
 
+import android.util.Log
 import hr.foi.air.mshop.network.api.LlmApi
 import hr.foi.air.ws.api.IAccountApi
 import hr.foi.air.ws.api.IArticleApi
 import hr.foi.air.ws.api.ITransactionApi
 import hr.foi.air.ws.data.SessionManager
+import hr.foi.air.ws.models.tokenRefresh.RefreshRequest
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.Route
 import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.Authenticator
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -39,9 +45,48 @@ object NetworkService {
         chain.proceed(builder.build())
     }
 
+    private val tokenAuthenticator = object : Authenticator {
+        override fun authenticate(route: Route?, response: Response): Request? {
+            if (response.code != 401) {
+                return null
+            }
+            Log.d("NetworkService", "Authenticator: 401 Unauthorized detected for URL: ${response.request.url}")
+
+            val refreshToken = SessionManager.refreshToken
+            if (refreshToken.isNullOrBlank()){
+                Log.e("NetworkService", "Authenticator: No refresh token found. Ending session.")
+                SessionManager.endSession()
+                return null
+            }
+
+            Log.d("NetworkService", "Authenticator: Attempting to refresh access token...")
+            val refreshApi = Retrofit.Builder()
+                .baseUrl(ACCOUNT_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(IAccountApi::class.java)
+
+            val refreshResponse = refreshApi.refreshAccessToken(RefreshRequest(refreshToken)).execute()
+
+            return if (refreshResponse.isSuccessful && refreshResponse.body() != null) {
+                val newTokens = refreshResponse.body()!!
+                SessionManager.startSession(newTokens.accessToken, newTokens.refreshToken)
+
+                response.request.newBuilder()
+                    .header("Authorization", "Bearer ${newTokens.accessToken}")
+                    .build()
+            } else {
+                Log.e("NetworkService", "Authenticator: Refresh failed (Code ${refreshResponse.code()}). Logging out.")
+                SessionManager.endSession()
+                null
+            }
+        }
+    }
+
     private val client = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
         .addInterceptor(authInterceptor)
+        .authenticator(tokenAuthenticator)
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(100, TimeUnit.SECONDS)
         .writeTimeout(60, TimeUnit.SECONDS)

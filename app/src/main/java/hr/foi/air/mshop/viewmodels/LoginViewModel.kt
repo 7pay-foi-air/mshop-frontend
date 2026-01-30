@@ -43,60 +43,76 @@ class LoginViewModel : ViewModel() {
             _loginState.value = LoginState.Loading
             try {
                 val response = repository.loginUser(username, password)
-                Log.d(
-                    "LoginViewModel",
-                    "Response received: Code=${response.code()}, Successful=${response.isSuccessful}"
-                )
+                Log.d("LoginViewModel", "Response received: Code=${response.code()}, Successful=${response.isSuccessful}")
 
                 if (response.isSuccessful && response.body() != null) {
                     val loginResponse = response.body()!!
                     Log.d("LoginViewModel", "Successful Response Body: $loginResponse")
 
-                    if (loginResponse.error == null && loginResponse.accessToken != null) {
-                        val token = loginResponse.accessToken
-                        SessionManager.startSession(token)
+//                    if (loginResponse.error == null && loginResponse.accessToken != null) {
+//                        val token = loginResponse.accessToken
+//                        SessionManager.startSession(token)
+//
+//                        Log.d("LoginViewModel", "Access Token: $token")
+//                        Log.d("LoginViewModel", "Recovery Token from Response: ${loginResponse.recoveryToken}")
+//
+//                        recoveryToken = loginResponse.recoveryToken ?: ""
+//
+//                        Log.d("LoginViewModel", "Stored recoveryToken variable: ${recoveryToken}")
+//
+//                        if (recoveryToken.isNotBlank()) {
+//                            Log.d("LoginViewModel", "First login detected. Navigating to setup.")
+//                            _loginState.value = LoginState.FirstLoginRequired(recoveryToken)
+//                        } else {
+//                            Log.d("LoginViewModel", "Normal login detected. Navigating to Home.")
+//                            _loginState.value = LoginState.Success(loginResponse)
+//                        }
+//                    } else {
+//                        _loginState.value =
+//                            LoginState.Error(loginResponse.error ?: "Nepoznata greška")
+//
+//                    }
+                    if (loginResponse.error != null) {
+                        _loginState.value = LoginState.Error(loginResponse.error!!)
+                        return@launch
+                    }
 
-                        Log.d("LoginViewModel", "Access Token: $token")
-                        Log.d("LoginViewModel", "Recovery Token from Response: ${loginResponse.recoveryToken}")
+                    recoveryToken = loginResponse.recoveryToken ?: ""
 
-                        recoveryToken = loginResponse.recoveryToken ?: ""
-
-                        Log.d("LoginViewModel", "Stored recoveryToken variable: ${recoveryToken}")
-
-                        if (recoveryToken.isNotBlank()) {
-                            Log.d("LoginViewModel", "First login detected. Navigating to setup.")
-                            _loginState.value = LoginState.FirstLoginRequired(recoveryToken)
-                        } else {
-                            Log.d("LoginViewModel", "Normal login detected. Navigating to Home.")
-                            _loginState.value = LoginState.Success(loginResponse)
-                        }
+                    if (recoveryToken.isNotBlank()) {
+                        _loginState.value = LoginState.FirstLoginRequired(recoveryToken)
                     } else {
-                        _loginState.value =
-                            LoginState.Error(loginResponse.error ?: "Nepoznata greška")
-
+                        _loginState.value = LoginState.Success(loginResponse)
                     }
                 } else {
-                    val errorBody = response.errorBody()?.string()
-                    Log.e(
-                        "LoginViewModel",
-                        "Login failed: Code=${response.code()}, Message=${response.message()}, Error Body: $errorBody"
-                    )
-
-                    when (response.code()) {
-                        400 -> _loginState.value =
-                            LoginState.Error("Loš zahtjev.")
-
-                        401 -> _loginState.value =
-                            LoginState.Error("Pogrešno korisničko ime ili lozinka.")
-
-                        else -> _loginState.value =
-                            LoginState.Error("Prijava nije uspjela (Kod: ${response.code()})")
-
+//                    val errorBody = response.errorBody()?.string()
+//                    Log.e(
+//                        "LoginViewModel",
+//                        "Login failed: Code=${response.code()}, Message=${response.message()}, Error Body: $errorBody"
+//                    )
+//
+//                    when (response.code()) {
+//                        400 -> _loginState.value =
+//                            LoginState.Error("Loš zahtjev.")
+//
+//                        401 -> _loginState.value =
+//                            LoginState.Error("Pogrešno korisničko ime ili lozinka.")
+//
+//                        else -> _loginState.value =
+//                            LoginState.Error("Prijava nije uspjela (Kod: ${response.code()})")
+//
+//                    }
+                    val message = when (response.code()) {
+                        400 -> "Loš zahtjev."
+                        401 -> "Pogrešno korisničko ime ili lozinka."
+                        else -> "Prijava nije uspjela (Kod: ${response.code()})"
                     }
+                    _loginState.value = LoginState.Error(message)
                 }
             } catch (e: Exception) {
                 val errorMessage = when (e) {
-                    is UnknownHostException, is SocketTimeoutException, is ConnectException -> "Nije moguće uspostaviti vezu s poslužiteljem."
+                    is UnknownHostException, is SocketTimeoutException, is ConnectException ->
+                        "Nije moguće uspostaviti vezu s poslužiteljem."
                     else -> "Došlo je do neočekivane pogreške."
                 }
                 _loginState.value = LoginState.Error(errorMessage)
