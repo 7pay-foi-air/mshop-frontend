@@ -14,6 +14,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import kotlin.math.abs
+import hr.foi.air.mshop.utils.toHrCurrency
 
 enum class SortOption {
     NEWEST, OLDEST, AMOUNT_DESC, AMOUNT_ASC
@@ -156,7 +157,7 @@ class TransactionHistoryViewModel(
 
         return TransactionSummaryUI(
             id = id,
-            amountText = "$totalAmount $currency",
+            amountText = "${amount.toHrCurrency()} €",
             amountValue = amount,
             currency = currency,
             dateText = date,
@@ -176,7 +177,7 @@ class TransactionHistoryViewModel(
 
         return RefundSummaryUI(
             id = id,
-            amountText = "-$totalAmount $currency",
+            amountText = "-${amount.toHrCurrency()} €",
             amountValue = -amount,
             currency = currency,
             dateText = date,

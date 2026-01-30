@@ -1,9 +1,10 @@
 package hr.foi.air.mshop.navigation.components.articleManagement
 
-import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleFormViewModel
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 
@@ -21,14 +22,14 @@ fun EditArticlePage(
     LaunchedEffect(uiState.successMessage, uiState.errorMessage) {
 
         uiState.successMessage?.let { msg ->
-            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            AppMessageManager.show(msg, AppMessageType.SUCCESS)
             editVm.clearMessages()
             articleVm.onFinishEditArticle()
             onUpdatedSuccessfully()
         }
 
         uiState.errorMessage?.let { msg ->
-            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+            AppMessageManager.show(msg, AppMessageType.ERROR)
             editVm.clearMessages()
         }
     }

@@ -3,9 +3,10 @@ package hr.foi.air.mshop.languagemodels
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.navigation.NavController
 import hr.foi.air.mshop.navigation.AppRoutes
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.ws.data.SessionManager
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -160,7 +161,7 @@ fun createAssistantIntentHandler(
 
         AssistantIntent.LOGOUT -> {
             SessionManager.endSession()
-            Toast.makeText(context, "Odjavio sam Vas.", Toast.LENGTH_SHORT).show()
+            AppMessageManager.show("Odjavio sam Vas!", AppMessageType.INFO)
             onCloseChatDialog()
             navController.navigate(AppRoutes.LOGIN_GRAPH) {
                 popUpTo(0) { inclusive = true }
@@ -176,7 +177,7 @@ fun createAssistantIntentHandler(
         }
 
         else -> {
-            Toast.makeText(context, "Nije prepoznat zadatak.", Toast.LENGTH_SHORT).show()
+            AppMessageManager.show("Nije prepoznat zadatak.", AppMessageType.ERROR)
         }
     }
 }
