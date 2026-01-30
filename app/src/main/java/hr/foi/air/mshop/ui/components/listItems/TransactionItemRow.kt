@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.ui.theme.MShopCard
+import hr.foi.air.mshop.utils.toHrCurrency
 
 @Composable
 fun TransactionItemRow(
@@ -46,7 +47,7 @@ fun TransactionItemRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Cijena: ${"%.2f".format(price)} €",
+                    text = "Cijena: ${price.toHrCurrency()} €",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -65,7 +66,7 @@ fun TransactionItemRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "${"%.2f".format(subtotal)} €",
+                    text = "${subtotal.toHrCurrency()} €",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )

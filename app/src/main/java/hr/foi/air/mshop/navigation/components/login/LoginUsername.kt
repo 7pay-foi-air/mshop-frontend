@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,6 +22,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import androidx.compose.ui.unit.sp
 import hr.foi.air.mshop.R
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
@@ -39,7 +42,7 @@ fun LoginUsername(
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collectLatest { message ->
             if (message.isNotBlank()) {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                AppMessageManager.show(message, AppMessageType.ERROR)
             }
         }
     }
@@ -107,6 +110,6 @@ fun LoginUsername(
 
 @Preview(showBackground = true)
 @Composable
-fun LoginUsernamePreview() {
-    LoginUsername(onNext = {}, viewModel = LoginViewModel())
+fun LoginUsernamePreview(){
+    LoginUsername(onNext = {}, viewModel = remember { LoginViewModel() })
 }

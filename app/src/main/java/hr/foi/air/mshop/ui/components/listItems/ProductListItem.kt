@@ -15,12 +15,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import hr.foi.air.mshop.R
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.ui.components.QuantitySelector
+import hr.foi.air.mshop.utils.toHrCurrency
 import hr.foi.air.mshop.ui.theme.Dimens
 
 @Composable
@@ -69,7 +71,7 @@ fun ProductListItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "€${String.format("%.2f", product.price)}",
+                    text = "${product.price.toHrCurrency()} €",
                     style = MaterialTheme.typography.bodyLarge
                 )
             }

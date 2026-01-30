@@ -6,6 +6,12 @@ val RedPrimary = Color(0xFFD32F2F)
 val RedSecondary = Color(0xFFEF5350)
 val RedTertiary = Color(0xFFFFCDD2)
 
+val SuccessContainer = Color(0xFFC8E6C9)
+val ErrorContainer = Color(0xFFEF9A9A)
+val InfoContainer    = Color(0xFFBBDEFB)
+
+
+
 
 val WarmBackground = Color(0xFFFFFAF5)   // topla skoro-bijela (ivory)
 val WarmOutline = Color(0xFFEAD5C5)      // bež outline (nije sivo)

@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import hr.foi.air.mshop.R
 import hr.foi.air.mshop.data.LoginState
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.DialogMessage
 import hr.foi.air.mshop.ui.components.FullScreenLoadingIndicator
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
@@ -49,11 +52,15 @@ fun LoginPassword(
     LaunchedEffect(loginState) {
         when (val state = loginState) {
             is LoginState.Success -> {
-                Toast.makeText(context, "Prijava uspješna!", Toast.LENGTH_SHORT).show()
+                AppMessageManager.show("Prijava uspješna!", AppMessageType.SUCCESS)
                 onLoginSuccess()
             }
-            is LoginState.FirstLoginRequired -> onFirstLogin()
-            is LoginState.Error -> Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
+            is LoginState.FirstLoginRequired -> {
+                onFirstLogin()
+            }
+            is LoginState.Error -> {
+                AppMessageManager.show("Prijava neuspješna!", AppMessageType.ERROR)
+            }
             else -> {}
         }
     }
@@ -163,6 +170,6 @@ fun LoginPasswordPreview() {
         onForgotPassword = {},
         onLoginSuccess = {},
         onFirstLogin = {},
-        viewModel = LoginViewModel()
+        viewModel = remember { LoginViewModel() }
     )
 }

@@ -6,6 +6,7 @@ import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.models.Transaction
 import hr.foi.air.mshop.core.models.TransactionItem
 import hr.foi.air.mshop.core.repository.IArticleRepository
+import hr.foi.air.mshop.utils.toHrCurrency
 import hr.foi.air.ws.repository.ArticleRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -115,7 +116,7 @@ class HomepageViewModel(
             (article?.price ?: 0.0) * quantity
         }
         _chargeAmountUIState.value = _chargeAmountUIState.value.copy(
-            text = String.format("%.2f€", currentTotalPrice)
+            text = "${currentTotalPrice.toHrCurrency()} €"
         )
     }
 

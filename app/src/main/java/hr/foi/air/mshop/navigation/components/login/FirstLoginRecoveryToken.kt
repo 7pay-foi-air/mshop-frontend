@@ -1,6 +1,6 @@
 package hr.foi.air.mshop.navigation.components.login
 
-import android.widget.Toast
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +25,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import hr.foi.air.mshop.data.LoginState
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.FullScreenLoadingIndicator
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
 import hr.foi.air.mshop.ui.theme.Dimens
@@ -41,7 +43,9 @@ fun FirstLoginRecoveryToken(
 
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collectLatest { message ->
-            if (message.isNotBlank()) Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            if (message.isNotBlank()) {
+                AppMessageManager.show(message, AppMessageType.ERROR)
+            }
         }
     }
 

@@ -35,10 +35,14 @@ import hr.foi.air.mshop.core.models.CardPaymentData
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.mshop.utils.randomCardNumber
+import hr.foi.air.mshop.utils.randomCvc
+import hr.foi.air.mshop.utils.randomExpiry
+import hr.foi.air.mshop.utils.toHrCurrency
 
 @Composable
 fun PaymentPage(
-    totalAmount: String,
+    totalAmount: Double,
     onPay: (CardPaymentData) -> Unit
 ) {
     var cardNumber by remember { mutableStateOf("") }
@@ -89,9 +93,9 @@ fun PaymentPage(
                     modifier = Modifier
                         .padding(bottom = Dimens.xl)
                         .clickable {
-                            cardNumber = "4242 4242 4242 4242"
-                            expiry = "12/26"
-                            cvv = "123"
+                            cardNumber = randomCardNumber()
+                            expiry = randomExpiry()
+                            cvv = randomCvc()
                         }
                 ) {
                     Icon(
@@ -153,7 +157,7 @@ fun PaymentPage(
             Spacer(Modifier.height(Dimens.xl))
 
             Text(
-                text = "UKUPNO: $totalAmount",
+                text = "UKUPNO: ${totalAmount.toHrCurrency()} €",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Start

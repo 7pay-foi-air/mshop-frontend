@@ -33,7 +33,7 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import hr.foi.air.mshop.ui.theme.MShopSheetDefaults
-
+import hr.foi.air.mshop.utils.toHrCurrency
 
 fun LocalDate.toUtcEpochMillis(): Long =
     this.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
@@ -117,12 +117,15 @@ fun TransactionHistoryPage(
         }
     }
 
-    val amountFilterText = remember(minAmount, maxAmount) {
+    val min = minAmount
+    val max = maxAmount
+
+    val amountFilterText = remember(min, max) {
         when {
-            minAmount == null && maxAmount == null -> null
-            minAmount != null && maxAmount == null -> "≥ $minAmount"
-            minAmount == null && maxAmount != null -> "≤ $maxAmount"
-            else -> "$minAmount – $maxAmount"
+            min == null && max == null -> null
+            min != null && max == null -> "≥ ${min.toHrCurrency()}"
+            min == null && max != null -> "≤ ${max.toHrCurrency()}"
+            else -> "${min!!.toHrCurrency()} – ${max!!.toHrCurrency()}"
         }
     }
 

@@ -30,6 +30,7 @@ import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.ui.theme.Dimens
 import androidx.compose.foundation.shape.RoundedCornerShape
 
+import hr.foi.air.mshop.utils.toHrCurrency
 
 
 @Composable
@@ -75,7 +76,7 @@ fun ArticleManagementListItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "€${String.format("%.2f", article.price)}",
+                    text = "${article.price.toHrCurrency()} €",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Normal
                 )

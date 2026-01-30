@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import hr.foi.air.mshop.navigation.drawerItems
 import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.ws.data.SessionManager
+import hr.foi.air.mshop.utils.userRoleToHrLabel
 import kotlinx.coroutines.launch
 
 
@@ -117,14 +118,16 @@ fun NavigationDrawer(
                         )
                     }
 
-                    Text(
-                        text = "Role: ${SessionManager.currentUserRole}",
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(Dimens.lg)
-                    )
+                    SessionManager.currentUserRole.let { userRole ->
+                        Text(
+                            text = "Uloga: ${userRoleToHrLabel(SessionManager.currentUserRole)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(Dimens.lg)
+                        )
+                    }
                 }
             }
         },
