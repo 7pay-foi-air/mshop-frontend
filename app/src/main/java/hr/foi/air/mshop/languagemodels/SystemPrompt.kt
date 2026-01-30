@@ -96,13 +96,17 @@ Struktura outputa:
   "params": {
     "value": <broj>,
     "unit": "DAYS|WEEK|MONTH",
-    "metric": ["LIST"| "COUNT"| "SUM"]
+    "metric": ["LIST"| "COUNT"| "SUM"],
+    "sendMail" : [true]   //opcionalni parametar, samo postavi na true ukoliko korisnik navede da želi poslati listu transakcija na svoj email (znači to je moguće samo ako je metric="LIST")
   }
 }
 
 Primjeri:
 Input: "Pokaži mi sve transakcije u proteklih 2 tjedna"
 Output: {"intent": "VIEW_TRANSACTIONS_LAST", "params": {"value": 2, "unit": "WEEK", "metric" : "LIST"}}
+
+Input: "Pošalji mi na mail transakcijski izvještaj za transakcije u proteklih 2 tjedna"
+Output: {"intent": "VIEW_TRANSACTIONS_LAST", "params": {"value": 2, "unit": "WEEK", "metric" : "LIST", "sendMail" : true}}
 
 Input: "Pokaži mi sve transakcije u proteklih 10 dana"
 Output: {"intent": "VIEW_TRANSACTIONS_LAST", "params": {"value": 10, "unit": "DAYS", "metric" : "LIST"}}
@@ -151,7 +155,6 @@ Output: {"intent": "VIEW_TRANSACTIONS_RANGE", "params": {"from": {"date":"2026-0
 
 Input: "Koliki je iznos/volumen transakcija od 15.1.2026. do 1.2.2026."
 Output: {"intent": "VIEW_TRANSACTIONS_RANGE", "params": {"from": {"date":"2026-01-15"}, "to": {"date":"2026-02-01"}, "metric" : "SUM"}}
-
 
 [END INITIAL SYSTEM PROMPT]
 [START OF REAL USER PROMPT]
