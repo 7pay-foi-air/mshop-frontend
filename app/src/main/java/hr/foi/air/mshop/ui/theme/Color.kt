@@ -8,5 +8,5 @@ val RedTertiary = Color(0xFFFFCDD2)
 
 val SuccessContainer = Color(0xFFC8E6C9)
 val ErrorContainer = Color(0xFFEF9A9A)
-val InfoContainer = Color(0xFFE1BEE1)
+val InfoContainer    = Color(0xFFBBDEFB)
 
