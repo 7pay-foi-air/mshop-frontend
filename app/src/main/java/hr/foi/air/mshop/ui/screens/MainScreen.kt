@@ -57,7 +57,8 @@ fun MainScreen() {
             onDismissRequest = { showDialog = false },
             assistantViewModel = assistantVm,
             assistantHandler = assistantHandler,
-            transactionRepo = RepositoryProvider.transactionRepo
+            transactionRepo = RepositoryProvider.transactionRepo,
+            userRepo = RepositoryProvider.userRepo
         )
     }
 

@@ -7,8 +7,6 @@ import android.widget.Toast
 import androidx.navigation.NavController
 import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.ws.data.SessionManager
-import hr.foi.air.ws.repository.TransactionRepo
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int

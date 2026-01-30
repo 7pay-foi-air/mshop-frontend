@@ -134,13 +134,17 @@ Output: {"intent": "WANTS_INFO", "params": {"message": "..." }}
   "params": {
     "from":  {"date":"YYYY-MM-DD"},
     "to":    {"date":"YYYY-MM-DD"},
-    "metric": ["LIST"| "COUNT"| "SUM"]
+    "metric": ["LIST"| "COUNT"| "SUM"],
+    "sendMail" : [true]   //opcionalni parametar, samo postavi na true ukoliko korisnik navede da želi poslati listu transakcija na svoj email (znači to je moguće samo ako je metric="LIST")
   }
 }
 
 Primjeri:
 Input: "Pokaži mi sve transakcije od 15.1.2026. do 1.2.2026."
 Output: {"intent": "VIEW_TRANSACTIONS_RANGE", "params": {"from": {"date":"2026-01-15"}, "to": {"date":"2026-02-01"}, "metric" : "LIST"}}
+
+Input: "Pošalji mi transakcijski izvještaj na email od 15.1.2026. do 1.2.2026."
+Output: {"intent": "VIEW_TRANSACTIONS_RANGE", "params": {"from": {"date":"2026-01-15"}, "to": {"date":"2026-02-01"}, "metric" : "LIST", "sendMail" : true}}
 
 Input: "Koliki je broj/količina transakcija od 15.1.2026. do 1.2.2026."
 Output: {"intent": "VIEW_TRANSACTIONS_RANGE", "params": {"from": {"date":"2026-01-15"}, "to": {"date":"2026-02-01"}, "metric" : "COUNT"}}

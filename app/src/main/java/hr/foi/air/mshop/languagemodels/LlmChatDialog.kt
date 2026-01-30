@@ -29,12 +29,16 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.AlertDialog
 import androidx.core.content.ContextCompat
+import hr.foi.air.mshop.data.UIState
 import hr.foi.air.mshop.viewmodels.LLM.AssistantViewModel
 import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.ws.repository.TransactionRepo
+import hr.foi.air.ws.repository.UserRepo
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
@@ -108,7 +112,8 @@ fun LlmChatDialog(
     onDismissRequest: () -> Unit,
     assistantViewModel: AssistantViewModel,
     assistantHandler: LlmIntentHandler,
-    transactionRepo: TransactionRepo
+    transactionRepo: TransactionRepo,
+    userRepo: UserRepo
 ) {
     var userInput by remember { mutableStateOf("") }
     val messages = remember { mutableStateListOf<ChatMessage>() }
@@ -133,11 +138,11 @@ fun LlmChatDialog(
     fun getAsyncHandlerIfAny(
         intentObj: AssistantIntent,
         params: JsonObject?,
-        repo: TransactionRepo?
     ): Pair<String, suspend (JsonObject) -> String>? {
-        if (repo == null) return null
         if (intentObj != AssistantIntent.VIEW_TRANSACTIONS_LAST && intentObj != AssistantIntent.VIEW_TRANSACTIONS_RANGE) return null
         val metric = params?.get("metric")?.jsonPrimitive?.contentOrNull ?: return null
+
+        val needsMailSending  = params["sendMail"]?.jsonPrimitive?.booleanOrNull
 
         return when (metric.uppercase()) {
             "COUNT" -> Pair("Računam broj transakcija...") { p ->
@@ -170,7 +175,7 @@ fun LlmChatDialog(
                 }
 
                 count = try {
-                    repo.getTransactionsCountPeriod(startDate, endDate)
+                    transactionRepo.getTransactionsCountPeriod(startDate, endDate)
                 } catch (e: Exception) {
                     null
                 }
@@ -213,11 +218,45 @@ fun LlmChatDialog(
                 }
 
                 total = try {
-                    repo.getTransactionsSumPeriod(startDate, endDate)
+                    transactionRepo.getTransactionsSumPeriod(startDate, endDate)
                 } catch (e: Exception) {
                     null
                 }
                 if (total != null) String.format("Ukupni iznos: %.2f %s", total, "€") else "Nisam uspio dohvatiti iznos transakcija."
+            }
+
+            "LIST" -> {
+                if(needsMailSending != null && needsMailSending){
+                    Pair("Šaljem transakcijski izvještaj na email...") { p ->
+
+                        val fromDateStr = p["from"]?.jsonObject["date"]?.jsonPrimitive?.content
+                        val toDateStr = p["to"]?.jsonObject["date"]?.jsonPrimitive?.content
+
+                        if(fromDateStr == null || toDateStr == null){
+                            return@Pair "Neispravni parametri."
+                        }
+
+                        if(SessionManager.currentUserId == null){
+                            return@Pair "Nema prijavljenog korisnika."
+                        }
+
+                        val result = userRepo.getUserById(SessionManager.currentUserId!!)
+                        if (result.isSuccess) {
+                            val user = result.getOrNull() ?: return@Pair "Nema prijavljenog korisnika."
+
+                            val email = user.email
+                            val result = transactionRepo.postEmailReport(fromDateStr, toDateStr, email)
+
+                            if(result) return@Pair "Poslan je transakcijski izvještaj na email: $email"
+
+                        }
+
+                        return@Pair "Dogodila se greška pri slanju izvještaja. Molimo pokušajte ponovo."
+                    }
+                }
+                else{
+                    return null
+                }
             }
 
             else -> null
@@ -295,7 +334,7 @@ fun LlmChatDialog(
                         }
                     }
 
-                    val asyncPair = getAsyncHandlerIfAny(intentObj, result.params, transactionRepo)
+                    val asyncPair = getAsyncHandlerIfAny(intentObj, result.params)
 
                     Log.d("AssistantActionsDate", "asyncPair: $asyncPair")
 
@@ -320,7 +359,7 @@ fun LlmChatDialog(
                         val handler = asyncPair.second
 
                         scope.launch {
-                            delay(1000)
+                            delay(300)
                             try {
 
                                 val finalText =

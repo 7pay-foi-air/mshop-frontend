@@ -15,6 +15,7 @@ import hr.foi.air.mshop.network.dto.transaction.TransactionItemRequest
 import hr.foi.air.mshop.network.dto.transaction.TransactionResponse
 import hr.foi.air.ws.api.ITransactionApi
 import hr.foi.air.ws.models.transaction.RefundTransactionRequest
+import hr.foi.air.ws.models.transaction.SendEmailReportTransactionRequest
 import hr.foi.air.ws.models.transaction.TransactionDetailsResponseDto
 import hr.foi.air.ws.models.transaction.TransactionSummary
 import java.time.LocalDate
@@ -206,6 +207,10 @@ class TransactionRepo(
         return paymentsSum - refundsSum
     }
 
-
+    suspend fun postEmailReport(startDate: String, endDate: String, email: String): Boolean {
+        val request = SendEmailReportTransactionRequest(startDate, endDate, email)
+        val response = api.sendEmailReport(request)
+        return response.isSuccessful
+    }
 
 }

@@ -6,4 +6,8 @@ object RepositoryProvider {
     val transactionRepo: TransactionRepo by lazy {
         TransactionRepo(NetworkService.transactionApi)
     }
+
+    val userRepo: UserRepo by lazy {
+        UserRepo()
+    }
 }
