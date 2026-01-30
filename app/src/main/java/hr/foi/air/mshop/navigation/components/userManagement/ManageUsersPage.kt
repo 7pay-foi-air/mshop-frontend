@@ -27,6 +27,7 @@ import hr.foi.air.mshop.utils.AppMessageManager
 import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.listItems.UserManagementListItem
 import hr.foi.air.mshop.ui.components.textFields.SearchField
+import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.viewmodels.userManagement.UserManagementViewModel
 import kotlinx.coroutines.flow.collectLatest
 
@@ -46,28 +47,33 @@ fun ManageUsersPage(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = Dimens.lg),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "mShop",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            text = "mShop",
+            style = MaterialTheme.typography.displayLarge,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Dimens.lg, bottom = Dimens.xs)
         )
 
         Text(
-            "Upravljanje korisnicima",
+            text = "Upravljanje korisnicima",
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = Dimens.lg)
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 20.dp),
+                .padding(bottom = Dimens.md),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(Dimens.sm)
         ) {
             SearchField(
                 value = query,
@@ -76,6 +82,7 @@ fun ManageUsersPage(
                 leadingIcon = Icons.Default.Search,
                 modifier = Modifier.weight(1f)
             )
+
             IconButton(
                 onClick = { navController.navigate(AppRoutes.ADD_USER) },
                 modifier = Modifier
@@ -93,25 +100,21 @@ fun ManageUsersPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp)
                 .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(Dimens.sm),
+            contentPadding = PaddingValues(bottom = Dimens.md)
         ) {
             items(filteredUsers) { user ->
                 UserManagementListItem(
-                    modifier = Modifier.padding(bottom = 3.dp),
+                    modifier = Modifier.padding(bottom = Dimens.xs),
                     user = user,
                     onEditClicked = {
                         viewModel.onStartEditUser(user)
                         navController.navigate(AppRoutes.EDIT_USER)
                     },
-                    onDeleteClicked = {
-                        viewModel.onDeleteUser(user)
-                    }
+                    onDeleteClicked = { viewModel.onDeleteUser(user) }
                 )
             }
         }
     }
 }
-
-

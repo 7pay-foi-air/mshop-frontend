@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.navigation.components.userManagement
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -11,13 +12,13 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import hr.foi.air.mshop.utils.AppMessageManager
 import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.DateFieldUnderLabel
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
+import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.viewmodels.userManagement.AddUserViewModel
 import hr.foi.air.mshop.viewmodels.userManagement.FocusedField
 
@@ -35,20 +36,22 @@ fun AddUserPage(
             initialSelectedDateMillis = uiState.dateOfBirthMillis ?: System.currentTimeMillis()
         )
         DatePickerDialog(
-            onDismissRequest = {
-                viewModel.onDatePickerDismissed()
-            },
+            onDismissRequest = { viewModel.onDatePickerDismissed() },
             confirmButton = {
-                TextButton(onClick = {
-                    viewModel.onDateOfBirthChange(dateState.selectedDateMillis)
-                }) { Text("OK") }
+                TextButton(onClick = { viewModel.onDateOfBirthChange(dateState.selectedDateMillis) }) { Text("OK") }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    viewModel.onDatePickerDismissed()
-                }) { Text("Odustani") }
+                TextButton(onClick = { viewModel.onDatePickerDismissed() }) { Text("Odustani") }
             }
-        ) { DatePicker(state = dateState) }
+        ) { DatePicker(
+            state = dateState,
+            colors = DatePickerDefaults.colors(
+                selectedDayContainerColor = MaterialTheme.colorScheme.primary,
+                selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
+                todayDateBorderColor = MaterialTheme.colorScheme.primary
+            )
+        )
+        }
     }
 
     LaunchedEffect(uiState.successMessage, uiState.errorMessage) {
@@ -66,24 +69,25 @@ fun AddUserPage(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = Dimens.lg, vertical = Dimens.md)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Text(
-            "mShop",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            text = "mShop",
+            style = MaterialTheme.typography.displayLarge,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 4.dp)
+                .padding(top = Dimens.lg, bottom = Dimens.xs)
         )
 
         Text(
-            "Unos zaposlenika",
+            text = "Unos zaposlenika",
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = Dimens.lg)
         )
 
         UnderLabelTextField(
@@ -92,11 +96,11 @@ fun AddUserPage(
             onValueChange = viewModel::onFirstNameChange,
             isError = uiState.fnVisited && uiState.isFirstNameEmpty,
             errorText = if (uiState.fnVisited && uiState.isFirstNameEmpty) "Obavezno polje" else null,
-            modifier = Modifier.onFocusChanged { focusState ->
-                viewModel.onFocusChange(FocusedField.FIRST_NAME, focusState.isFocused)
+            modifier = Modifier.onFocusChanged { f ->
+                viewModel.onFocusChange(FocusedField.FIRST_NAME, f.isFocused)
             }
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Dimens.sm))
 
         UnderLabelTextField(
             caption = "Prezime",
@@ -104,11 +108,11 @@ fun AddUserPage(
             onValueChange = viewModel::onLastNameChange,
             isError = uiState.lnVisited && uiState.isLastNameEmpty,
             errorText = if (uiState.lnVisited && uiState.isLastNameEmpty) "Obavezno polje" else null,
-            modifier = Modifier.onFocusChanged { focusState ->
-                viewModel.onFocusChange(FocusedField.LAST_NAME, focusState.isFocused)
+            modifier = Modifier.onFocusChanged { f ->
+                viewModel.onFocusChange(FocusedField.LAST_NAME, f.isFocused)
             }
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Dimens.sm))
 
         UnderLabelTextField(
             caption = "Korisničko ime",
@@ -116,11 +120,11 @@ fun AddUserPage(
             onValueChange = viewModel::onUsernameChange,
             isError = uiState.unVisited && uiState.isUsernameEmpty,
             errorText = if (uiState.unVisited && uiState.isUsernameEmpty) "Obavezno polje" else null,
-            modifier = Modifier.onFocusChanged { focusState ->
-                viewModel.onFocusChange(FocusedField.USERNAME, focusState.isFocused)
+            modifier = Modifier.onFocusChanged { f ->
+                viewModel.onFocusChange(FocusedField.USERNAME, f.isFocused)
             }
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Dimens.sm))
 
         DateFieldUnderLabel(
             caption = "Datum rođenja",
@@ -129,7 +133,7 @@ fun AddUserPage(
             isError = uiState.dobVisited && uiState.isDobMissing,
             errorText = if (uiState.dobVisited && uiState.isDobMissing) "Obavezno polje" else null
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Dimens.sm))
 
         UnderLabelTextField(
             caption = "Adresa",
@@ -137,11 +141,11 @@ fun AddUserPage(
             onValueChange = viewModel::onAddressChange,
             isError = uiState.adVisited && uiState.isAddressEmpty,
             errorText = if (uiState.adVisited && uiState.isAddressEmpty) "Obavezno polje" else null,
-            modifier = Modifier.onFocusChanged { focusState ->
-                viewModel.onFocusChange(FocusedField.ADDRESS, focusState.isFocused)
+            modifier = Modifier.onFocusChanged { f ->
+                viewModel.onFocusChange(FocusedField.ADDRESS, f.isFocused)
             }
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Dimens.sm))
 
         UnderLabelTextField(
             caption = "E-mail",
@@ -154,11 +158,11 @@ fun AddUserPage(
                 uiState.emVisited && uiState.isEmailFormatInvalid -> "Neispravan format e-mail adrese"
                 else -> null
             },
-            modifier = Modifier.onFocusChanged { focusState ->
-                viewModel.onFocusChange(FocusedField.EMAIL, focusState.isFocused)
+            modifier = Modifier.onFocusChanged { f ->
+                viewModel.onFocusChange(FocusedField.EMAIL, f.isFocused)
             }
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Dimens.sm))
 
         UnderLabelTextField(
             caption = "Broj telefona",
@@ -171,39 +175,44 @@ fun AddUserPage(
                 uiState.phVisited && uiState.isPhoneFormatInvalid -> "Neispravan broj telefona"
                 else -> null
             },
-            modifier = Modifier.onFocusChanged { focusState ->
-                viewModel.onFocusChange(FocusedField.PHONE, focusState.isFocused)
+            modifier = Modifier.onFocusChanged { f ->
+                viewModel.onFocusChange(FocusedField.PHONE, f.isFocused)
             }
         )
-        Spacer(Modifier.height(16.dp))
+
+        Spacer(Modifier.height(Dimens.lg))
 
         Row(
-            modifier = Modifier.padding(top = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Dimens.xs)
         ) {
             Checkbox(
                 checked = uiState.isAdmin,
                 onCheckedChange = viewModel::onIsAdminChange
             )
             Text(
-                "Admin",
+                text = "Admin",
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(start = 4.dp)
+                modifier = Modifier.padding(start = Dimens.xs)
             )
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(Dimens.lg))
 
         if (uiState.loading) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(Dimens.sm))
         }
 
         StyledButton(
             label = if (uiState.loading) "Spremanje..." else "Dodaj",
             enabled = uiState.isFormValid && !uiState.loading,
             onClick = { viewModel.addUser(context) },
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier.padding(top = Dimens.md)
         )
+
+        Spacer(Modifier.height(Dimens.lg))
     }
 }

@@ -1,16 +1,21 @@
 package hr.foi.air.mshop.navigation.components.transactionHistory
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -19,19 +24,16 @@ import androidx.navigation.NavHostController
 import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.ui.screens.PaymentsScreen
 import hr.foi.air.mshop.ui.screens.RefundsScreen
+import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.viewmodels.transaction.SortOption
 import hr.foi.air.mshop.viewmodels.transaction.TransactionHistoryViewModel
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import hr.foi.air.mshop.ui.theme.MShopSheetDefaults
 import hr.foi.air.mshop.utils.toHrCurrency
-import java.time.ZoneOffset
 
 fun LocalDate.toUtcEpochMillis(): Long =
     this.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
@@ -163,9 +165,14 @@ fun TransactionHistoryPage(
                 ) { Text("OK") }
             },
             dismissButton = { TextButton(onClick = { showFromPicker = false }) { Text("Odustani") } },
-            properties = DialogProperties()
+            properties = DialogProperties(),
+            colors = MShopSheetDefaults.datePickerColors()
         ) {
-            DatePicker(state = fromPickerState)
+            DatePicker(
+                state = fromPickerState,
+                colors = MShopSheetDefaults.datePickerColors()
+            )
+
         }
     }
 
@@ -196,35 +203,43 @@ fun TransactionHistoryPage(
                 ) { Text("OK") }
             },
             dismissButton = { TextButton(onClick = { showToPicker = false }) { Text("Odustani") } },
-            properties = DialogProperties()
+            properties = DialogProperties(),
+            colors = MShopSheetDefaults.datePickerColors()
+
         ) {
-            DatePicker(state = toPickerState)
+            DatePicker(
+                state = toPickerState,
+                colors = MShopSheetDefaults.datePickerColors()
+            )
         }
     }
 
     if (showFilterSheet) {
         ModalBottomSheet(
             onDismissRequest = { showFilterSheet = false },
-            sheetState = sheetState
+            sheetState = sheetState,
+            containerColor = MShopSheetDefaults.containerColor(),
+            contentColor = MaterialTheme.colorScheme.onBackground,
+            tonalElevation = 0.dp
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 24.dp)
+                    .padding(horizontal = Dimens.lg)
+                    .padding(bottom = Dimens.xl)
             ) {
                 Text(
                     text = "Filtriranje i sortiranje",
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(Dimens.md))
 
-                Text(text = "Datum", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Datum", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(Dimens.sm))
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // OD
+                Row(horizontalArrangement = Arrangement.spacedBy(Dimens.sm)) {
                     Box(modifier = Modifier.weight(1f)) {
                         OutlinedTextField(
                             value = draftFrom?.format(displayFormatter) ?: "",
@@ -232,6 +247,7 @@ fun TransactionHistoryPage(
                             readOnly = true,
                             singleLine = true,
                             label = { Text("Od") },
+                            colors = MShopSheetDefaults.textFieldColors(),
                             trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -242,13 +258,13 @@ fun TransactionHistoryPage(
                         )
                     }
 
-                    // DO
                     Box(modifier = Modifier.weight(1f)) {
                         OutlinedTextField(
                             value = draftTo?.format(displayFormatter) ?: "",
                             onValueChange = {},
                             readOnly = true,
                             singleLine = true,
+                            colors = MShopSheetDefaults.textFieldColors(),
                             label = { Text("Do") },
                             trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
                             modifier = Modifier.fillMaxWidth()
@@ -261,17 +277,18 @@ fun TransactionHistoryPage(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Dimens.lg))
 
-                Text(text = "Iznos", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Iznos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(Dimens.sm))
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Dimens.sm)) {
                     OutlinedTextField(
                         value = draftMinAmountText,
                         onValueChange = { draftMinAmountText = it },
                         singleLine = true,
                         label = { Text("Min") },
+                        colors = MShopSheetDefaults.textFieldColors(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                         isError = amountRangeInvalid
@@ -280,6 +297,7 @@ fun TransactionHistoryPage(
                         value = draftMaxAmountText,
                         onValueChange = { draftMaxAmountText = it },
                         singleLine = true,
+                        colors = MShopSheetDefaults.textFieldColors(),
                         label = { Text("Max") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
@@ -288,7 +306,7 @@ fun TransactionHistoryPage(
                 }
 
                 if (amountRangeInvalid) {
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(Dimens.xs))
                     Text(
                         text = "Min ne smije biti veći od Max.",
                         color = MaterialTheme.colorScheme.error,
@@ -296,10 +314,10 @@ fun TransactionHistoryPage(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Dimens.lg))
 
-                Text(text = "Sortiranje", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Sortiranje", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(Dimens.sm))
 
                 var sortExpanded by remember { mutableStateOf(false) }
                 val sortLabel = when (draftSort) {
@@ -318,6 +336,7 @@ fun TransactionHistoryPage(
                         onValueChange = {},
                         readOnly = true,
                         singleLine = true,
+                        colors = MShopSheetDefaults.textFieldColors(),
                         label = { Text("Sort") },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -326,32 +345,21 @@ fun TransactionHistoryPage(
                     )
                     ExposedDropdownMenu(
                         expanded = sortExpanded,
-                        onDismissRequest = { sortExpanded = false }
+                        onDismissRequest = { sortExpanded = false },
+                        containerColor = MShopSheetDefaults.containerColor()
                     ) {
-                        DropdownMenuItem(
-                            text = { Text("Najnovije prvo") },
-                            onClick = { draftSort = SortOption.NEWEST; sortExpanded = false }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Najstarije prvo") },
-                            onClick = { draftSort = SortOption.OLDEST; sortExpanded = false }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Iznos: veći prvo") },
-                            onClick = { draftSort = SortOption.AMOUNT_DESC; sortExpanded = false }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Iznos: manji prvo") },
-                            onClick = { draftSort = SortOption.AMOUNT_ASC; sortExpanded = false }
-                        )
+                        DropdownMenuItem(text = { Text("Najnovije prvo") }, onClick = { draftSort = SortOption.NEWEST; sortExpanded = false })
+                        DropdownMenuItem(text = { Text("Najstarije prvo") }, onClick = { draftSort = SortOption.OLDEST; sortExpanded = false })
+                        DropdownMenuItem(text = { Text("Iznos: veći prvo") }, onClick = { draftSort = SortOption.AMOUNT_DESC; sortExpanded = false })
+                        DropdownMenuItem(text = { Text("Iznos: manji prvo") }, onClick = { draftSort = SortOption.AMOUNT_ASC; sortExpanded = false })
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(Dimens.xl))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.md)
                 ) {
                     OutlinedButton(
                         modifier = Modifier.weight(1f),
@@ -379,36 +387,39 @@ fun TransactionHistoryPage(
                         }
                     ) { Text("Primijeni") }
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
 
     Scaffold(
         topBar = {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+            ) {
                 Text(
-                    "mShop",
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                    text = "mShop",
+                    style = MaterialTheme.typography.displayLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(top = Dimens.sm, bottom = Dimens.xs)
                 )
 
                 CenterAlignedTopAppBar(
+                    modifier = Modifier.height(48.dp),
                     title = {
                         Text(
-                            "Povijest transakcija",
-                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                            text = "Povijest transakcija",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
                     },
                     actions = {
                         IconButton(onClick = { openFilters() }) {
                             Icon(Icons.Default.FilterList, contentDescription = "Filter")
                         }
-                    },
-                    windowInsets = WindowInsets(0, 0, 0, 0),
+                    }
                 )
 
                 TabRow(selectedTabIndex = selectedTabIndex) {
@@ -420,8 +431,6 @@ fun TransactionHistoryPage(
                         )
                     }
                 }
-
-
             }
         }
     ) { innerPadding ->
@@ -430,21 +439,23 @@ fun TransactionHistoryPage(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            val hasAnyFilter = (dateFilterText != null) || (amountFilterText != null) || (sortOption != SortOption.NEWEST)
+            val hasAnyFilter =
+                (dateFilterText != null) || (amountFilterText != null) || (sortOption != SortOption.NEWEST)
 
             if (hasAnyFilter) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 10.dp, bottom = 6.dp)
+                        .padding(horizontal = Dimens.lg)
+                        .padding(top = Dimens.sm, bottom = Dimens.xs)
                 ) {
                     Text(
                         text = "Primijenjeno:",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(Dimens.xs))
+
                     val chips = buildList {
                         if (dateFilterText != null) add("Datum: $dateFilterText")
                         if (amountFilterText != null) add("Iznos: $amountFilterText")
@@ -453,8 +464,8 @@ fun TransactionHistoryPage(
 
                     LazyRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(end = 16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.sm),
+                        contentPadding = PaddingValues(end = Dimens.lg)
                     ) {
                         items(chips) { label ->
                             AssistChip(
@@ -472,19 +483,17 @@ fun TransactionHistoryPage(
                 }
             }
 
-
             when (selectedTabIndex) {
                 0 -> PaymentsScreen(
                     viewModel = viewModel,
                     onTransactionClick = { id ->
+                        Log.d("TX_CLICK", "clicked id=$id")
                         navController.navigate(AppRoutes.transactionDetails(id))
                     }
                 )
                 1 -> RefundsScreen(
                     viewModel = viewModel,
-                    onTransactionClick = { id ->
-                        navController.navigate(AppRoutes.transactionDetails(id))
-                    }
+                    onTransactionClick = { id -> navController.navigate(AppRoutes.transactionDetails(id)) }
                 )
             }
         }

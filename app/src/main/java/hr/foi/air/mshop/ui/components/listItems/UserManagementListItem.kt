@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.core.models.User
+import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.utils.userRoleToHrLabel
 
 @Composable
@@ -45,7 +46,7 @@ fun UserManagementListItem(
             }
         },
         trailingContent = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Dimens.sm)) {
                 IconButton(onClick = onEditClicked) {
                     Icon(
                         imageVector = Icons.Default.Edit,

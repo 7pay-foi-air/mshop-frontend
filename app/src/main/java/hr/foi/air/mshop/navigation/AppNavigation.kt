@@ -3,8 +3,10 @@ package hr.foi.air.mshop.navigation
 import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Groups3
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -12,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -49,6 +52,7 @@ import hr.foi.air.mshop.viewmodels.userManagement.UserManagementViewModel
 import hr.foi.air.ws.data.SessionManager
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import hr.foi.air.mshop.R
 
 object AppRoutes {
     // LOGIN
@@ -104,7 +108,7 @@ val drawerItems: List<DrawerItem>
                 route = AppRoutes.MANAGE_USERS
             ),
             DrawerItem(
-                icon = Icons.Default.Settings,
+                icon = Icons.Default.Category,
                 title = "Upravljanje artiklima",
                 route = AppRoutes.MANAGE_ARTICLES
             ),

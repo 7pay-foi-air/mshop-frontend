@@ -2,6 +2,7 @@ package hr.foi.air.mshop.navigation.components.articleManagement
 
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -26,25 +27,26 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
+import hr.foi.air.image_loader.interfaces.IImageLoader
+import hr.foi.air.image_loader.interfaces.IPhotoListener
 import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.imageloader.ImageLoaderManager
-import hr.foi.air.image_loader.interfaces.IPhotoListener
-import hr.foi.air.image_loader.interfaces.IImageLoader
 import hr.foi.air.mshop.utils.AppMessageManager
 import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextFieldMultiline
 import hr.foi.air.mshop.ui.screens.LoaderPickerScreen
+import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.mshop.ui.theme.MShopCard
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleFormViewModel
 
 @Composable
@@ -63,17 +65,18 @@ fun ArticleFormPage(
     val imageLoaderManager = remember { ImageLoaderManager() }
 
     val photoListener = remember {
-        object: IPhotoListener {
+        object : IPhotoListener {
             override fun onSuccess(imageUri: Uri) {
                 viewModel.onImageSelected(imageUri)
             }
+
             override fun onFailure(message: String) {
                 AppMessageManager.show(message, AppMessageType.ERROR)
             }
         }
     }
 
-    for(module in imageLoaderManager.imageLoaders) {
+    for (module in imageLoaderManager.imageLoaders) {
         module.LoadImage(listener = photoListener)
     }
 
@@ -81,7 +84,7 @@ fun ArticleFormPage(
         LoaderPickerScreen(
             imageLoaderManager = imageLoaderManager,
             onDismiss = { viewModel.hideImagePicker() },
-            onModuleSelected = { selectedModule : IImageLoader ->
+            onModuleSelected = { selectedModule: IImageLoader ->
                 selectedModule.pickImage()
             }
         )
@@ -94,23 +97,24 @@ fun ArticleFormPage(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(Dimens.screenPadding)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Dimens.md)
     ) {
         Text(
-            "mShop",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            text = "mShop",
+            style = MaterialTheme.typography.displayLarge,
             textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 4.dp)
+            modifier = Modifier.fillMaxWidth()
         )
 
         Text(
-            if (viewModel.isEditMode) "Ažuriranje artikla" else "Dodavanje novog artikla",
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(bottom = 24.dp)
+            text = if (viewModel.isEditMode) "Ažuriranje artikla" else "Dodavanje novog artikla",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
 
         UnderLabelTextField(
@@ -130,9 +134,6 @@ fun ArticleFormPage(
             }
         )
 
-        Spacer(Modifier.height(8.dp))
-
-
         UnderLabelTextField(
             caption = "Naziv artikla",
             value = viewModel.articleName,
@@ -145,8 +146,6 @@ fun ArticleFormPage(
             }
         )
 
-        Spacer(Modifier.height(8.dp))
-
         UnderLabelTextFieldMultiline(
             caption = "Opis artikla",
             value = viewModel.description,
@@ -156,10 +155,8 @@ fun ArticleFormPage(
             errorText = null,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .heightIn(min = Dimens.multilineMinHeight)
         )
-
-        Spacer(Modifier.height(8.dp))
 
         UnderLabelTextField(
             caption = "Jedinična cijena (€)",
@@ -167,7 +164,9 @@ fun ArticleFormPage(
             onValueChange = { viewModel.price = it },
             placeholder = "",
             isError = viewModel.priceError,
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+            ),
             errorText = when {
                 !viewModel.priceVisited -> null
                 viewModel.priceEmpty -> "Obavezno polje"
@@ -179,8 +178,6 @@ fun ArticleFormPage(
             }
         )
 
-        Spacer(Modifier.height(8.dp))
-
         UnderLabelTextField(
             caption = "Slika",
             value = viewModel.imagePath,
@@ -188,13 +185,9 @@ fun ArticleFormPage(
             placeholder = "",
             isError = false,
             errorText = null,
-            enabled = false,
+            enabled = false, // ostavljam kako si imala (dizajn-only)
             trailingIcon = {
-                IconButton(
-                    onClick = {
-                        viewModel.showImagePicker()
-                    }
-                ) {
+                IconButton(onClick = { viewModel.showImagePicker() }) {
                     Icon(
                         imageVector = Icons.Filled.Upload,
                         contentDescription = "Odaberi sliku",
@@ -204,17 +197,15 @@ fun ArticleFormPage(
             }
         )
 
-        Spacer(Modifier.height(12.dp))
-
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.md)
         ) {
-            // Preview slike (prikaz stare ako je rijec o uredivanju inace prikaz nove lokalne)
             Box(
                 modifier = Modifier
-                    .size(140.dp),
+                    .size(Dimens.imagePreviewSize)
+                    .clip(MShopCard.shape),
                 contentAlignment = Alignment.Center
             ) {
                 if (imageModel != null) {
@@ -229,9 +220,10 @@ fun ArticleFormPage(
                 }
             }
 
-
-            Column(modifier = Modifier.padding(start = 16.dp)) {
-
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(Dimens.sm)
+            ) {
                 StyledButton(
                     label = if (viewModel.isEditMode) "SPREMI" else "DODAJ",
                     enabled = viewModel.isFormValid,
@@ -242,7 +234,6 @@ fun ArticleFormPage(
                 )
 
                 if (viewModel.isEditMode) {
-                    Spacer(Modifier.height(8.dp))
                     StyledButton(
                         label = "ODUSTANI",
                         enabled = true,
@@ -251,6 +242,8 @@ fun ArticleFormPage(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.padding(bottom = Dimens.md))
     }
 }
 
@@ -262,10 +255,3 @@ fun ArticleFormPagePreview() {
         onCancel = { }
     )
 }
-
-
-
-
-
-
-
