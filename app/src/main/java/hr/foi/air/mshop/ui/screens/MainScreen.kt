@@ -1,7 +1,6 @@
 package hr.foi.air.mshop.ui.screens
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,10 +27,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
 import hr.foi.air.mshop.utils.AppMessage
 import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.ws.data.SessionManager
 
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
+    val accessToken = SessionManager.accessToken
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
@@ -44,6 +45,14 @@ fun MainScreen() {
     val assistantVm = mainActivity?.assistantViewModel
     val assistantHandler = mainActivity?.let {
         createAssistantIntentHandler(navController, it) { showDialog = false }
+    }
+
+    LaunchedEffect(accessToken) {
+        if (accessToken.isNullOrBlank()) {
+            navController.navigate(AppRoutes.LOGIN_GRAPH) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
     }
 
     if (showDialog && assistantVm != null && assistantHandler != null) {
@@ -89,9 +98,7 @@ fun MainScreen() {
                         }
                     },
                     onLogout = {
-                        navController.navigate(AppRoutes.LOGIN_GRAPH) {
-                            popUpTo(0) { inclusive = true }
-                        }
+                        SessionManager.endSession()
                     },
                     navigationIcon = {
                         when (currentRoute) {
