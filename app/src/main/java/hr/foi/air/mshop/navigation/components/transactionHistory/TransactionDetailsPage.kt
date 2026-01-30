@@ -13,13 +13,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.ui.components.listItems.TransactionItemRow
+import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.mshop.ui.theme.MShopCard
 import hr.foi.air.mshop.viewmodels.transaction.TransactionDetailsViewModel
 import hr.foi.air.mshop.viewmodels.transaction.TransactionHistoryViewModel
 
@@ -45,25 +47,28 @@ fun TransactionDetailsPage(
     LaunchedEffect(transactionId) { vm.loadTransactionDetails(transactionId) }
 
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = "Detalji transakcije",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = "mShop",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            )
+            Column(modifier = Modifier.fillMaxWidth()) {
+
+                Text(
+                    text = "mShop",
+                    style = MaterialTheme.typography.displayLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Dimens.lg, bottom = Dimens.sm)
+                )
+
+                Text(
+                    text = "Detalji transakcije",
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = Dimens.lg)
+                )
+
+            }
         }
     ) { innerPadding ->
 
@@ -85,8 +90,8 @@ fun TransactionDetailsPage(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                        .padding(Dimens.lg),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.md),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
@@ -129,17 +134,19 @@ fun TransactionDetailsPage(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    contentPadding = PaddingValues(Dimens.lg),
+                    verticalArrangement = Arrangement.spacedBy(Dimens.md)
                 ) {
                     item {
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.extraLarge
+                            colors = MShopCard.elevatedColors(),
+                            shape = MShopCard.shape,
+                            elevation = MShopCard.elevatedElevation()
                         ) {
                             Column(
-                                modifier = Modifier.padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                                modifier = Modifier.padding(Dimens.lg),
+                                verticalArrangement = Arrangement.spacedBy(Dimens.sm)
                             ) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -169,9 +176,7 @@ fun TransactionDetailsPage(
                                         else -> MaterialTheme.colorScheme.primary
                                     }
 
-
-
-                                    if(statusText.isNotBlank()){
+                                    if (statusText.isNotBlank()) {
                                         AssistChip(
                                             onClick = {},
                                             enabled = false,
@@ -196,12 +201,15 @@ fun TransactionDetailsPage(
                                 }
 
                                 if (d.paymentMethod.isNotBlank()) {
-                                    Text("Način plaćanja: ${paymentMethodText}", style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        "Način plaćanja: $paymentMethodText",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
                                 }
 
                                 if (isRefunded) {
                                     Text(
-                                        text = "Refund: " + (matchingRefund?.id?.let { it } ?: "—"),
+                                        text = "Refund: " + (matchingRefund?.id ?: "—"),
                                         color = MaterialTheme.colorScheme.error,
                                         fontWeight = FontWeight.SemiBold
                                     )
@@ -213,8 +221,8 @@ fun TransactionDetailsPage(
                     item {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier.padding(top = 6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(Dimens.sm),
+                            modifier = Modifier.padding(top = Dimens.sm)
                         ) {
                             Icon(Icons.Outlined.ReceiptLong, contentDescription = null)
                             Text(
@@ -238,18 +246,20 @@ fun TransactionDetailsPage(
                         item {
                             ElevatedCard(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = MaterialTheme.shapes.extraLarge
+                                colors = MShopCard.elevatedColors(),
+                                shape = MShopCard.shape,
+                                elevation = MShopCard.elevatedElevation()
                             ) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(20.dp),
+                                        .padding(Dimens.xl),
                                     horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    verticalArrangement = Arrangement.spacedBy(Dimens.sm)
                                 ) {
                                     Text(
                                         text = "\uD83E\uDD16",
-                                        style = MaterialTheme.typography.displayLarge,
+                                        style = MaterialTheme.typography.displayLarge
                                     )
                                     Text(
                                         text = "AI inicirana transakcija",
@@ -272,26 +282,21 @@ fun TransactionDetailsPage(
                                 Box(
                                     modifier = Modifier.fillMaxWidth(),
                                     contentAlignment = Alignment.Center
-                                ){
-                                    Button(
-                                        onClick = { openRefundSheet = true },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primary,
-                                            contentColor = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    ) { Text("Izvrši povrat") }
-                                }
-
-                            } else {
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.errorContainer
-                                    )
                                 ) {
+                                    Button(onClick = { openRefundSheet = true }) {
+                                        Text("Izvrši povrat")
+                                    }
+                                }
+                            } else {
+                                ElevatedCard(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = MShopCard.elevatedColors(),
+                                    shape = MShopCard.shape,
+                                    elevation = MShopCard.elevatedElevation()
+                                ){
                                     Text(
                                         text = "Ova transakcija je već refundirana.",
-                                        modifier = Modifier.padding(16.dp),
+                                        modifier = Modifier.padding(Dimens.lg),
                                         color = MaterialTheme.colorScheme.onErrorContainer,
                                         fontWeight = FontWeight.SemiBold
                                     )
@@ -308,8 +313,9 @@ fun TransactionDetailsPage(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                                .padding(horizontal = Dimens.lg)
+                                .padding(bottom = Dimens.xl),
+                            verticalArrangement = Arrangement.spacedBy(Dimens.md)
                         ) {
                             Text(
                                 text = "Potvrdi povrat",
@@ -323,7 +329,7 @@ fun TransactionDetailsPage(
                             )
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(Dimens.md)
                             ) {
                                 OutlinedButton(
                                     onClick = { openRefundSheet = false },
@@ -348,8 +354,6 @@ fun TransactionDetailsPage(
                                     modifier = Modifier.weight(1f)
                                 ) { Text("Refund") }
                             }
-
-                            Spacer(Modifier.height(8.dp))
                         }
                     }
                 }

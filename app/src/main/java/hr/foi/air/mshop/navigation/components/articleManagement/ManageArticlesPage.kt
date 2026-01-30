@@ -26,16 +26,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.ui.components.listItems.ArticleManagementListItem
 import hr.foi.air.mshop.ui.components.textFields.SearchField
+import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 
 @Composable
@@ -53,9 +51,7 @@ fun ManageArticlesPage(
             title = { Text("Potvrda brisanja") },
             text = { Text("Jeste li sigurni da želite obrisati artikal '${articleToDelete!!.articleName}'?") },
             confirmButton = {
-                TextButton(
-                    onClick = { viewModel.deleteArticle() }
-                ) {
+                TextButton(onClick = { viewModel.deleteArticle() }) {
                     Text("Obriši")
                 }
             },
@@ -70,30 +66,32 @@ fun ManageArticlesPage(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp),
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = Dimens.screenPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            "mShop",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            text = "mShop",
+            style = MaterialTheme.typography.displayLarge,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 4.dp)
+                .padding(top = Dimens.lg, bottom = Dimens.sm)
         )
 
         Text(
-            "Upravljanje artiklima",
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(bottom = 24.dp)
+            text = "Upravljanje artiklima",
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(bottom = Dimens.lg)
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 20.dp),
+                .padding(bottom = Dimens.md),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(Dimens.sm)
         ) {
             SearchField(
                 value = query,
@@ -102,11 +100,12 @@ fun ManageArticlesPage(
                 leadingIcon = Icons.Default.Search,
                 modifier = Modifier.weight(1f)
             )
+
             IconButton(
                 onClick = { navController.navigate(AppRoutes.ADD_ARTICLE) },
                 modifier = Modifier
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f))
+                    .clip(RoundedCornerShape(Dimens.md))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -119,12 +118,13 @@ fun ManageArticlesPage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(bottom = Dimens.sm),
+            verticalArrangement = Arrangement.spacedBy(Dimens.md),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = Dimens.md)
         ) {
             items(filteredArticles) { article ->
                 ArticleManagementListItem(
-                    modifier = Modifier.padding(bottom = 3.dp),
+                    modifier = Modifier.padding(bottom = Dimens.xs),
                     article = article,
                     onEditClicked = {
                         viewModel.onStartEditArticle(article)
@@ -135,14 +135,4 @@ fun ManageArticlesPage(
             }
         }
     }
-}
-
-@SuppressLint("ViewModelConstructorInComposable")
-@Preview(showBackground = true)
-@Composable
-fun ManageArticlesPagePreview() {
-    ManageArticlesPage(
-        navController = NavHostController(LocalContext.current),
-        viewModel = ArticleManagementViewModel()
-    )
 }

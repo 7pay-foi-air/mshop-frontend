@@ -1,5 +1,7 @@
 package hr.foi.air.mshop.navigation.components.transaction
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,8 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,18 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.BuildConfig
 import hr.foi.air.mshop.core.models.CardPaymentData
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.ui.graphics.Color
-import hr.foi.air.mshop.BuildConfig
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoFixHigh
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
+import hr.foi.air.mshop.ui.theme.Dimens
 
 @Composable
 fun PaymentPage(
@@ -46,8 +46,8 @@ fun PaymentPage(
     var cvv by remember { mutableStateOf("") }
 
     val cardNumberInvalid = cardNumber.replace(" ", "").length !in 13..19
-    val expiryInvalid = !expiry.matches(Regex("^(0[1-9]|1[0-2])/\\d{2}\$"))
-    val cvvInvalid = !cvv.matches(Regex("^\\d{3,4}\$"))
+    val expiryInvalid = !expiry.matches(Regex("^(0[1-9]|1[0-2])/\\d{2}$"))
+    val cvvInvalid = !cvv.matches(Regex("^\\d{3,4}$"))
 
     val allValid = cardNumber.isNotBlank() &&
             expiry.isNotBlank() &&
@@ -59,36 +59,35 @@ fun PaymentPage(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = Dimens.screenHPadding, vertical = Dimens.screenVPadding)
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Text(
-                "mShop",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                text = "mShop",
+                style = MaterialTheme.typography.displayLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 4.dp)
+                    .padding(top = Dimens.lg, bottom = Dimens.sm)
             )
 
             Text(
-                "Plaćanje",
+                text = "Plaćanje",
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(bottom = 32.dp)
+                modifier = Modifier.padding(bottom = Dimens.xl)
             )
 
             if (BuildConfig.DEBUG) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .padding(bottom = 24.dp)
+                        .padding(bottom = Dimens.xl)
                         .clickable {
                             cardNumber = "4242 4242 4242 4242"
                             expiry = "12/26"
@@ -112,7 +111,6 @@ fun PaymentPage(
                 }
             }
 
-
             UnderLabelTextField(
                 caption = "Broj kartice",
                 value = cardNumber,
@@ -123,11 +121,11 @@ fun PaymentPage(
                     "Neispravan broj kartice" else null
             )
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(Dimens.md))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(Dimens.md)
             ) {
                 UnderLabelTextField(
                     caption = "Vrijedi do",
@@ -152,16 +150,16 @@ fun PaymentPage(
                 )
             }
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(Dimens.xl))
 
             Text(
                 text = "UKUPNO: $totalAmount",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Start
             )
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(Dimens.lg))
 
             StyledButton(
                 label = "PLATI",
@@ -176,7 +174,8 @@ fun PaymentPage(
                     )
                 }
             )
+
+            Spacer(Modifier.height(Dimens.xl))
         }
     }
-
 }
