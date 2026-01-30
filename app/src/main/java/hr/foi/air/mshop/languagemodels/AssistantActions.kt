@@ -11,6 +11,7 @@ import hr.foi.air.ws.data.SessionManager
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -20,12 +21,23 @@ fun loginRequiredMessage(intent: String): String {
     return intentObj.requiresLoginMessage ?: "Morate se prijaviti da biste izvršili tu radnju. ⚠️"
 }
 
+fun adminRequiredMessage(intent: String): String {
+    val intentObj = AssistantIntent.fromIntent(intent)
+    return intentObj.requiresAdminMessage ?: "Samo administratori mogu izvršiti tu radnju. ⚠️"
+}
+
+
+
 fun cancellationTextForIntent(intent: String): String {
     val intentObj = AssistantIntent.fromIntent(intent)
     return intentObj.cancellationText ?: "Operacija otkazana ❌"
 }
 
-fun userFriendlyMessageForIntent(intent: String, params: JsonObject? = null, context: Context? = null): String {
+fun userFriendlyMessageForIntent(
+    intent: String,
+    params: JsonObject? = null,
+    context: Context? = null
+): String {
     val intentObj = AssistantIntent.fromIntent(intent)
     return when (intentObj) {
         AssistantIntent.WANTS_INFO -> {
@@ -48,26 +60,25 @@ fun userFriendlyMessageForIntent(intent: String, params: JsonObject? = null, con
                 locationOrNull?.let { "Lokacija Vašeg koda za oporavak:\n$it" }
             } ?: intentObj.defaultUserFriendlyMessage ?: "Nema informacije o lokaciji koda."
         }
-        AssistantIntent.VIEW_TRANSACTIONS_PERIOD -> {
-            intentObj.defaultUserFriendlyMessage ?: "Prebacio sam Vas na stranicu za pregled transakcija i primijenio tražene filtre. 🧾"
-        }
         else -> {
             intentObj.defaultUserFriendlyMessage ?: "Pokrenuo sam proces... ⚙️"
         }
     }
 }
 
-
-
 fun getDateRange(value: Int, unit: String): Pair<String, String> {
     val today = LocalDate.now()
     val startDate = when (unit.uppercase()) {
-        "DAYS" -> today.minusDays(value.toLong())
+        "DAY", "DAYS" -> today.minusDays(value.toLong())
         "WEEK", "WEEKS" -> today.minusWeeks(value.toLong())
         "MONTH", "MONTHS" -> today.minusMonths(value.toLong())
-        else -> today.minusDays(value.toLong()) // default fallback
+        "YEAR", "YEARS" -> today.minusMonths(value.toLong() * 12)
+        else -> today.minusDays(value.toLong())
     }
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    Log.d("AssistantActions", "startDate: $startDate, endDate: $today")
+
     return Pair(startDate.format(formatter), today.format(formatter))
 }
 
@@ -86,19 +97,58 @@ fun createAssistantIntentHandler(
             navController.navigate(AppRoutes.TRANSACTION_HISTORY)
         }
 
-        AssistantIntent.VIEW_TRANSACTIONS_PERIOD -> {
+        AssistantIntent.VIEW_TRANSACTIONS_LAST -> {
             val value = params?.get("value")?.jsonPrimitive?.int
             val unit = params?.get("unit")?.jsonPrimitive?.content
+            val metric = params?.get("metric")?.jsonPrimitive?.content
 
-            if(value != null && unit != null){
-                val (startDate, endDate) = getDateRange(value, unit)
-                Log.d("AssistantActions", "startDate: $startDate, endDate: $endDate")
-                navController.navigate(
-                    "transaction_history?from=${Uri.encode(startDate)}&to=${Uri.encode(endDate)}"
-                )
-            } else {
-                navController.navigate(AppRoutes.TRANSACTION_HISTORY)
+            if(metric != "LIST"){
+
             }
+            else{
+                if(value != null && unit != null){
+                    val (startDate, endDate) = getDateRange(value, unit)
+                    Log.d("AssistantActions", "startDate: $startDate, endDate: $endDate")
+                    navController.navigate(
+                        "transaction_history?from=${Uri.encode(startDate)}&to=${Uri.encode(endDate)}"
+                    )
+                } else {
+                    navController.navigate(AppRoutes.TRANSACTION_HISTORY)
+                }
+            }
+        }
+
+        AssistantIntent.VIEW_TRANSACTIONS_RANGE -> {
+            val startDate = params?.get("from")?.jsonObject?.get("date")?.jsonPrimitive?.content
+            val endDate = params?.get("to")?.jsonObject?.get("date")?.jsonPrimitive?.content
+
+            val metric = params?.get("metric")?.jsonPrimitive?.content
+
+            if(metric != "LIST"){
+
+            }
+            else{
+                if(startDate != null && endDate != null){
+                    Log.d("AssistantActions", "startDate: $startDate, endDate: $endDate")
+                    navController.navigate(
+                        "transaction_history?from=${Uri.encode(startDate)}&to=${Uri.encode(endDate)}"
+                    )
+                } else {
+                    navController.navigate(AppRoutes.TRANSACTION_HISTORY)
+                }
+            }
+        }
+
+        AssistantIntent.MANAGE_USERS -> {
+            navController.navigate(AppRoutes.MANAGE_USERS)
+        }
+
+        AssistantIntent.MANAGE_ITEMS -> {
+            navController.navigate(AppRoutes.MANAGE_ARTICLES)
+        }
+
+        AssistantIntent.EDIT_PROFILE -> {
+            navController.navigate(AppRoutes.PROFILE_USER)
         }
 
 

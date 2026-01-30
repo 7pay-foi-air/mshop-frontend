@@ -3,6 +3,8 @@ package hr.foi.air.ws.api
 import hr.foi.air.mshop.network.dto.transaction.CreateTransactionRequest
 import hr.foi.air.mshop.network.dto.transaction.TransactionResponse
 import hr.foi.air.ws.models.transaction.RefundTransactionRequest
+import hr.foi.air.ws.models.transaction.SendEmailReportTransactionRequest
+import hr.foi.air.ws.models.transaction.SendEmailReportTransactionResponseDto
 import hr.foi.air.ws.models.transaction.TransactionDetailsResponseDto
 import hr.foi.air.ws.models.transaction.TransactionHistoryResponse
 import retrofit2.Response
@@ -31,5 +33,10 @@ interface ITransactionApi {
     suspend fun refundTransaction(
         @Body request: RefundTransactionRequest
     ): Response<TransactionDetailsResponseDto>
+
+    @POST("transactions/report")
+    suspend fun sendEmailReport(
+        @Body request: SendEmailReportTransactionRequest
+    ): Response<SendEmailReportTransactionResponseDto>
 
 }

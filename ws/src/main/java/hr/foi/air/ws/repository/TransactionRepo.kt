@@ -15,6 +15,7 @@ import hr.foi.air.mshop.network.dto.transaction.TransactionItemRequest
 import hr.foi.air.mshop.network.dto.transaction.TransactionResponse
 import hr.foi.air.ws.api.ITransactionApi
 import hr.foi.air.ws.models.transaction.RefundTransactionRequest
+import hr.foi.air.ws.models.transaction.SendEmailReportTransactionRequest
 import hr.foi.air.ws.models.transaction.TransactionDetailsResponseDto
 import hr.foi.air.ws.models.transaction.TransactionSummary
 import java.time.LocalDate
@@ -188,5 +189,28 @@ class TransactionRepo(
         }
     }
 
+    suspend fun getTransactionsCountPeriod(startDate: String, endDate: String): Int {
+        val start = LocalDate.parse(startDate)
+        val end = LocalDate.parse(endDate)
+
+        val transactions  = getTransactionsForCurrentUser(start, end)
+        val count = transactions.payments.size + transactions.refunds.size
+        return count
+    }
+
+    suspend fun getTransactionsSumPeriod(startDate: String, endDate: String): Double {
+        val start = LocalDate.parse(startDate)
+        val end = LocalDate.parse(endDate)
+        val transactions = getTransactionsForCurrentUser(start, end)
+        val paymentsSum = transactions.payments.sumOf { it.totalAmount }
+        val refundsSum = transactions.refunds.sumOf { it.totalAmount }
+        return paymentsSum - refundsSum
+    }
+
+    suspend fun postEmailReport(startDate: String, endDate: String, email: String): Boolean {
+        val request = SendEmailReportTransactionRequest(startDate, endDate, email)
+        val response = api.sendEmailReport(request)
+        return response.isSuccessful
+    }
 
 }

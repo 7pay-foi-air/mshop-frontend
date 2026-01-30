@@ -32,14 +32,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
+import hr.foi.air.mshop.data.UIState
 import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.utils.AppMessageManager
 import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.viewmodels.LLM.AssistantViewModel
 import hr.foi.air.ws.data.SessionManager
+import hr.foi.air.ws.repository.TransactionRepo
+import hr.foi.air.ws.repository.UserRepo
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import java.time.LocalDate
 import kotlin.coroutines.cancellation.CancellationException
 
 enum class Sender { User, Bot }
@@ -84,7 +94,7 @@ fun MessageBubble(
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Razmišlja…",
+                            text = message.text.ifBlank { "Razmišlja..." },
                             style = MaterialTheme.typography.bodyMedium,
                             color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -119,7 +129,9 @@ fun MessageBubble(
 fun LlmChatDialog(
     onDismissRequest: () -> Unit,
     assistantViewModel: AssistantViewModel,
-    assistantHandler: LlmIntentHandler
+    assistantHandler: LlmIntentHandler,
+    transactionRepo: TransactionRepo,
+    userRepo: UserRepo
 ) {
     var userInput by remember { mutableStateOf("") }
     val messages = remember { mutableStateListOf<ChatMessage>() }
@@ -140,6 +152,135 @@ fun LlmChatDialog(
     var pendingParams: JsonObject? by remember { mutableStateOf(null) }
 
     var isDialogOpen by remember { mutableStateOf(true) }
+
+    fun getAsyncHandlerIfAny(
+        intentObj: AssistantIntent,
+        params: JsonObject?,
+    ): Pair<String, suspend (JsonObject) -> String>? {
+        if (intentObj != AssistantIntent.VIEW_TRANSACTIONS_LAST && intentObj != AssistantIntent.VIEW_TRANSACTIONS_RANGE) return null
+        val metric = params?.get("metric")?.jsonPrimitive?.contentOrNull ?: return null
+
+        val needsMailSending  = params["sendMail"]?.jsonPrimitive?.booleanOrNull
+
+        return when (metric.uppercase()) {
+            "COUNT" -> Pair("Računam broj transakcija...") { p ->
+                val fromDateStr = p["from"]?.jsonObject["date"]?.jsonPrimitive?.content
+                val toDateStr = p["to"]?.jsonObject["date"]?.jsonPrimitive?.content
+
+                val value = p["value"]?.jsonPrimitive?.int
+                val unit = p["unit"]?.jsonPrimitive?.content
+
+                var count: Int? = null
+                var startDate: String? = null
+                var endDate: String? = null
+
+                if(fromDateStr != null && toDateStr != null){
+                    val fromDate = LocalDate.parse(fromDateStr)
+                    val toDate = LocalDate.parse(toDateStr)
+
+                    if(fromDate.isAfter(toDate)) return@Pair "Neispravni parametri."
+
+                    startDate = fromDateStr
+                    endDate = toDateStr
+
+                }else if(value != null && unit != null){
+                    val (startDateTemp, endDateTemp) = getDateRange(value, unit)
+                    startDate = startDateTemp
+                    endDate = endDateTemp
+                }
+                else{
+                    return@Pair "Neispravni parametri."
+                }
+
+                count = try {
+                    transactionRepo.getTransactionsCountPeriod(startDate, endDate)
+                } catch (e: Exception) {
+                    null
+                }
+
+                if (count != null) "Broj transakcija: $count" else "Nisam uspio dohvatiti broj transakcija."
+            }
+
+            "SUM" -> Pair("Računam iznos transakcija...") { p ->
+
+                val fromDateStr = p["from"]?.jsonObject["date"]?.jsonPrimitive?.content
+                val toDateStr = p["to"]?.jsonObject["date"]?.jsonPrimitive?.content
+
+                val value = p["value"]?.jsonPrimitive?.int
+                val unit = p["unit"]?.jsonPrimitive?.content
+
+                var total: Double? = null
+                var startDate: String? = null
+                var endDate: String? = null
+
+
+                if(fromDateStr != null && toDateStr != null){
+                    val fromDate = LocalDate.parse(fromDateStr)
+                    val toDate = LocalDate.parse(toDateStr)
+
+                    if(fromDate.isAfter(toDate)) return@Pair "Neispravni parametri."
+
+                    Log.d("AssistantActionsDate", "fromDate: $fromDate, toDate: $toDate")
+
+
+                    startDate = fromDateStr
+                    endDate = toDateStr
+
+                }else if(value != null && unit != null){
+                    val (startDateTemp, endDateTemp) = getDateRange(value, unit)
+                    startDate = startDateTemp
+                    endDate = endDateTemp
+                }
+                else{
+                    return@Pair "Neispravni parametri."
+                }
+
+                total = try {
+                    transactionRepo.getTransactionsSumPeriod(startDate, endDate)
+                } catch (e: Exception) {
+                    null
+                }
+                if (total != null) String.format("Ukupni iznos: %.2f %s", total, "€") else "Nisam uspio dohvatiti iznos transakcija."
+            }
+
+            "LIST" -> {
+                if(needsMailSending != null && needsMailSending){
+                    Pair("Šaljem transakcijski izvještaj na email...") { p ->
+
+                        val fromDateStr = p["from"]?.jsonObject["date"]?.jsonPrimitive?.content
+                        val toDateStr = p["to"]?.jsonObject["date"]?.jsonPrimitive?.content
+
+                        if(fromDateStr == null || toDateStr == null){
+                            return@Pair "Neispravni parametri."
+                        }
+
+                        if(SessionManager.currentUserId == null){
+                            return@Pair "Nema prijavljenog korisnika."
+                        }
+
+                        val result = userRepo.getUserById(SessionManager.currentUserId!!)
+                        if (result.isSuccess) {
+                            val user = result.getOrNull() ?: return@Pair "Nema prijavljenog korisnika."
+
+                            val email = user.email
+                            val result = transactionRepo.postEmailReport(fromDateStr, toDateStr, email)
+
+                            if(result) return@Pair "Poslan je transakcijski izvještaj na email: $email"
+
+                        }
+
+                        return@Pair "Dogodila se greška pri slanju izvještaja. Molimo pokušajte ponovo."
+                    }
+                }
+                else{
+                    return null
+                }
+            }
+
+            else -> null
+        }
+    }
+
 
     val sendMessage = remember {
         { text: String ->
@@ -166,63 +307,180 @@ fun LlmChatDialog(
                     val intent = result.intent
                     val intentObj = AssistantIntent.fromIntent(intent)
                     val requiresLoginButNotLogged = intentObj.requiresLogin && SessionManager.accessToken == null
+                    val requiresAdminButNotAdmin = intentObj.requiresAdmin && SessionManager.currentUserRole == "cashier"
 
-                    val displayText = when (intentObj) {
-                        AssistantIntent.WANTS_INFO -> userFriendlyMessageForIntent(intent, result.params)
-                        AssistantIntent.RECOVERY_HINT_GET -> userFriendlyMessageForIntent(intent, result.params, context)
-                        else -> {
-                            if (requiresLoginButNotLogged) loginRequiredMessage(intent)
-                            else userFriendlyMessageForIntent(intent, result.params)
+                    val idxLoading = messages.indexOfFirst { it.id == loadingId }
+
+                    if (requiresLoginButNotLogged) {
+                        val msg = loginRequiredMessage(intent)
+                        if (idxLoading != -1) {
+                            messages[idxLoading] = messages[idxLoading].copy(text = msg, isLoading = false)
+                        } else {
+                            messages.add(ChatMessage(id = nextId(), text = msg, sender = Sender.Bot))
                         }
+                        return@launch
                     }
 
-                    val idx = messages.indexOfFirst { it.id == loadingId }
-                    if (idx != -1) {
-                        messages[idx] = messages[idx].copy(text = displayText, isLoading = false)
-                    } else {
-                        messages.add(ChatMessage(id = nextId(), text = displayText, sender = Sender.Bot))
+                    if (requiresAdminButNotAdmin) {
+                        val msg = adminRequiredMessage(intent)
+                        if (idxLoading != -1) {
+                            messages[idxLoading] = messages[idxLoading].copy(text = msg, isLoading = false)
+                        } else {
+                            messages.add(ChatMessage(id = nextId(), text = msg, sender = Sender.Bot))
+                        }
+                        return@launch
                     }
 
-                    if (intentObj.isCritical && !requiresLoginButNotLogged) {
-                        pendingIntent = intent
-                        pendingParams = result.params
+                    if(intentObj == AssistantIntent.VIEW_TRANSACTIONS_RANGE){
+                        val fromDateStr = result.params?.get("from")?.jsonObject["date"]?.jsonPrimitive?.content
+                        val toDateStr = result.params?.get("to")?.jsonObject["date"]?.jsonPrimitive?.content
 
-                        val countdownId = nextId()
-                        pendingMessageId = countdownId
-                        val start = 5
+                        if(fromDateStr != null && toDateStr != null){
+                            val fromDate = LocalDate.parse(fromDateStr)
+                            val toDate = LocalDate.parse(toDateStr)
 
-                        messages.add(
-                            ChatMessage(
-                                id = countdownId,
-                                text = "Počinjem za $start sek.",
-                                sender = Sender.Bot
-                            )
-                        )
-
-                        pendingJob = scope.launch {
-                            var countdown = start
-                            try {
-                                while (countdown > 0) {
-                                    delay(1000)
-                                    countdown--
-                                    val idx2 = messages.indexOfFirst { it.id == countdownId }
-                                    if (idx2 != -1) {
-                                        messages[idx2] = messages[idx2].copy(text = "Počinjem za $countdown sek.")
-                                    }
+                            if(fromDate.isAfter(toDate)){
+                                val msg = "Nažalost ne mogu prikazati transakcije za određeni period. Početni datum ne smije biti kasnije od završnog datuma. ⚠️"
+                                if (idxLoading != -1) {
+                                    messages[idxLoading] = messages[idxLoading].copy(text = msg, isLoading = false)
+                                } else {
+                                    messages.add(ChatMessage(id = nextId(), text = msg, sender = Sender.Bot))
                                 }
-                                pendingIntent?.let { assistantHandler(it, pendingParams) }
-                            } catch (_: CancellationException) {
-                            } finally {
-                                pendingJob = null
-                                pendingMessageId = null
-                                pendingIntent = null
-                                pendingParams = null
+
+                                return@launch
                             }
                         }
+                    }
 
-                    } else {
-                        if (!intentObj.isCritical) {
-                            assistantHandler(intent, result.params)
+                    val asyncPair = getAsyncHandlerIfAny(intentObj, result.params)
+
+                    Log.d("AssistantActionsDate", "asyncPair: $asyncPair")
+
+                    if (asyncPair != null) {
+
+                        val placeholder = asyncPair.first
+                        if (!isDialogOpen) return@launch
+                        if (idxLoading != -1) {
+                            messages[idxLoading] =
+                                messages[idxLoading].copy(text = placeholder, isLoading = true)
+                        } else {
+                            messages.add(
+                                ChatMessage(
+                                    id = nextId(),
+                                    text = placeholder,
+                                    sender = Sender.Bot,
+                                    isLoading = true
+                                )
+                            )
+                        }
+
+                        val handler = asyncPair.second
+
+                        scope.launch {
+                            delay(300)
+                            try {
+
+                                val finalText =
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                        handler(result.params!!)
+                                    }
+                                if (!isDialogOpen) return@launch
+                                val idx2 = messages.indexOfFirst { it.id == loadingId }
+                                if (idx2 != -1) {
+                                    messages[idx2] =
+                                        messages[idx2].copy(text = finalText, isLoading = false)
+                                } else {
+                                    messages.add(
+                                        ChatMessage(
+                                            id = nextId(),
+                                            text = finalText,
+                                            sender = Sender.Bot
+                                        )
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                val errText = "Greška pri izračunu."
+                                if (!isDialogOpen) return@launch
+                                val idx2 = messages.indexOfFirst { it.id == loadingId }
+                                if (idx2 != -1) {
+                                    messages[idx2] =
+                                        messages[idx2].copy(text = errText, isLoading = false)
+                                } else {
+                                    messages.add(
+                                        ChatMessage(
+                                            id = nextId(),
+                                            text = errText,
+                                            sender = Sender.Bot
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    else{
+                        val displayText = when (intentObj) {
+                            AssistantIntent.WANTS_INFO -> userFriendlyMessageForIntent(intent, result.params)
+                            AssistantIntent.RECOVERY_HINT_GET -> userFriendlyMessageForIntent(intent, result.params, context)
+                            else -> userFriendlyMessageForIntent(intent, result.params, context)
+                        }
+
+                        Log.d("LlmChatDialog", "displayText: $displayText")
+
+                        val idx = messages.indexOfFirst { it.id == loadingId }
+                        if (idx != -1) {
+                            messages[idx] = messages[idx].copy(text = displayText, isLoading = false)
+                        } else {
+                            messages.add(ChatMessage(id = nextId(), text = displayText, sender = Sender.Bot))
+                        }
+
+                        if(requiresLoginButNotLogged || requiresAdminButNotAdmin){
+                            return@launch
+                        }
+
+
+                        if (intentObj.isCritical) {
+                            pendingIntent = intent
+                            pendingParams = result.params
+
+                            val countdownId = nextId()
+                            pendingMessageId = countdownId
+                            val start = 5
+
+                            messages.add(
+                                ChatMessage(
+                                    id = countdownId,
+                                    text = "Počinjem za $start sek.",
+                                    sender = Sender.Bot
+                                )
+                            )
+
+                            pendingJob = scope.launch {
+                                var countdown = start
+                                try {
+                                    while (countdown > 0) {
+                                        delay(1000)
+                                        countdown--
+                                        val idx2 = messages.indexOfFirst { it.id == countdownId }
+                                        if (idx2 != -1) {
+                                            messages[idx2] = messages[idx2].copy(text = "Počinjem za $countdown sek.")
+                                        }
+                                    }
+                                    pendingIntent?.let { intent ->
+                                        assistantHandler(intent, pendingParams)
+                                    }
+                                } catch (ex: CancellationException) {
+                                } finally {
+                                    pendingJob = null
+                                    pendingMessageId = null
+                                    pendingIntent = null
+                                    pendingParams = null
+                                }
+                            }
+
+                        } else {
+                            if (!intentObj.isCritical) {
+                                assistantHandler(intent, result.params)
+                            }
                         }
                     }
                 } catch (e: Exception) {
