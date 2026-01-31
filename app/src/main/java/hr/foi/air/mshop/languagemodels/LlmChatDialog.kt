@@ -1,6 +1,7 @@
 package hr.foi.air.mshop.languagemodels
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
@@ -150,6 +151,7 @@ fun LlmChatDialog(
 
                     val displayText = when (intentObj) {
                         AssistantIntent.WANTS_INFO -> userFriendlyMessageForIntent(intent, result.params)
+                        AssistantIntent.RECOVERY_HINT_GET -> userFriendlyMessageForIntent(intent, result.params, context)
                         else -> {
                             if (requiresLoginButNotLogged) loginRequiredMessage(intent)
                             else userFriendlyMessageForIntent(intent, result.params)

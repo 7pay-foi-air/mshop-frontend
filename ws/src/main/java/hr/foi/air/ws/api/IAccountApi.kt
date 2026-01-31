@@ -1,6 +1,7 @@
 package hr.foi.air.ws.api
 
 import hr.foi.air.ws.models.MessageResponse
+import hr.foi.air.ws.models.login.ChangePasswordRequest
 import hr.foi.air.ws.models.userManagement.AddUserRequest
 import hr.foi.air.ws.models.login.LoginRequest
 import hr.foi.air.ws.models.login.LoginResponse
@@ -47,6 +48,11 @@ interface IAccountApi {
     suspend fun  loginUser(
         @Body loginRequest: LoginRequest,
     ): Response<LoginResponse>
+
+    @POST("password/change")
+    suspend fun changePassword(
+        @Body request: ChangePasswordRequest
+    ): Response<MessageResponse>
 
     @POST("password/reset")
     suspend fun changePassword(

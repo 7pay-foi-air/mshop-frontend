@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.viewmodels.transaction
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.TransactionDetails
@@ -27,15 +28,12 @@ class TransactionDetailsViewModel(
     val details: StateFlow<TransactionDetails?> = _details.asStateFlow()
 
     private fun formatDate(iso: String): String {
-        return DateTimeFormatter.ofPattern("dd.MM.yyyy")
-            .withZone(ZoneId.systemDefault())
-            .format(Instant.parse(iso))
+        val parts = iso.substring(0, 10).split("-")
+        return "${parts[2]}.${parts[1]}.${parts[0]}"
     }
 
     private fun formatTime(iso: String): String {
-        return DateTimeFormatter.ofPattern("HH:mm")
-            .withZone(ZoneId.systemDefault())
-            .format(Instant.parse(iso))
+        return if (iso.length >= 16) iso.substring(11, 16) else ""
     }
 
     fun loadTransactionDetails(id: String) {
@@ -43,19 +41,63 @@ class TransactionDetailsViewModel(
             _uiState.value = UIState(loading = true)
 
             val result = repository.getTransactionDetails(id)
+            if (result.isFailure) {
+                _uiState.value = UIState(errorMessage =
+                    result.exceptionOrNull()?.message ?: "Greška pri dohvaćanju detalja.")
+                return@launch
+            }
+
+            val raw = result.getOrNull()
+            if (raw == null) {
+                _details.value = null
+                _uiState.value = UIState()
+                return@launch
+            }
+
+            val refundFormatted = raw.copy(
+                transactionDate = "${formatDate(raw.transactionDate)} u ${formatTime(raw.transactionDate)}"
+            )
+
+            val finalDetails =
+                if (refundFormatted.transactionType == "Refund" && !refundFormatted.transactionRefundId.isNullOrBlank()) {
+                    val originalResult = repository.getTransactionDetails(refundFormatted.transactionRefundId!!)
+                    val original = originalResult.getOrNull()
+
+                    if (original != null) {
+                        refundFormatted.copy(items = original.items)
+                    } else refundFormatted
+                } else refundFormatted
+
+            _details.value = finalDetails
+            _uiState.value = UIState()
+        }
+    }
+
+
+    fun refundTransaction(
+        description: String = "Refund transaction",
+        onComplete: (success: Boolean) -> Unit
+    ) {
+        val transactionId = details.value?.uuidTransaction ?: return
+
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(loading = true)
+
+            val result = repository.refundTransaction(
+                transactionId = transactionId,
+                description = description
+            )
 
             _uiState.value = if (result.isSuccess) {
-                val raw = result.getOrNull()
-                _details.value = raw?.copy(
-                    transactionDate = "${formatDate(raw.transactionDate)} u ${formatTime(raw.transactionDate)}"
-                )
+                onComplete(true)  // refund uspješan
                 UIState()
             } else {
-                UIState(errorMessage = result.exceptionOrNull()?.message
-                    ?: "Greška pri dohvaćanju detalja.")
+                onComplete(false) // refund nije uspio
+                UIState(errorMessage = result.exceptionOrNull()?.message)
             }
         }
     }
+
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)

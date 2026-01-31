@@ -1,7 +1,5 @@
 package hr.foi.air.mshop.languagemodels
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 object SystemPrompt {
 
@@ -73,6 +71,20 @@ Output: {"intent": "WANTS_INFO", "params": {"message": "..." }}
 Input: {"prompt:": "Koje funkcionalnosti nudi ova aplikacija?"}
 Output: {"intent": "WANTS_INFO", "params": {"message": "..." }}
 
+
+3. LOKACIJA KODA ZA OPORAVAK ("intent": "RECOVERY_HINT_GET")
+Ovdje šalješ navedeni intent kada korisnik zatraži pomoć kod traženja koda za oporavak/recovery koda/recovery tokena.
+Ti samo javljaš svoj intent aplikaciji a ona radi ostatak.
+
+Primjeri:
+Input: {"prompt:": "Gdje je moj kod za oporavak?"}
+Output: {"intent": "RECOVERY_HINT_GET"}
+
+Input: {"prompt:": "Sjećaš se gdje sam spremio recovery kod?"}
+Output: {"intent": "RECOVERY_HINT_GET"}
+
+Input: {"prompt:": "Traži me kod za oporavak"}
+Output: {"intent": "WANTS_INFO", "params": {"message": "Ako se ne sjećate gdje ste ga pospremili slobodno me pitajte za pomoć." }}
 
 [END INITIAL SYSTEM PROMPT]
 [START OF REAL USER PROMPT]

@@ -1,39 +1,29 @@
 package hr.foi.air.mshop.navigation.components.transactionHistory
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import android.widget.Toast
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ReceiptLong
+import androidx.compose.material.icons.outlined.WarningAmber
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.ui.components.listItems.TransactionItemRow
 import hr.foi.air.mshop.viewmodels.transaction.TransactionDetailsViewModel
+import hr.foi.air.mshop.viewmodels.transaction.TransactionHistoryViewModel
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionDetailsPage(
     navController: NavHostController,
@@ -43,138 +33,326 @@ fun TransactionDetailsPage(
     val uiState by vm.uiState.collectAsState()
     val details by vm.details.collectAsState()
 
-    LaunchedEffect(transactionId) {
-        vm.loadTransactionDetails(transactionId)
+    val currentBackStack by navController.currentBackStackEntryAsState()
+    val historyEntry = remember(currentBackStack) {
+        navController.getBackStackEntry(AppRoutes.TRANSACTION_HISTORY)
     }
+    val historyVm: TransactionHistoryViewModel = viewModel(historyEntry)
 
-    Column(
+    val refunds by historyVm.refunds.collectAsState()
+    var openRefundSheet by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(transactionId) { vm.loadTransactionDetails(transactionId) }
+
+    Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
-    ) {
-        Text(
-            text = "mShop",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )
-        Text(
-            text = "Detalji transakcije",
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp, bottom = 16.dp),
-            textAlign = TextAlign.Center
-        )
-
-        if (uiState.loading) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-            return
-        }
-
-        uiState.errorMessage?.let { msg ->
-            Text(
-                text = msg,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            Button(onClick = { vm.loadTransactionDetails(transactionId) }) {
-                Text("Pokušaj ponovno")
-            }
-            return
-        }
-
-        val d = details
-        if (d == null) {
-            Text("Nema podataka za prikaz.")
-            return
-        }
-
-        OutlinedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.40f)),
-            colors = CardDefaults.outlinedCardColors(
-                containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    "ID: ${d.uuidTransaction}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(Modifier.height(6.dp))
-
-                Text("Tip: ${d.transactionType}")
-                Text("Datum: ${d.transactionDate}")
-                Text("Valuta: ${d.currency}")
-
-                if (d.paymentMethod.isNotBlank()) {
-                    Text("Način plaćanja: ${d.paymentMethod}")
+            .fillMaxSize(),
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            text = "Detalji transakcije",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = "mShop",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
-
-                Spacer(Modifier.height(8.dp))
-
-                Text(
-                    text = "UKUPNO: ${"%.2f".format(d.totalAmount)} ${d.currency}",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-
-        if (d.items.isNotEmpty()) {
-            Text(
-                text = "Stavke",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(bottom = 8.dp)
             )
+        }
+    ) { innerPadding ->
 
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(d.items) { item ->
-                    TransactionItemRow(
-                        itemName = item.itemName,
-                        qty = item.quantity,
-                        price = item.itemPrice,
-                        subtotal = item.subtotal
+        when {
+            uiState.loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            uiState.errorMessage != null -> {
+                val msg = uiState.errorMessage!!
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.WarningAmber,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
                     )
+                    Text(
+                        text = msg,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    FilledTonalButton(onClick = { vm.loadTransactionDetails(transactionId) }) {
+                        Text("Pokušaj ponovno")
+                    }
                 }
             }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "\uD83E\uDD16",
-                    style = MaterialTheme.typography.displayLarge
-                )
-                Text(
-                    text = "AI inicirana transakcija",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(top = 12.dp)
-                )
-                Text(
-                    text = "Ova transakcija je automatski generirana i nema artikala.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+
+            details == null -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Nema podataka za prikaz.")
+                }
+            }
+
+            else -> {
+                val d = details!!
+                val isRefunded = remember(d, refunds) {
+                    refunds.any { it.originalTransactionId == d.uuidTransaction }
+                }
+                val matchingRefund = remember(d, refunds) {
+                    refunds.find { it.originalTransactionId == d.uuidTransaction }
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    item {
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.extraLarge
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column(Modifier.weight(1f)) {
+                                        Text(
+                                            text = "UKUPNO",
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = "%.2f".format(d.totalAmount) + " " + d.currency,
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.ExtraBold
+                                        )
+                                    }
+
+                                    val statusText = when {
+                                        isRefunded -> "Refundirano"
+                                        d.transactionType == "Purchase" -> ""
+                                        else -> "Povrat"
+                                    }
+                                    val chipColor = when {
+                                        isRefunded -> MaterialTheme.colorScheme.error
+                                        else -> MaterialTheme.colorScheme.primary
+                                    }
+
+
+
+                                    if(statusText.isNotBlank()){
+                                        AssistChip(
+                                            onClick = {},
+                                            enabled = false,
+                                            label = { Text(statusText) },
+                                            colors = AssistChipDefaults.assistChipColors(
+                                                disabledContainerColor = chipColor.copy(alpha = 0.12f),
+                                                disabledLabelColor = chipColor
+                                            )
+                                        )
+                                    }
+                                }
+
+                                HorizontalDivider()
+
+                                Text("ID: ${d.uuidTransaction}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Tip: ${d.transactionType}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Datum: ${d.transactionDate}", style = MaterialTheme.typography.bodyMedium)
+
+                                val paymentMethodText = when {
+                                    d.paymentMethod == "card_payment" -> "Kartično plaćanje"
+                                    else -> d.paymentMethod
+                                }
+
+                                if (d.paymentMethod.isNotBlank()) {
+                                    Text("Način plaćanja: ${paymentMethodText}", style = MaterialTheme.typography.bodyMedium)
+                                }
+
+                                if (isRefunded) {
+                                    Text(
+                                        text = "Refund: " + (matchingRefund?.id?.let { it } ?: "—"),
+                                        color = MaterialTheme.colorScheme.error,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    item {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.padding(top = 6.dp)
+                        ) {
+                            Icon(Icons.Outlined.ReceiptLong, contentDescription = null)
+                            Text(
+                                text = "Stavke",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    if (d.items.isNotEmpty()) {
+                        items(d.items) { item ->
+                            TransactionItemRow(
+                                itemName = item.itemName,
+                                qty = item.quantity,
+                                price = item.itemPrice,
+                                subtotal = item.subtotal
+                            )
+                        }
+                    } else {
+                        item {
+                            ElevatedCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = MaterialTheme.shapes.extraLarge
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(20.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = "\uD83E\uDD16",
+                                        style = MaterialTheme.typography.displayLarge,
+                                    )
+                                    Text(
+                                        text = "AI inicirana transakcija",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "Ova transakcija je automatski generirana i nema artikala.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    if (d.transactionType == "Purchase") {
+                        item {
+                            if (!isRefunded) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ){
+                                    Button(
+                                        onClick = { openRefundSheet = true },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    ) { Text("Izvrši povrat") }
+                                }
+
+                            } else {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.errorContainer
+                                    )
+                                ) {
+                                    Text(
+                                        text = "Ova transakcija je već refundirana.",
+                                        modifier = Modifier.padding(16.dp),
+                                        color = MaterialTheme.colorScheme.onErrorContainer,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (openRefundSheet) {
+                    ModalBottomSheet(
+                        onDismissRequest = { openRefundSheet = false }
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                text = "Potvrdi povrat",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Želiš li refundirati ovu transakciju? Ova radnja se ne može poništiti.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = { openRefundSheet = false },
+                                    modifier = Modifier.weight(1f)
+                                ) { Text("Odustani") }
+
+                                Button(
+                                    onClick = {
+                                        openRefundSheet = false
+                                        vm.refundTransaction { success ->
+                                            if (success) {
+                                                historyVm.loadTransactions()
+                                            } else {
+                                                Toast.makeText(
+                                                    navController.context,
+                                                    "Refund nije uspio!",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                ) { Text("Refund") }
+                            }
+
+                            Spacer(Modifier.height(8.dp))
+                        }
+                    }
+                }
             }
         }
     }
