@@ -89,7 +89,7 @@ dependencies {
     //core
     implementation(project(":core"))
     implementation(project(":ws"))
-    implementation(project(":image_loader"))
+    implementation("hr.foi.air:image-loader-sdk:1.0.3")
     implementation(project(":camera_loader"))
 
     implementation("com.google.mediapipe:tasks-genai:0.10.27")
