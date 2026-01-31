@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import hr.foi.air.mshop.ui.components.DialogMessage
@@ -26,7 +29,7 @@ import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.viewmodels.userManagement.ChangePasswordViewModel
 
 @Composable
-fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel()) {
+fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel(), initialUsername: String = "") {
     var step by remember { mutableStateOf(1) }
     var recoveryCode by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -34,8 +37,9 @@ fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel()) {
     var showDialog by remember { mutableStateOf(false) }
     var dialogTitle by remember { mutableStateOf("") }
     var dialogMessage by remember { mutableStateOf("") }
-
+    var username by remember { mutableStateOf(initialUsername) }
     val changePasswordResult by viewModel.changePasswordResult.collectAsState()
+    val context = LocalContext.current
 
     if (showDialog) {
         DialogMessage(
@@ -49,6 +53,19 @@ fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel()) {
         )
     }
 
+    LaunchedEffect(changePasswordResult) {
+        changePasswordResult?.let {
+            if (it.isSuccess) {
+                dialogTitle = "Uspjeh"
+                dialogMessage = it.getOrNull() ?: "Lozinka uspješno promijenjena."
+                showDialog = true
+            } else {
+                val errorMessage = it.exceptionOrNull()?.message ?: "Dogodila se greška."
+                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,6 +75,21 @@ fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel()) {
     ) {
         if (step == 1) {
             Text(text = "Promjena lozinke")
+            Spacer(modifier = Modifier.height(16.dp))
+            UnderLabelTextField(
+                value = username,
+                onValueChange = { username = it },
+                caption = "Korisničko ime",
+                placeholder = "Unesite korisničko ime",
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default,
+                isError = false,
+                errorText = null,
+                trailingIcon = null,
+                enabled = true,
+                onClick = null
+            )
             Spacer(modifier = Modifier.height(16.dp))
             UnderLabelTextField(
                 value = recoveryCode,
@@ -75,7 +107,15 @@ fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel()) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             NextArrow(
-                onClick = { step = 2 },
+                onClick = {
+                    if (username.isNotBlank() && recoveryCode.isNotBlank()) {
+                        step = 2
+                    } else {
+                        dialogTitle = "Greška"
+                        dialogMessage = "Molimo unesite korisničko ime i kod za oporavak."
+                        showDialog = true
+                    }
+                },
                 modifier = Modifier.align(Alignment.End)
             )
         } else {
@@ -102,27 +142,13 @@ fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel()) {
             NextArrow(
                 onClick = {
                     if (password == repeatPassword) {
-                        viewModel.changePassword(recoveryCode, password)
+                        viewModel.changePassword(username, recoveryCode, password)
                     } else {
-                        dialogTitle = "Greška"
-                        dialogMessage = "Lozinke se ne podudaraju."
-                        showDialog = true
+                        Toast.makeText(context, "Lozinke se ne podudaraju.", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.align(Alignment.End)
             )
-        }
-    }
-
-    changePasswordResult?.let {
-        if (it.isSuccess) {
-            dialogTitle = "Uspjeh"
-            dialogMessage = it.getOrNull() ?: "Lozinka uspješno promijenjena."
-            showDialog = true
-        } else {
-            dialogTitle = "Greška"
-            dialogMessage = it.exceptionOrNull()?.message ?: "Dogodila se greška."
-            showDialog = true
         }
     }
 }

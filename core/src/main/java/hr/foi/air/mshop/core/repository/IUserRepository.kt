@@ -10,5 +10,5 @@ interface IUserRepository {
     suspend fun addUser(user: User, context: Context): Result<String>
     suspend fun updateUser(user: User, context: Context): Result<String>
     suspend fun deleteUser(userId: String): Result<String>
-    suspend fun changePassword(recoveryToken: String, newPassword: String): Result<String>
+    suspend fun changePassword(username: String, recoveryToken: String, newPassword: String): Result<String>
 }

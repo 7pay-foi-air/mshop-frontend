@@ -195,9 +195,9 @@ class UserRepo : IUserRepository {
         }
     }
 
-    override suspend fun changePassword(recoveryToken: String, newPassword: String): Result<String> {
+    override suspend fun changePassword(username: String, recoveryToken: String, newPassword: String): Result<String> {
         return try {
-            val request = ChangePasswordRequest(recoveryToken, newPassword)
+            val request = ChangePasswordRequest(username, recoveryToken, newPassword)
             val response = api.changePassword(request)
             if (response.isSuccessful) {
                 Result.success(response.body()?.message ?: "Lozinka uspješno promijenjena")

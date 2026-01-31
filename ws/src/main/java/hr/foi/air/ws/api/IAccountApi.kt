@@ -48,7 +48,7 @@ interface IAccountApi {
         @Body loginRequest: LoginRequest,
     ): Response<LoginResponse>
 
-    @POST("password/change")
+    @POST("password/reset")
     suspend fun changePassword(
         @Body request: ChangePasswordRequest
     ): Response<MessageResponse>

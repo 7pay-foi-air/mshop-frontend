@@ -14,9 +14,9 @@ class ChangePasswordViewModel : ViewModel() {
     private val _changePasswordResult = MutableStateFlow<Result<String>?>(null)
     val changePasswordResult: StateFlow<Result<String>?> = _changePasswordResult
 
-    fun changePassword(recoveryToken: String, newPassword: String) {
+    fun changePassword(username: String, recoveryToken: String, newPassword: String) {
         viewModelScope.launch {
-            val result = userRepository.changePassword(recoveryToken, newPassword)
+            val result = userRepository.changePassword(username, recoveryToken, newPassword)
             _changePasswordResult.value = result
         }
     }

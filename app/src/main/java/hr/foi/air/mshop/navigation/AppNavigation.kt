@@ -173,9 +173,15 @@ fun AppNavHost(
                     }
                 )
             }
-            composable(AppRoutes.CHANGE_PASSWORD) {
+            composable(AppRoutes.CHANGE_PASSWORD) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(AppRoutes.LOGIN_GRAPH)
+                }
+                val loginViewModel: LoginViewModel = viewModel(parentEntry)
+
                 ChangePasswordScreen(
-                    viewModel = viewModel()
+                    viewModel = viewModel(),
+                    initialUsername = loginViewModel.username
                 )
             }
         }
