@@ -177,7 +177,7 @@ fun createAssistantIntentHandler(
         }
 
         else -> {
-            AppMessageManager.show("Nije prepoznat zadatak.", AppMessageType.ERROR)
+            //AppMessageManager.show("Nije prepoznat zadatak.", AppMessageType.ERROR)
         }
     }
 }

@@ -96,5 +96,7 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
 
+    implementation("androidx.room:room-runtime:2.8.4")
+
 
 }
