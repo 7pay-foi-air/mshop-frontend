@@ -1,6 +1,5 @@
 package hr.foi.air.mshop.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +30,7 @@ import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.viewmodels.userManagement.RecoverPasswordViewModel
 
 @Composable
-fun ChangePasswordScreen(viewModel: RecoverPasswordViewModel = viewModel(), initialUsername: String = "") {
+fun RecoverPasswordScreen(viewModel: RecoverPasswordViewModel = viewModel(), initialUsername: String = "") {
     var step by remember { mutableStateOf(1) }
     var recoveryCode by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
