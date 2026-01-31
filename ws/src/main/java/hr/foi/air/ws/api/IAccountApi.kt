@@ -8,6 +8,7 @@ import hr.foi.air.ws.models.login.LoginResponse
 import hr.foi.air.ws.models.tokenRefresh.RefreshRequest
 import hr.foi.air.ws.models.tokenRefresh.RefreshResponse
 import hr.foi.air.ws.models.userManagement.AllUsersResponse
+import hr.foi.air.ws.models.userManagement.RecoverPasswordRequest
 import hr.foi.air.ws.models.userManagement.UpdateMyProfileRequest
 import hr.foi.air.ws.models.userManagement.UpdateUserAsAdminRequest
 import retrofit2.Call
@@ -59,5 +60,10 @@ interface IAccountApi {
     @POST("password/change")
     suspend fun changePassword(
         @Body request: ChangePasswordRequest
+    ): Response<MessageResponse>
+
+    @POST("password/reset")
+    suspend fun changePassword(
+        @Body request: RecoverPasswordRequest
     ): Response<MessageResponse>
 }

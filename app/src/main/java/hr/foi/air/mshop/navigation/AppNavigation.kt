@@ -1,20 +1,14 @@
 package hr.foi.air.mshop.navigation
 
-import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Groups3
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -22,7 +16,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import hr.foi.air.mshop.core.models.Transaction
 import hr.foi.air.mshop.navigation.components.articleManagement.AddArticlePage
 import hr.foi.air.mshop.navigation.components.userManagement.AddUserPage
 import hr.foi.air.mshop.navigation.components.articleManagement.EditArticlePage
@@ -34,20 +27,14 @@ import hr.foi.air.mshop.navigation.components.userManagement.ManageUsersPage
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
 import hr.foi.air.mshop.navigation.components.login.FirstLoginPassword
 import hr.foi.air.mshop.navigation.components.login.FirstLoginRecoveryToken
-import hr.foi.air.mshop.navigation.components.transaction.PaymentDonePage
-import hr.foi.air.mshop.navigation.components.transaction.PaymentPage
-import hr.foi.air.mshop.navigation.components.transaction.PaymentProcessingPage
 import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionDetailsPage
 import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionHistoryPage
 import hr.foi.air.mshop.navigation.components.userManagement.EditUserPage
 import hr.foi.air.mshop.navigation.components.userManagement.ProfilePage
-import hr.foi.air.mshop.utils.AppMessageManager
-import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.ui.components.DrawerItem
+import hr.foi.air.mshop.ui.screens.ChangePasswordScreen
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
-import hr.foi.air.mshop.viewmodels.HomepageViewModel
 import hr.foi.air.mshop.viewmodels.LoginViewModel
-import hr.foi.air.mshop.viewmodels.transaction.PaymentViewModel
 import hr.foi.air.mshop.viewmodels.userManagement.UserManagementViewModel
 import hr.foi.air.ws.data.SessionManager
 import java.time.LocalDate
@@ -60,6 +47,7 @@ object AppRoutes {
     const val LOGIN_GRAPH = "login"
     const val LOGIN_USERNAME = "logUsername"
     const val LOGIN_PASSWORD = "logPassword"
+    const val RECOVER_PASSWORD = "recoverPassword"
     const val FIRST_LOGIN_PASSWORD = "firstLoginPassword"
     const val FIRST_LOGIN_RECOVERY = "firstLoginRecovery"
 
@@ -88,12 +76,10 @@ object AppRoutes {
 
     const val TRANSACTION_DETAILS = "transaction_details/{id}"
     fun transactionDetails(id: String) = "transaction_details/$id"
-
-
 }
 
 // Used for routes where no icons appear in the top left corner
-val authRoutes = setOf(AppRoutes.LOGIN_USERNAME, AppRoutes.LOGIN_PASSWORD, AppRoutes.FIRST_LOGIN_PASSWORD, AppRoutes.FIRST_LOGIN_RECOVERY)
+val authRoutes = setOf(AppRoutes.LOGIN_USERNAME, AppRoutes.LOGIN_PASSWORD, AppRoutes.FIRST_LOGIN_PASSWORD, AppRoutes.FIRST_LOGIN_RECOVERY, AppRoutes.RECOVER_PASSWORD)
 
 val drawerItems: List<DrawerItem>
     get(){
@@ -168,7 +154,9 @@ fun AppNavHost(
 
                 LoginPassword(
                     viewModel = loginViewModel,
-                    onForgotPassword = { /* TODO */ },
+                    onForgotPassword = {
+                        navController.navigate(AppRoutes.RECOVER_PASSWORD)
+                    },
                     onLoginSuccess = {
                         navController.navigate(AppRoutes.HOME) {
                             popUpTo(AppRoutes.LOGIN_GRAPH) { inclusive = true }
@@ -209,6 +197,17 @@ fun AppNavHost(
                             popUpTo(AppRoutes.LOGIN_GRAPH) { inclusive = true }
                         }
                     }
+                )
+            }
+            composable(AppRoutes.RECOVER_PASSWORD) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(AppRoutes.LOGIN_GRAPH)
+                }
+                val loginViewModel: LoginViewModel = viewModel(parentEntry)
+
+                ChangePasswordScreen(
+                    viewModel = viewModel(),
+                    initialUsername = loginViewModel.username
                 )
             }
         }
