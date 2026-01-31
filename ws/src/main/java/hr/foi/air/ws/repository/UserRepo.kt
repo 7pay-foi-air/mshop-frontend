@@ -8,7 +8,7 @@ import hr.foi.air.ws.NetworkService
 import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.ws.models.MessageResponse
 import hr.foi.air.ws.models.userManagement.AddUserRequest
-import hr.foi.air.ws.models.userManagement.ChangePasswordRequest
+import hr.foi.air.ws.models.userManagement.RecoverPasswordRequest
 import hr.foi.air.ws.models.userManagement.UpdateMyProfileRequest
 import hr.foi.air.ws.models.userManagement.UpdateUserAsAdminRequest
 import kotlinx.coroutines.flow.Flow
@@ -195,9 +195,9 @@ class UserRepo : IUserRepository {
         }
     }
 
-    override suspend fun changePassword(username: String, recoveryToken: String, newPassword: String): Result<String> {
+    override suspend fun recoverPassword(username: String, recoveryToken: String, newPassword: String): Result<String> {
         return try {
-            val request = ChangePasswordRequest(username, recoveryToken, newPassword)
+            val request = RecoverPasswordRequest(username, recoveryToken, newPassword)
             val response = api.changePassword(request)
             if (response.isSuccessful) {
                 Result.success(response.body()?.message ?: "Lozinka uspješno promijenjena")

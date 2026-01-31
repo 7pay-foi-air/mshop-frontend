@@ -26,10 +26,10 @@ import hr.foi.air.mshop.ui.components.DialogMessage
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelPasswordField
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
-import hr.foi.air.mshop.viewmodels.userManagement.ChangePasswordViewModel
+import hr.foi.air.mshop.viewmodels.userManagement.RecoverPasswordViewModel
 
 @Composable
-fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel(), initialUsername: String = "") {
+fun ChangePasswordScreen(viewModel: RecoverPasswordViewModel = viewModel(), initialUsername: String = "") {
     var step by remember { mutableStateOf(1) }
     var recoveryCode by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -142,7 +142,7 @@ fun ChangePasswordScreen(viewModel: ChangePasswordViewModel = viewModel(), initi
             NextArrow(
                 onClick = {
                     if (password == repeatPassword) {
-                        viewModel.changePassword(username, recoveryCode, password)
+                        viewModel.recoverPassword(username, recoveryCode, password)
                     } else {
                         Toast.makeText(context, "Lozinke se ne podudaraju.", Toast.LENGTH_SHORT).show()
                     }

@@ -8,15 +8,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class ChangePasswordViewModel : ViewModel() {
+class RecoverPasswordViewModel : ViewModel() {
     private val userRepository: IUserRepository = UserRepo()
 
     private val _changePasswordResult = MutableStateFlow<Result<String>?>(null)
     val changePasswordResult: StateFlow<Result<String>?> = _changePasswordResult
 
-    fun changePassword(username: String, recoveryToken: String, newPassword: String) {
+    fun recoverPassword(username: String, recoveryToken: String, newPassword: String) {
         viewModelScope.launch {
-            val result = userRepository.changePassword(username, recoveryToken, newPassword)
+            val result = userRepository.recoverPassword(username, recoveryToken, newPassword)
             _changePasswordResult.value = result
         }
     }
