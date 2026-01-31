@@ -29,6 +29,7 @@ import hr.foi.air.mshop.ui.components.listItems.UserManagementListItem
 import hr.foi.air.mshop.ui.components.textFields.SearchField
 import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.viewmodels.userManagement.UserManagementViewModel
+import hr.foi.air.ws.data.SessionManager
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -39,6 +40,7 @@ fun ManageUsersPage(
     val context = LocalContext.current
     val query by viewModel.searchQuery.collectAsState()
     val filteredUsers by viewModel.filteredUsers.collectAsState()
+    val currentUserRole = SessionManager.currentUserRole?.lowercase() ?: ""
 
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collectLatest { message ->
@@ -105,9 +107,20 @@ fun ManageUsersPage(
             contentPadding = PaddingValues(bottom = Dimens.md)
         ) {
             items(filteredUsers) { user ->
+                val targetRole = user.role.lowercase()
+
+                val canModerate = when (currentUserRole) {
+                    "owner" -> true
+                    "admin" -> {
+                        targetRole != "owner" && targetRole != "admin"
+                    }
+                    else -> false
+                }
+
                 UserManagementListItem(
                     modifier = Modifier.padding(bottom = Dimens.xs),
                     user = user,
+                    canModerate = canModerate,
                     onEditClicked = {
                         viewModel.onStartEditUser(user)
                         navController.navigate(AppRoutes.EDIT_USER)
