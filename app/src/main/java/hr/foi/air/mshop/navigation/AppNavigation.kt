@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Groups3
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -54,7 +53,7 @@ object AppRoutes {
     const val LOGIN_GRAPH = "login"
     const val LOGIN_USERNAME = "logUsername"
     const val LOGIN_PASSWORD = "logPassword"
-    const val CHANGE_PASSWORD = "changePassword"
+    const val RECOVER_PASSWORD = "recoverPassword"
 
     // HOME
     const val HOME = "home"
@@ -84,7 +83,7 @@ object AppRoutes {
 }
 
 // Used for routes where no icons appear in the top left corner
-val authRoutes = setOf(AppRoutes.LOGIN_USERNAME, AppRoutes.LOGIN_PASSWORD, AppRoutes.CHANGE_PASSWORD)
+val authRoutes = setOf(AppRoutes.LOGIN_USERNAME, AppRoutes.LOGIN_PASSWORD, AppRoutes.RECOVER_PASSWORD)
 
 val drawerItems: List<DrawerItem>
     get(){
@@ -162,7 +161,7 @@ fun AppNavHost(
                 LoginPassword(
                     viewModel = loginViewModel,
                     onForgotPassword = {
-                        navController.navigate(AppRoutes.CHANGE_PASSWORD)
+                        navController.navigate(AppRoutes.RECOVER_PASSWORD)
                     },
                     onLoginSuccess = {
                         navController.navigate(AppRoutes.HOME) {
@@ -173,7 +172,7 @@ fun AppNavHost(
                     }
                 )
             }
-            composable(AppRoutes.CHANGE_PASSWORD) { backStackEntry ->
+            composable(AppRoutes.RECOVER_PASSWORD) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(AppRoutes.LOGIN_GRAPH)
                 }
