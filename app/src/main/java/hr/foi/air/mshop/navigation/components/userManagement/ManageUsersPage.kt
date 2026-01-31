@@ -1,6 +1,5 @@
 package hr.foi.air.mshop.navigation.components.userManagement
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,6 +40,7 @@ fun ManageUsersPage(
     val context = LocalContext.current
     val query by viewModel.searchQuery.collectAsState()
     val filteredUsers by viewModel.filteredUsers.collectAsState()
+    val currentUserRole = SessionManager.currentUserRole?.lowercase() ?: ""
 
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collectLatest { message ->
@@ -99,8 +99,6 @@ fun ManageUsersPage(
             }
         }
 
-        val currentUserRole = SessionManager.currentUserRole?.lowercase() ?: ""
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -118,9 +116,6 @@ fun ManageUsersPage(
                     }
                     else -> false
                 }
-
-                Log.d("ManageUsersPage", "currentUserRole=${SessionManager.currentUserRole}")
-                Log.d("ManageUsersPage", "targetRole=${user.role}")
 
                 UserManagementListItem(
                     modifier = Modifier.padding(bottom = Dimens.xs),
