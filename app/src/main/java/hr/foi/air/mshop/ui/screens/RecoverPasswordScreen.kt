@@ -26,6 +26,8 @@ import hr.foi.air.mshop.ui.components.DialogMessage
 import hr.foi.air.mshop.ui.components.buttons.NextArrow
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelPasswordField
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.viewmodels.userManagement.RecoverPasswordViewModel
 
 @Composable
@@ -61,7 +63,7 @@ fun ChangePasswordScreen(viewModel: RecoverPasswordViewModel = viewModel(), init
                 showDialog = true
             } else {
                 val errorMessage = it.exceptionOrNull()?.message ?: "Dogodila se greška."
-                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                AppMessageManager.show(errorMessage, AppMessageType.ERROR)
             }
         }
     }
@@ -144,7 +146,7 @@ fun ChangePasswordScreen(viewModel: RecoverPasswordViewModel = viewModel(), init
                     if (password == repeatPassword) {
                         viewModel.recoverPassword(username, recoveryCode, password)
                     } else {
-                        Toast.makeText(context, "Lozinke se ne podudaraju.", Toast.LENGTH_SHORT).show()
+                        AppMessageManager.show("Lozinke se ne podudaraju.", AppMessageType.ERROR)
                     }
                 },
                 modifier = Modifier.align(Alignment.End)
