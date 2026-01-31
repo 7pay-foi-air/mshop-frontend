@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.navigation.components.userManagement
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,6 +30,7 @@ import hr.foi.air.mshop.ui.components.listItems.UserManagementListItem
 import hr.foi.air.mshop.ui.components.textFields.SearchField
 import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.viewmodels.userManagement.UserManagementViewModel
+import hr.foi.air.ws.data.SessionManager
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -97,6 +99,8 @@ fun ManageUsersPage(
             }
         }
 
+        val currentUserRole = SessionManager.currentUserRole?.lowercase() ?: ""
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -105,9 +109,23 @@ fun ManageUsersPage(
             contentPadding = PaddingValues(bottom = Dimens.md)
         ) {
             items(filteredUsers) { user ->
+                val targetRole = user.role.lowercase()
+
+                val canModerate = when (currentUserRole) {
+                    "owner" -> true
+                    "admin" -> {
+                        targetRole != "owner" && targetRole != "admin"
+                    }
+                    else -> false
+                }
+
+                Log.d("ManageUsersPage", "currentUserRole=${SessionManager.currentUserRole}")
+                Log.d("ManageUsersPage", "targetRole=${user.role}")
+
                 UserManagementListItem(
                     modifier = Modifier.padding(bottom = Dimens.xs),
                     user = user,
+                    canModerate = canModerate,
                     onEditClicked = {
                         viewModel.onStartEditUser(user)
                         navController.navigate(AppRoutes.EDIT_USER)
