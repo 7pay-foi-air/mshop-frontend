@@ -27,6 +27,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import hr.foi.air.mshop.R
 import hr.foi.air.mshop.core.models.Article
+import hr.foi.air.mshop.ui.theme.Dimens
+import androidx.compose.foundation.shape.RoundedCornerShape
+
+import hr.foi.air.mshop.utils.toHrCurrency
 
 
 @Composable
@@ -42,10 +46,10 @@ fun ArticleManagementListItem(
         leadingContent = {
             Box(
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(Dimens.listThumb)
                     .background(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        shape = MaterialTheme.shapes.small
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(Dimens.radiusInput)
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -72,14 +76,14 @@ fun ArticleManagementListItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "€${String.format("%.2f", article.price)}",
+                    text = "${article.price.toHrCurrency()} €",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Normal
                 )
             }
         },
         trailingContent = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Dimens.sm)) {
                 IconButton(onClick = onEditClicked) {
                     Icon(
                         imageVector = Icons.Default.Edit,

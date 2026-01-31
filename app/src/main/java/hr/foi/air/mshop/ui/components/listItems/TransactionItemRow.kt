@@ -7,7 +7,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.mshop.ui.theme.MShopCard
+import hr.foi.air.mshop.utils.toHrCurrency
 
 @Composable
 fun TransactionItemRow(
@@ -17,23 +19,19 @@ fun TransactionItemRow(
     subtotal: Double,
     modifier: Modifier = Modifier
 ) {
-    // Bijeli, “filled” card (bez outline looka)
     ElevatedCard(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
-    ) {
+        modifier = Modifier.fillMaxWidth(),
+        colors = MShopCard.elevatedColors(),
+        shape = MShopCard.shape,
+        elevation = MShopCard.elevatedElevation()
+    )  {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(horizontal = Dimens.lg, vertical = Dimens.md),
+            verticalArrangement = Arrangement.spacedBy(Dimens.sm)
         ) {
             Text(
                 text = itemName,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -49,7 +47,7 @@ fun TransactionItemRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Cijena: ${"%.2f".format(price)} €",
+                    text = "Cijena: ${price.toHrCurrency()} €",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -68,7 +66,7 @@ fun TransactionItemRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "${"%.2f".format(subtotal)} €",
+                    text = "${subtotal.toHrCurrency()} €",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )

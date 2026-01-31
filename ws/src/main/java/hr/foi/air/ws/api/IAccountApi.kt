@@ -5,10 +5,13 @@ import hr.foi.air.ws.models.login.ChangePasswordRequest
 import hr.foi.air.ws.models.userManagement.AddUserRequest
 import hr.foi.air.ws.models.login.LoginRequest
 import hr.foi.air.ws.models.login.LoginResponse
+import hr.foi.air.ws.models.tokenRefresh.RefreshRequest
+import hr.foi.air.ws.models.tokenRefresh.RefreshResponse
 import hr.foi.air.ws.models.userManagement.AllUsersResponse
 import hr.foi.air.ws.models.userManagement.RecoverPasswordRequest
 import hr.foi.air.ws.models.userManagement.UpdateMyProfileRequest
 import hr.foi.air.ws.models.userManagement.UpdateUserAsAdminRequest
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -48,6 +51,11 @@ interface IAccountApi {
     suspend fun  loginUser(
         @Body loginRequest: LoginRequest,
     ): Response<LoginResponse>
+
+    @POST("refresh")
+    fun refreshAccessToken(
+        @Body request: RefreshRequest
+    ): Call<RefreshResponse>
 
     @POST("password/change")
     suspend fun changePassword(

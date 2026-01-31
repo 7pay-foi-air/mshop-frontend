@@ -45,7 +45,7 @@ class UserFormViewModel(
                 address = user.address
                 email = user.email
                 phoneNum = user.phoneNum
-                isAdmin = (user.role == "admin")
+                isAdmin = (user.role == "admin" || user.role == "owner")
                 isActive = user.isActive
             }
         }
@@ -109,6 +109,14 @@ class UserFormViewModel(
                 return
             }
 
+            if (userToEdit?.role == "owner") {
+                val isAdminValue = isAdmin ?: false
+                if (!isAdminValue) {
+                    _uiState.value = UIState(errorMessage = "Uloga vlasnika se ne može mijenjati.")
+                    return
+                }
+            }
+
             val uuidOrganisation = userToEdit?.uuidOrganisation
                 ?: hr.foi.air.ws.data.SessionManager.currentOrgId
             val isAdminValue = isAdmin ?: false
@@ -122,7 +130,7 @@ class UserFormViewModel(
                 address = address.trim(),
                 email = email.trim(),
                 phoneNum = phoneNum.trim(),
-                role = if (isAdminValue) "admin" else (userToEdit?.role ?: "cashier"),
+                role = if (isAdminValue) "admin" else "cashier",
                 dateOfBirthMillis = dateOfBirth,
                 uuidOrganisation = uuidOrganisation,
                 isActive = isActiveValue

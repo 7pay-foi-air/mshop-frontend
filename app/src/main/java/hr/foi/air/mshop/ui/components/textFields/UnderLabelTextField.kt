@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.theme.MShopTextField
 
 @Composable
 fun UnderLabelTextField(
@@ -43,16 +44,10 @@ fun UnderLabelTextField(
             singleLine = singleLine,
             keyboardOptions = keyboardOptions,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
+            shape = MShopTextField.shape,
             isError = isError,
             enabled = enabled,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
-                focusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f),
-                unfocusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
-                cursorColor = MaterialTheme.colorScheme.primary
-            ),
+            colors = MShopTextField.colors(),
             trailingIcon = trailingIcon,
             supportingText = {
                 if (errorText != null) {
