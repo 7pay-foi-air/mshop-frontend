@@ -7,16 +7,19 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,18 +33,28 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.AlertDialog
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
+import hr.foi.air.mshop.core.room.DbProvider
+import hr.foi.air.mshop.core.room.dao.ConversationPreview
+import hr.foi.air.mshop.core.room.entity.Sender
+import hr.foi.air.mshop.core.room.repository.LlmChatRepository
 import hr.foi.air.mshop.data.UIState
+import hr.foi.air.mshop.navigation.components.transactionHistory.utcMillisToLocalDate
 import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.mshop.utils.AppMessage
 import hr.foi.air.mshop.utils.AppMessageManager
 import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.viewmodels.LLM.AssistantViewModel
 import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.ws.repository.TransactionRepo
 import hr.foi.air.ws.repository.UserRepo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.booleanOrNull
@@ -49,10 +62,13 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
-
-enum class Sender { User, Bot }
+import kotlin.math.abs
 
 data class ChatMessage(
     val id: Long,
@@ -121,8 +137,6 @@ fun MessageBubble(
     }
 }
 
-
-
 @Composable
 fun LlmChatDialog(
     onDismissRequest: () -> Unit,
@@ -139,6 +153,7 @@ fun LlmChatDialog(
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
 
+
     val idGen = remember { AtomicLong(System.currentTimeMillis()) }
     fun nextId() = idGen.getAndIncrement()
 
@@ -150,6 +165,73 @@ fun LlmChatDialog(
     var pendingParams: JsonObject? by remember { mutableStateOf(null) }
 
     var isDialogOpen by remember { mutableStateOf(true) }
+
+    val db = remember { DbProvider.get(context) }
+    val chatRepo = remember { LlmChatRepository(db.llmChatDao()) }
+
+    fun Long.toHrRelativeShort(nowMillis: Long = System.currentTimeMillis()): String {
+        val diff = nowMillis - this
+        if (diff <= 0L) return "prije 0 sek" // budućnost ili točno sad
+
+        val seconds = diff / 1_000L
+        val minutes = diff / 60_000L
+        val hours   = diff / 3_600_000L
+        val days    = diff / 86_400_000L
+        val years   = days / 365L
+
+        return when {
+            years >= 1 -> "prije ${years}g"
+            days >= 1  -> "prije ${days}d"
+            hours >= 1 -> "prije ${hours}h"
+            minutes >= 1 -> "prije ${minutes} min"
+            else -> "prije ${seconds} sek"
+        }
+    }
+
+    suspend fun ensureConversationIdOnMainSafe(uid: String): Long {
+        val existing = assistantViewModel.activeConversationId
+        if (existing != null) return existing
+
+        val newId = chatRepo.createConversation(uid)
+        withContext(Dispatchers.Main) { assistantViewModel.selectConversation(newId) }
+        return newId
+    }
+
+    suspend fun saveUser(cid: Long, text: String) = chatRepo.insertUser(cid, text)
+    suspend fun saveBot(cid: Long, text: String) = chatRepo.insertBot(cid, text)
+
+    var showHistory by remember { mutableStateOf(false) }
+    var historyItems by remember { mutableStateOf(emptyList<ConversationPreview>()) }
+    var isHistoryLoading by remember { mutableStateOf(false) }
+
+    var isMessagesLoading by remember { mutableStateOf(false) }
+
+    suspend fun loadConversationToUi(cid: Long) {
+        val start = System.currentTimeMillis()
+        isMessagesLoading = true
+        try {
+            val dbMsgs = withContext(Dispatchers.IO) { chatRepo.getMessages(cid) }
+            messages.clear()
+            messages.addAll(dbMsgs.map { m -> ChatMessage(m.id, m.text, m.sender) })
+        } finally {
+            val elapsed = System.currentTimeMillis() - start
+            val minMs = 300L
+            if (elapsed < minMs) delay(minMs - elapsed)
+            isMessagesLoading = false
+        }
+    }
+
+    LaunchedEffect(SessionManager.currentUserId) {
+        assistantViewModel.resetIfUserChanged(SessionManager.currentUserId)
+    }
+
+    LaunchedEffect(assistantViewModel.activeConversationId, showHistory) {
+        val cid = assistantViewModel.activeConversationId ?: return@LaunchedEffect
+        if (showHistory) return@LaunchedEffect
+        if (messages.isNotEmpty()) return@LaunchedEffect
+        loadConversationToUi(cid)
+    }
+
 
     fun getAsyncHandlerIfAny(
         intentObj: AssistantIntent,
@@ -298,20 +380,32 @@ fun LlmChatDialog(
 
     val sendMessage = remember {
         { text: String ->
+
             if (text.isBlank() || isSending) return@remember
 
-            focusManager.clearFocus(force = true)
-            val userText = text.trim()
-            val userMsg = ChatMessage(id = nextId(), text = text, sender = Sender.User)
-            messages.add(userMsg)
-            userInput = ""
-            isSending = true
-
-            val loadingId = nextId()
-            val loadingMsg = ChatMessage(id = loadingId, text = "Razmišlja...", sender = Sender.Bot, isLoading = true)
-            messages.add(loadingMsg)
-
             scope.launch {
+                focusManager.clearFocus(force = true)
+                val userText = text.trim()
+                val userMsg = ChatMessage(id = nextId(), text = text, sender = Sender.User)
+                messages.add(userMsg)
+
+                val uid = SessionManager.currentUserId
+
+                val cid: Long? = if (uid != null) {
+                    val createdCid = withContext(Dispatchers.IO) { ensureConversationIdOnMainSafe(uid) }
+                    withContext(Dispatchers.IO) { saveUser(createdCid, userText) }
+                    createdCid
+                } else {
+                    null
+                }
+
+                userInput = ""
+                isSending = true
+
+                val loadingId = nextId()
+                val loadingMsg = ChatMessage(id = loadingId, text = "Razmišlja...", sender = Sender.Bot, isLoading = true)
+                messages.add(loadingMsg)
+
                 try {
                     val (aiText, result) = assistantViewModel.processMessage(userText)
                     Log.d("LlmChatDialog", "text: $aiText, result: $result")
@@ -332,6 +426,10 @@ fun LlmChatDialog(
                         } else {
                             messages.add(ChatMessage(id = nextId(), text = msg, sender = Sender.Bot))
                         }
+                        cid?.let{
+                            withContext(Dispatchers.IO) { saveBot(cid, msg) }
+                        }
+
                         return@launch
                     }
 
@@ -341,6 +439,9 @@ fun LlmChatDialog(
                             messages[idxLoading] = messages[idxLoading].copy(text = msg, isLoading = false)
                         } else {
                             messages.add(ChatMessage(id = nextId(), text = msg, sender = Sender.Bot))
+                        }
+                        cid?.let{
+                            withContext(Dispatchers.IO) { saveBot(cid, msg) }
                         }
                         return@launch
                     }
@@ -360,7 +461,9 @@ fun LlmChatDialog(
                                 } else {
                                     messages.add(ChatMessage(id = nextId(), text = msg, sender = Sender.Bot))
                                 }
-
+                                cid?.let {
+                                    withContext(Dispatchers.IO) { saveBot(cid, msg) }
+                                }
                                 return@launch
                             }
                         }
@@ -390,47 +493,53 @@ fun LlmChatDialog(
 
                         val handler = asyncPair.second
 
-                        scope.launch {
-                            delay(300)
-                            try {
+                        delay(300)
 
-                                val finalText =
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                        handler(result.params!!)
-                                    }
-                                if (!isDialogOpen) return@launch
-                                val idx2 = messages.indexOfFirst { it.id == loadingId }
-                                if (idx2 != -1) {
-                                    messages[idx2] =
-                                        messages[idx2].copy(text = finalText, isLoading = false)
-                                } else {
-                                    messages.add(
-                                        ChatMessage(
-                                            id = nextId(),
-                                            text = finalText,
-                                            sender = Sender.Bot
-                                        )
-                                    )
+                        try {
+
+                            val finalText =
+                                withContext(Dispatchers.IO) {
+                                    handler(result.params!!)
                                 }
-                            } catch (e: Exception) {
-                                val errText = "Greška pri izračunu."
-                                if (!isDialogOpen) return@launch
-                                val idx2 = messages.indexOfFirst { it.id == loadingId }
-                                if (idx2 != -1) {
-                                    messages[idx2] =
-                                        messages[idx2].copy(text = errText, isLoading = false)
-                                } else {
-                                    messages.add(
-                                        ChatMessage(
-                                            id = nextId(),
-                                            text = errText,
-                                            sender = Sender.Bot
-                                        )
+                            if (!isDialogOpen) return@launch
+                            val idx2 = messages.indexOfFirst { it.id == loadingId }
+                            if (idx2 != -1) {
+                                messages[idx2] =
+                                    messages[idx2].copy(text = finalText, isLoading = false)
+                            } else {
+                                messages.add(
+                                    ChatMessage(
+                                        id = nextId(),
+                                        text = finalText,
+                                        sender = Sender.Bot
                                     )
+                                )
+                            }
+                            cid?.let {
+                                withContext(Dispatchers.IO) { saveBot(cid, finalText) }
+                            }
+                        } catch (e: Exception) {
+                            val errText = "Greška pri izračunu."
+                            if (!isDialogOpen) return@launch
+                            val idx2 = messages.indexOfFirst { it.id == loadingId }
+                            if (idx2 != -1) {
+                                messages[idx2] =
+                                    messages[idx2].copy(text = errText, isLoading = false)
+                            } else {
+                                messages.add(
+                                    ChatMessage(
+                                        id = nextId(),
+                                        text = errText,
+                                        sender = Sender.Bot
+                                    )
+                                )
+                                cid?.let {
+                                    withContext(Dispatchers.IO) { saveBot(cid, errText) }
                                 }
                             }
                         }
                     }
+
                     else{
                         val displayText = when (intentObj) {
                             AssistantIntent.WANTS_INFO -> userFriendlyMessageForIntent(intent, result.params)
@@ -445,6 +554,9 @@ fun LlmChatDialog(
                             messages[idx] = messages[idx].copy(text = displayText, isLoading = false)
                         } else {
                             messages.add(ChatMessage(id = nextId(), text = displayText, sender = Sender.Bot))
+                        }
+                        cid?.let{
+                            withContext(Dispatchers.IO) { saveBot(cid, displayText) }
                         }
 
                         if(requiresLoginButNotLogged || requiresAdminButNotAdmin){
@@ -505,9 +617,13 @@ fun LlmChatDialog(
                     if (idx != -1) {
                         messages[idx] = messages[idx].copy(isLoading = false, text = lmmErrorMessage)
                     }
+                    cid?.let {
+                        withContext(Dispatchers.IO) { saveBot(cid, lmmErrorMessage) }
+                    }
                 } finally {
                     isSending = false
                 }
+
             }
         }
     }
@@ -555,13 +671,14 @@ fun LlmChatDialog(
             usePlatformDefaultWidth = false
         )
     ) {
+
         Surface(
             shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 2.dp,
             modifier = Modifier
-                .fillMaxWidth(0.94f)          // ✅ širina dijaloga (probaj 0.98f)
-                .heightIn(min = 460.dp, max = 560.dp) // ✅ visina
+                .fillMaxWidth(0.94f)
+                .heightIn(min = 460.dp, max = 560.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -590,6 +707,77 @@ fun LlmChatDialog(
                         modifier = Modifier.weight(1f)
                     )
 
+                    if(SessionManager.currentUserId!=null){
+                        IconButton(
+                            enabled = !isSending,
+                            onClick = {
+
+                                val uid = SessionManager.currentUserId
+
+                                sttManager.stopListening()
+                                isSttListening = false
+                                pendingJob?.cancel(CancellationException("Conversation history"))
+                                pendingJob = null
+                                pendingMessageId = null
+                                pendingIntent = null
+                                pendingParams = null
+
+                                userInput = ""
+
+                                showHistory = true
+                                isHistoryLoading = true
+
+                                scope.launch(Dispatchers.IO) {
+                                    val previews = chatRepo.getConversationPreviews(uid!!)
+                                    withContext(Dispatchers.Main) {
+                                        historyItems = previews
+                                        isHistoryLoading = false
+                                    }
+                                }
+                            }) {
+                            Icon(
+                                imageVector = Icons.Outlined.History,
+                                contentDescription = "History",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+
+
+                    IconButton(
+                        enabled = !isSending,
+                        onClick = {
+
+                            sttManager.stopListening()
+                            isSttListening = false
+                            pendingJob?.cancel(CancellationException("New conversation"))
+                            pendingJob = null
+                            pendingMessageId = null
+                            pendingIntent = null
+                            pendingParams = null
+
+
+                            messages.clear()
+                            userInput = ""
+
+                            assistantViewModel.selectConversation(null)
+
+                            showHistory = false
+
+                            /*AppMessageManager.show(
+                                "Započet je novi razgovor.",
+                                AppMessageType.INFO
+                            )*/
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Novi razgovor",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
 
                     IconButton(onClick = {
                         sttManager.stopListening()
@@ -605,117 +793,255 @@ fun LlmChatDialog(
                     }
                 }
 
-                Spacer(Modifier.height(6.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.primary) // ✅ ako želiš crvenu liniju
-                Spacer(Modifier.height(6.dp))
 
-                // Messages
-                LazyColumn(
-                    state = listState,
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    text = "Powered by LLaMA 3.1 8B (Meta)",
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
-                    contentPadding = PaddingValues(vertical = 6.dp)
-                ) {
-                    items(messages, key = { it.id }) { msg ->
-                        MessageBubble(
-                            message = msg,
-                            isCancellable = (msg.id == pendingMessageId),
-                            onCancel = {
-                                val intentToCancel = pendingIntent
+                        .padding(vertical = 6.dp)
 
-                                pendingJob?.cancel(CancellationException("User canceled"))
-                                pendingJob = null
+                )
+                Spacer(Modifier.height(3.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.height(6.dp))
 
-                                val idx = messages.indexOfFirst { it.id == pendingMessageId }
-                                if (idx != -1) {
-                                    val cancelText = intentToCancel?.let { cancellationTextForIntent(it) }
-                                        ?: "Operacija otkazana ❌"
-                                    messages[idx] = messages[idx].copy(text = cancelText, isLoading = false)
-                                }
 
-                                pendingMessageId = null
-                                pendingIntent = null
-                                pendingParams = null
-                            }
-                        )
-                    }
-                }
 
-                // Auto-scroll
-                LaunchedEffect(messages.size) {
-                    if (messages.isNotEmpty()) {
-                        listState.animateScrollToItem(messages.size - 1)
-                    }
-                }
-
-                Spacer(Modifier.height(10.dp))
-
-                // Composer (input)
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    tonalElevation = 1.dp,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
+                if (showHistory) {
+                    // HISTORY VIEW (umjesto chata)
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .weight(1f)
                     ) {
-                        OutlinedTextField(
-                            value = userInput,
-                            onValueChange = { userInput = it },
-                            modifier = Modifier
-                                .weight(1f)
-                                .heightIn(min = 52.dp, max = 140.dp),
-                            placeholder = { Text("Upišite poruku") },
-                            singleLine = false,
-                            maxLines = 5,
-                            shape = RoundedCornerShape(14.dp),
-                            trailingIcon = {
-                                IconButton(onClick = {
-                                    if (isSttListening) {
-                                        sttManager.stopListening()
-                                        isSttListening = false
-                                    } else {
-                                        val hasPermission = ContextCompat.checkSelfPermission(
-                                            context, Manifest.permission.RECORD_AUDIO
-                                        ) == PackageManager.PERMISSION_GRANTED
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Povijest razgovora",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            TextButton(onClick = { showHistory = false }) {
+                                Text("Natrag")
+                            }
+                        }
 
-                                        if (!hasPermission) {
-                                            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                                        } else {
-                                            isSttListening = true
-                                            sttManager.startListeningOnce()
+                        Spacer(Modifier.height(8.dp))
+
+                        if (isHistoryLoading) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(Modifier.width(10.dp))
+                                Text("Učitavam...")
+                            }
+                        } else if (historyItems.isEmpty()) {
+                            Text("Nema spremljenih razgovora.")
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(vertical = 6.dp)
+                            ) {
+                                items(historyItems, key = { it.conversationId }) { item ->
+                                    ListItem(
+                                        headlineContent = {
+                                            Text(
+                                                text = item.lastText.orEmpty(),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        },
+                                        supportingContent = {
+                                            Text(
+                                                text = item.lastAt?.toHrRelativeShort()
+                                                    ?: "Nepoznato vrijeme"
+                                            )
+                                        },
+                                        trailingContent = {
+                                            IconButton(
+                                                enabled = !isSending,
+                                                onClick = {
+                                                    val uid = SessionManager.currentUserId
+                                                        ?: return@IconButton
+
+                                                    scope.launch(Dispatchers.IO) {
+                                                        chatRepo.deleteConversation(item.conversationId) // dodaj u repo/dao
+
+                                                        withContext(Dispatchers.Main) {
+
+                                                            if (assistantViewModel.activeConversationId == item.conversationId) {
+                                                                assistantViewModel.selectConversation(
+                                                                    null
+                                                                )
+                                                                messages.clear()
+                                                            }
+
+                                                            historyItems =
+                                                                historyItems.filterNot { it.conversationId == item.conversationId }
+                                                        }
+                                                    }
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Outlined.Delete,
+                                                    contentDescription = "Obriši razgovor"
+                                                )
+                                            }
+                                        },
+                                        modifier = Modifier.clickable {
+                                            isMessagesLoading = true
+                                            assistantViewModel.selectConversation(item.conversationId)
+
+                                            userInput = ""
+                                            messages.clear()
+                                            showHistory = false
                                         }
-                                    }
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Mic,
-                                        contentDescription = "Mikrofon",
-                                        tint = if (isSttListening) MaterialTheme.colorScheme.error
-                                        else MaterialTheme.colorScheme.primary
                                     )
+                                    HorizontalDivider()
                                 }
                             }
-                        )
-
-                        Spacer(Modifier.width(8.dp))
-
-                        FilledIconButton(
-                            onClick = {
-                                val text = userInput.trim()
-                                userInput = ""
-                                sendMessage(text)
-                            },
-                            enabled = !isSending && userInput.isNotBlank()
+                        }
+                    }
+                } else {
+                    if (isMessagesLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Send,
-                                contentDescription = "Pošalji"
+                            CircularProgressIndicator()
+                        }
+                    }
+                    else{
+                        // Messages
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            contentPadding = PaddingValues(vertical = 6.dp)
+                        ) {
+                            items(messages, key = { it.id }) { msg ->
+                                MessageBubble(
+                                    message = msg,
+                                    isCancellable = (msg.id == pendingMessageId),
+                                    onCancel = {
+                                        val intentToCancel = pendingIntent
+
+                                        pendingJob?.cancel(CancellationException("User canceled"))
+                                        pendingJob = null
+
+                                        val idx =
+                                            messages.indexOfFirst { it.id == pendingMessageId }
+                                        if (idx != -1) {
+                                            val cancelText =
+                                                intentToCancel?.let { cancellationTextForIntent(it) }
+                                                    ?: "Operacija otkazana ❌"
+                                            messages[idx] = messages[idx].copy(
+                                                text = cancelText,
+                                                isLoading = false
+                                            )
+                                            val cid = assistantViewModel.activeConversationId
+                                                ?: return@MessageBubble
+                                            scope.launch(Dispatchers.IO) {
+                                                saveBot(cid, cancelText)
+                                            }
+                                        }
+
+
+                                        pendingMessageId = null
+                                        pendingIntent = null
+                                        pendingParams = null
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Auto-scroll
+                    LaunchedEffect(messages.size) {
+                        if (messages.isNotEmpty()) {
+                            listState.animateScrollToItem(messages.size - 1)
+                        }
+                    }
+
+                    Spacer(Modifier.height(10.dp))
+
+                    // Composer (input)
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        tonalElevation = 1.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = userInput,
+                                onValueChange = { userInput = it },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .heightIn(min = 52.dp, max = 140.dp),
+                                placeholder = { Text("Upišite poruku") },
+                                singleLine = false,
+                                maxLines = 5,
+                                shape = RoundedCornerShape(14.dp),
+                                trailingIcon = {
+                                    IconButton(onClick = {
+                                        if (isSttListening) {
+                                            sttManager.stopListening()
+                                            isSttListening = false
+                                        } else {
+                                            val hasPermission =
+                                                ContextCompat.checkSelfPermission(
+                                                    context, Manifest.permission.RECORD_AUDIO
+                                                ) == PackageManager.PERMISSION_GRANTED
+
+                                            if (!hasPermission) {
+                                                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                            } else {
+                                                isSttListening = true
+                                                sttManager.startListeningOnce()
+                                            }
+                                        }
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Mic,
+                                            contentDescription = "Mikrofon",
+                                            tint = if (isSttListening) MaterialTheme.colorScheme.error
+                                            else MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
                             )
+
+                            Spacer(Modifier.width(8.dp))
+
+                            FilledIconButton(
+                                onClick = {
+                                    val text = userInput.trim()
+                                    userInput = ""
+                                    sendMessage(text)
+                                },
+                                enabled = !isSending && userInput.isNotBlank()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Send,
+                                    contentDescription = "Pošalji"
+                                )
+                            }
                         }
                     }
                 }

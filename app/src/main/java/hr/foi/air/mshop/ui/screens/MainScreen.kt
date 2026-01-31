@@ -135,18 +135,20 @@ fun MainScreen() {
 
             val message by AppMessageManager.message.collectAsState()
 
-            message?.let {
-                AppMessage(
-                    message = it.text,
-                    type = it.type,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 24.dp)
-                )
+            if (!showDialog) {
+                message?.let {
+                    AppMessage(
+                        message = it.text,
+                        type = it.type,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 24.dp)
+                    )
 
-                LaunchedEffect(it) {
-                    delay(3000)
-                    AppMessageManager.clear()
+                    LaunchedEffect(it) {
+                        delay(3000)
+                        AppMessageManager.clear()
+                    }
                 }
             }
         }
