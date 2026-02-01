@@ -35,9 +35,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import hr.foi.air.mshop.core.models.User
+import hr.foi.air.mshop.ui.components.DateFieldUnderLabel
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.mshop.ui.theme.MShopSheetDefaults
 import hr.foi.air.mshop.viewmodels.userManagement.FormField
 import hr.foi.air.mshop.viewmodels.userManagement.UserFormViewModel
 import java.text.SimpleDateFormat
@@ -123,18 +125,12 @@ fun UserFormPage(
 
         var showDatePicker by remember { mutableStateOf(false) }
 
-        UnderLabelTextField(
+        DateFieldUnderLabel(
             caption = "Datum rođenja",
             value = formattedDate,
-            onValueChange = { },
+            onOpenPicker = { showDatePicker = true },
             isError = dateOfBirthError != null,
-            errorText = dateOfBirthError,
-            enabled = false,
-            trailingIcon = {
-                IconButton(onClick = { showDatePicker = true }) {
-                    Icon(imageVector = Icons.Default.DateRange, contentDescription = "Odaberi datum")
-                }
-            }
+            errorText = dateOfBirthError
         )
 
         if (showDatePicker) {
@@ -153,14 +149,12 @@ fun UserFormPage(
                 },
                 dismissButton = {
                     Button(onClick = { showDatePicker = false }) { Text("Odustani") }
-                }
+                },
+                colors = MShopSheetDefaults.datePickerColors()
             ) { DatePicker(
                     state = datePickerState,
-                    colors = DatePickerDefaults.colors(
-                    selectedDayContainerColor = MaterialTheme.colorScheme.primary,
-                    selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
-                    todayDateBorderColor = MaterialTheme.colorScheme.primary
-            )) }
+                colors = MShopSheetDefaults.datePickerColors()
+            ) }
         }
 
         Spacer(Modifier.height(Dimens.sm))

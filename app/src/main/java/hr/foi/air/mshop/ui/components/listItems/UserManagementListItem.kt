@@ -3,6 +3,7 @@ package hr.foi.air.mshop.ui.components.listItems
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -47,17 +48,19 @@ fun UserManagementListItem(
         },
         trailingContent = {
             Row(horizontalArrangement = Arrangement.spacedBy(Dimens.sm)) {
-                IconButton(onClick = onEditClicked) {
+                IconButton(onClick = onEditClicked, modifier = Modifier.size(36.dp) ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Uredi korisnicke podatke",
+                        modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = onDeleteClicked) {
+                IconButton(onClick = onDeleteClicked, modifier = Modifier.size(36.dp) ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Obriši korisnika",
+                        modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }

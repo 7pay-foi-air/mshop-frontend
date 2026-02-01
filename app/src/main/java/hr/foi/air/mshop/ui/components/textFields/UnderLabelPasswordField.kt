@@ -40,7 +40,7 @@ fun UnderLabelPasswordField(
         singleLine = true,
         visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = MShopTextField.shape,
         trailingIcon = {
             IconButton(onClick = { visible = !visible }) {

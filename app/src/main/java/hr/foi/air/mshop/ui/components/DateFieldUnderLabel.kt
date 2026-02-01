@@ -32,6 +32,7 @@ fun DateFieldUnderLabel(
         },
         modifier = modifier.fillMaxWidth(),
         isError = isError,
+        shape = MShopTextField.shape,
         colors = MShopTextField.colors(),
         supportingText = {
             val hasError = isError && !errorText.isNullOrBlank()

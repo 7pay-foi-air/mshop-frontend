@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.User
 import hr.foi.air.mshop.core.repository.IUserRepository
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.ws.repository.UserRepo
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -78,10 +80,10 @@ class UserManagementViewModel(
             val result = userRepository.deleteUser(userId)
             if (result.isSuccess) {
                 _deletedUserIds.value += userId
-                _toastMessage.emit("Korisnik uspješno obrisan.")
+                AppMessageManager.show("Korisnik uspješno obrisan.", AppMessageType.SUCCESS)
             } else {
                 val errorMsg = result.exceptionOrNull()?.message ?: "Greška pri brisanju."
-                _toastMessage.emit(errorMsg)
+                AppMessageManager.show(errorMsg, AppMessageType.ERROR)
             }
         }
     }

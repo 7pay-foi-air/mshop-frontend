@@ -52,7 +52,6 @@ fun LoginPassword(
     LaunchedEffect(loginState) {
         when (val state = loginState) {
             is LoginState.Success -> {
-                AppMessageManager.show("Prijava uspješna!", AppMessageType.SUCCESS)
                 onLoginSuccess()
             }
             is LoginState.FirstLoginRequired -> {

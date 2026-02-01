@@ -13,6 +13,11 @@ import hr.foi.air.mshop.languagemodels.OnDeviceLLM
 import hr.foi.air.mshop.ui.screens.MainScreen
 import hr.foi.air.mshop.ui.theme.MShopTheme
 import hr.foi.air.mshop.viewmodels.LLM.AssistantViewModel
+import android.app.Activity
+import android.graphics.Color
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+
 
 class MainActivity() : ComponentActivity() {
     //val languageModel : ILanguageModel = OnDeviceLLM(this)

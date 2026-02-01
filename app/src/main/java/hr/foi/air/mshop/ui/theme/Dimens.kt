@@ -28,7 +28,7 @@ object Dimens {
     val elevationLow = 2.dp
     val elevationMed = 6.dp
 
-    val listThumb = 50.dp
+    val listThumb = 75.dp
     val historyRowHeight = 100.dp
     val pickerCardSize = 100.dp
     val pickerIconSize = 40.dp

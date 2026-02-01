@@ -41,7 +41,7 @@ fun BaseListItem(
         Row(
             modifier = Modifier.padding(Dimens.lg),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Dimens.lg)
+            horizontalArrangement = Arrangement.spacedBy(Dimens.sm)
         ) {
             if (leadingContent != null) {
                 Box(

@@ -432,7 +432,8 @@ fun TransactionHistoryPage(
                     }
                 }
             }
-        }
+        },
+        contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
     ) { innerPadding ->
         Column(
             modifier = Modifier

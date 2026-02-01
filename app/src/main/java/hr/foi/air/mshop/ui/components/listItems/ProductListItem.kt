@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import hr.foi.air.mshop.R
@@ -40,7 +41,7 @@ fun ProductListItem(
         leadingContent = {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .size(96.dp)
                     .background(
                         color = MaterialTheme.colorScheme.surface,
                         shape = RoundedCornerShape(Dimens.radiusInput)
@@ -67,7 +68,7 @@ fun ProductListItem(
                 Text(
                     text = product.articleName,
                     style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
@@ -77,7 +78,10 @@ fun ProductListItem(
             }
         },
         trailingContent = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.End
+                //horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 QuantitySelector(
                     quantity = quantity,
                     onIncrement = onIncrement,
