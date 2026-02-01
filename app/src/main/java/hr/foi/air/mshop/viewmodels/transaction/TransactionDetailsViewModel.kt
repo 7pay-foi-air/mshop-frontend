@@ -1,6 +1,5 @@
 package hr.foi.air.mshop.viewmodels.transaction
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.TransactionDetails
@@ -12,9 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 class TransactionDetailsViewModel(
     private val repository: ITransactionRepository =
@@ -73,7 +69,6 @@ class TransactionDetailsViewModel(
         }
     }
 
-
     fun refundTransaction(
         description: String = "Refund transaction",
         onComplete: (success: Boolean) -> Unit
@@ -89,18 +84,16 @@ class TransactionDetailsViewModel(
             )
 
             _uiState.value = if (result.isSuccess) {
-                onComplete(true)  // refund uspješan
+                onComplete(true)
                 UIState()
             } else {
-                onComplete(false) // refund nije uspio
+                onComplete(false)
                 UIState(errorMessage = result.exceptionOrNull()?.message)
             }
         }
     }
 
-
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
-
 }

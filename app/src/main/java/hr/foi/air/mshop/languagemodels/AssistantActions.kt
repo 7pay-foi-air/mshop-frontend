@@ -8,10 +8,6 @@ import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.utils.AppMessageManager
 import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.ws.data.SessionManager
-import hr.foi.air.ws.repository.RepositoryProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int
@@ -166,15 +162,14 @@ fun createAssistantIntentHandler(
         }
 
         AssistantIntent.RECOVERY_HINT_GET -> {
-            // handled elsewhere
+            // handled in LlmChatDialog.kt
         }
 
         AssistantIntent.WANTS_INFO ->{
-            // handled elsewhere
+            // handled in LlmChatDialog.kt
         }
 
         else -> {
-            //AppMessageManager.show("Nije prepoznat zadatak.", AppMessageType.ERROR)
         }
     }
 }

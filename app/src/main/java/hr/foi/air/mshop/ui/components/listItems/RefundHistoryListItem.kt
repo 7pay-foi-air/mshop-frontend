@@ -3,7 +3,6 @@ package hr.foi.air.mshop.ui.components.listItems
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Warning
@@ -22,7 +21,6 @@ import hr.foi.air.mshop.viewmodels.transaction.RefundSummaryUI
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ListItemDefaults
 

@@ -1,7 +1,6 @@
 package hr.foi.air.ws.api
 
 import hr.foi.air.ws.models.MessageResponse
-import hr.foi.air.ws.models.articleManagement.AllArticlesResponse
 import hr.foi.air.ws.models.login.ChangePasswordRequest
 import hr.foi.air.ws.models.login.GetRecoveryCodeLocationRequest
 import hr.foi.air.ws.models.login.GetRecoveryCodeLocationResponse

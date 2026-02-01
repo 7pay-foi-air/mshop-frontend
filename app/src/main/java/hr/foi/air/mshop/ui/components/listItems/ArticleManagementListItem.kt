@@ -32,7 +32,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 
 import hr.foi.air.mshop.utils.toHrCurrency
 
-
 @Composable
 fun ArticleManagementListItem(
     article: Article,

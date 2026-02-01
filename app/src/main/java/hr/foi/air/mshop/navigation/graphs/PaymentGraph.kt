@@ -76,7 +76,7 @@ fun NavGraphBuilder.paymentGraph(navController: NavHostController) {
 
         PaymentPage(
             totalAmount = finalTotalAmount,
-            onPay = { cardData -> // cardData se ne salje na backend
+            onPay = { cardData ->
 
                 if (!assistantFromArguments) {
 

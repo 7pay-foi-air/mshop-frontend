@@ -18,11 +18,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object NetworkService {
-    //private const val ACCOUNT_BASE_URL = "http://161.35.74.46:8080/api/v1/"
-    //const val ARTICLE_BASE_URL = "http://161.35.74.46:8082/api/v1/"
-
-    //private const val TRANSACTION_BASE_URL = "http://161.35.74.46:8081/api/v1/"
-
     private const val ACCOUNT_BASE_URL = "http://${BuildConfig.SUBDOMAIN}:8080/api/v1/"
     private const val TRANSACTION_BASE_URL = "http://${BuildConfig.SUBDOMAIN}:8081/api/v1/"
     const val ARTICLE_BASE_URL = "http://${BuildConfig.SUBDOMAIN}:8082/api/v1/"

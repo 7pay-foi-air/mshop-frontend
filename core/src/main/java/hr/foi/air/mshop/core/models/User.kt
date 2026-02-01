@@ -1,7 +1,5 @@
 package hr.foi.air.mshop.core.models
 
-import java.sql.Date
-
 data class User(
     val uuidUser: String? = null,
     val firstName: String,

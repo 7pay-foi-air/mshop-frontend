@@ -28,10 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.material3.AlertDialog
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,10 +38,7 @@ import hr.foi.air.mshop.core.room.DbProvider
 import hr.foi.air.mshop.core.room.dao.ConversationPreview
 import hr.foi.air.mshop.core.room.entity.Sender
 import hr.foi.air.mshop.core.room.repository.LlmChatRepository
-import hr.foi.air.mshop.data.UIState
-import hr.foi.air.mshop.navigation.components.transactionHistory.utcMillisToLocalDate
 import hr.foi.air.mshop.ui.theme.Dimens
-import hr.foi.air.mshop.utils.AppMessage
 import hr.foi.air.mshop.utils.AppMessageManager
 import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.viewmodels.LLM.AssistantViewModel
@@ -56,20 +50,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.math.abs
 
 data class ChatMessage(
     val id: Long,
@@ -172,7 +160,7 @@ fun LlmChatDialog(
 
     fun Long.toHrRelativeShort(nowMillis: Long = System.currentTimeMillis()): String {
         val diff = nowMillis - this
-        if (diff <= 0L) return "prije 0 sek" // budućnost ili točno sad
+        if (diff <= 0L) return "prije 0 sek"
 
         val seconds = diff / 1_000L
         val minutes = diff / 60_000L
@@ -697,14 +685,13 @@ fun LlmChatDialog(
                     .padding(12.dp)
             ) {
 
-                // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.SmartToy, // ili Person / Psychology
+                        imageVector = Icons.Outlined.SmartToy,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -822,7 +809,6 @@ fun LlmChatDialog(
 
 
                 if (showHistory) {
-                    // HISTORY VIEW (umjesto chata)
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -886,8 +872,6 @@ fun LlmChatDialog(
                                                 .padding(16.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-
-                                            // TEXT
                                             Column(
                                                 modifier = Modifier.weight(1f)
                                             ) {
@@ -909,7 +893,6 @@ fun LlmChatDialog(
                                                 )
                                             }
 
-                                            // DELETE
                                             IconButton(
                                                 enabled = !isSending,
                                                 onClick = {
@@ -955,7 +938,6 @@ fun LlmChatDialog(
                         }
                     }
                     else{
-                        // Messages
                         LazyColumn(
                             state = listState,
                             modifier = Modifier
@@ -1000,7 +982,6 @@ fun LlmChatDialog(
                         }
                     }
 
-                    // Auto-scroll
                     LaunchedEffect(messages.size) {
                         if (messages.isNotEmpty()) {
                             listState.animateScrollToItem(messages.size - 1)
@@ -1009,7 +990,6 @@ fun LlmChatDialog(
 
                     Spacer(Modifier.height(10.dp))
 
-                    // Composer (input)
                     Surface(
                         shape = RoundedCornerShape(16.dp),
                         color = MaterialTheme.colorScheme.surfaceVariant,
