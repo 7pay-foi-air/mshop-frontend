@@ -175,6 +175,11 @@ fun AppNavHost(
                         navController.navigate(AppRoutes.FIRST_LOGIN_PASSWORD) {
                             popUpTo(AppRoutes.LOGIN_USERNAME) { inclusive = true }
                         }
+                    },
+                    onAccountLocked = {
+                        navController.navigate(AppRoutes.RECOVER_PASSWORD) {
+                            popUpTo(AppRoutes.LOGIN_PASSWORD) { inclusive = false }
+                        }
                     }
                 )
             }

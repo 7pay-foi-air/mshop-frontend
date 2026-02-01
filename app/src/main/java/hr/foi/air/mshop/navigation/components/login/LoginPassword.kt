@@ -44,6 +44,7 @@ fun LoginPassword(
     onForgotPassword: () -> Unit,
     onLoginSuccess: () -> Unit,
     onFirstLogin: () -> Unit,
+    onAccountLocked: () -> Unit,
     viewModel: LoginViewModel
 ) {
     val context = LocalContext.current
@@ -56,6 +57,13 @@ fun LoginPassword(
             }
             is LoginState.FirstLoginRequired -> {
                 onFirstLogin()
+            }
+            is LoginState.AccountLocked -> {
+                AppMessageManager.show(
+                    "Račun zaključan! Koristite kod za oporavak.",
+                    AppMessageType.ERROR
+                )
+                onAccountLocked()
             }
             is LoginState.Error -> {
                 AppMessageManager.show("Prijava neuspješna!", AppMessageType.ERROR)
@@ -169,6 +177,7 @@ fun LoginPasswordPreview() {
         onForgotPassword = {},
         onLoginSuccess = {},
         onFirstLogin = {},
-        viewModel = remember { LoginViewModel() }
+        viewModel = remember { LoginViewModel() },
+        onAccountLocked = {}
     )
 }

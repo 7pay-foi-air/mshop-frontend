@@ -63,7 +63,11 @@ class LoginViewModel : ViewModel() {
                     Log.d("LoginViewModel", "Successful Response Body: $loginResponse")
 
                     if (loginResponse.error != null) {
-                        _loginState.value = LoginState.Error(loginResponse.error!!)
+                        if (loginResponse.error!!.contains("zaključan", ignoreCase = true)) {
+                            _loginState.value = LoginState.AccountLocked(loginResponse.error!!)
+                        } else {
+                            _loginState.value = LoginState.Error(loginResponse.error!!)
+                        }
                         return@launch
                     }
 
@@ -75,6 +79,15 @@ class LoginViewModel : ViewModel() {
                         _loginState.value = LoginState.Success(loginResponse)
                     }
                 } else {
+                    val errorBody = response.errorBody()?.string()
+
+                    if (errorBody?.contains("zaključan", ignoreCase = true) == true) {
+                        _loginState.value = LoginState.AccountLocked(
+                            "Račun je zaključan. 3 puta ste neuspješno unesli lozinku."
+                        )
+                        return@launch
+                    }
+
                     val message = when (response.code()) {
                         400 -> "Loš zahtjev."
                         401 -> "Pogrešno korisničko ime ili lozinka."
