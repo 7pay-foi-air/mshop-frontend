@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import hr.foi.air.image_loader.interfaces.IImageLoader
 import hr.foi.air.mshop.imageloader.ImageLoaderManager
 import hr.foi.air.mshop.ui.theme.Dimens
@@ -39,13 +40,17 @@ fun LoaderPickerScreen(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Dimens.lg),
+                horizontalArrangement = Arrangement.spacedBy(
+                    Dimens.lg,
+                    Alignment.CenterHorizontally
+                ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 imageLoaderManager.imageLoaders.forEach { module ->
                     LoaderModuleItem(
                         module = module,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .width(100.dp),
                         onClick = {
                             onModuleSelected(module)
                             onDismiss()
