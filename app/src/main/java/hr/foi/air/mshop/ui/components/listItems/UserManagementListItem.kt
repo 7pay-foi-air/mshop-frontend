@@ -13,9 +13,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.core.models.User
 import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.utils.userRoleToHrLabel
@@ -25,7 +25,8 @@ fun UserManagementListItem(
     user: User,
     onEditClicked: () -> Unit,
     onDeleteClicked: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    canModerate: Boolean = true,
 ) {
     BaseListItem(
         modifier = modifier,
@@ -48,20 +49,28 @@ fun UserManagementListItem(
         },
         trailingContent = {
             Row(horizontalArrangement = Arrangement.spacedBy(Dimens.sm)) {
-                IconButton(onClick = onEditClicked, modifier = Modifier.size(36.dp) ) {
+                IconButton(
+                    onClick = onEditClicked,
+                    enabled = canModerate,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Uredi korisnicke podatke",
                         modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = if (canModerate) MaterialTheme.colorScheme.primary else Color.Gray
                     )
                 }
-                IconButton(onClick = onDeleteClicked, modifier = Modifier.size(36.dp) ) {
+                IconButton(
+                    onClick = onDeleteClicked,
+                    enabled = canModerate, 
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Obriši korisnika",
                         modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.error
+                        tint = if (canModerate) MaterialTheme.colorScheme.primary else Color.Gray
                     )
                 }
             }

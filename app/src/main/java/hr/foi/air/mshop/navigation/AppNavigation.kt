@@ -32,7 +32,7 @@ import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionHist
 import hr.foi.air.mshop.navigation.components.userManagement.EditUserPage
 import hr.foi.air.mshop.navigation.components.userManagement.ProfilePage
 import hr.foi.air.mshop.ui.components.DrawerItem
-import hr.foi.air.mshop.ui.screens.ChangePasswordScreen
+import hr.foi.air.mshop.ui.screens.RecoverPasswordScreen
 import hr.foi.air.mshop.viewmodels.articleManagement.ArticleManagementViewModel
 import hr.foi.air.mshop.viewmodels.LoginViewModel
 import hr.foi.air.mshop.viewmodels.userManagement.UserManagementViewModel
@@ -205,7 +205,7 @@ fun AppNavHost(
                 }
                 val loginViewModel: LoginViewModel = viewModel(parentEntry)
 
-                ChangePasswordScreen(
+                RecoverPasswordScreen(
                     viewModel = viewModel(),
                     initialUsername = loginViewModel.username
                 )

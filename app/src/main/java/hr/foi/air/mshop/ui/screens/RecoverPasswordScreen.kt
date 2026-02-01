@@ -35,10 +35,7 @@ import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.viewmodels.userManagement.RecoverPasswordViewModel
 
 @Composable
-fun ChangePasswordScreen(
-    viewModel: RecoverPasswordViewModel = viewModel(),
-    initialUsername: String = ""
-) {
+fun RecoverPasswordScreen(viewModel: RecoverPasswordViewModel = viewModel(), initialUsername: String = "") {
     var step by remember { mutableStateOf(1) }
     var recoveryCode by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
