@@ -62,11 +62,13 @@ fun TransactionDetailsPage(
 
                 Text(
                     text = "Detalji transakcije",
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = Dimens.lg)
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = Dimens.xl),
+                    textAlign = TextAlign.Center
                 )
+
 
             }
         }

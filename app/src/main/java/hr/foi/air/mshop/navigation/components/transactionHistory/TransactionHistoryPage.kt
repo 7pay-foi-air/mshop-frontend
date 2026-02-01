@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -395,7 +396,6 @@ fun TransactionHistoryPage(
         topBar = {
             Column(modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
             ) {
                 Text(
                     text = "mShop",
@@ -403,24 +403,29 @@ fun TransactionHistoryPage(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = Dimens.sm, bottom = Dimens.xs)
+                        .padding(top = Dimens.lg, bottom = Dimens.sm)
                 )
 
-                CenterAlignedTopAppBar(
-                    modifier = Modifier.height(48.dp),
-                    title = {
-                        Text(
-                            text = "Povijest transakcija",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                    },
-                    actions = {
-                        IconButton(onClick = { openFilters() }) {
-                            Icon(Icons.Default.FilterList, contentDescription = "Filter")
-                        }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Dimens.screenPadding)
+                        .padding(bottom = Dimens.md),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(modifier = Modifier.size(48.dp))
+
+                    Text(
+                        text = "Povijest transakcija",
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    IconButton(onClick = { openFilters() }) {
+                        Icon(Icons.Default.FilterList, contentDescription = "Filter")
                     }
-                )
+                }
 
                 TabRow(selectedTabIndex = selectedTabIndex) {
                     tabTitles.forEachIndexed { index, title ->
