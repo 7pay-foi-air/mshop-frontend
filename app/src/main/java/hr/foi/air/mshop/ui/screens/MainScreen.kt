@@ -82,7 +82,9 @@ fun MainScreen() {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+
             if (showNavigationUI) {
+
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
                 NavigationDrawer(

@@ -211,7 +211,7 @@ fun TransactionDetailsPage(
                                     Text(
                                         text = "Refund: " + (matchingRefund?.id ?: "—"),
                                         color = MaterialTheme.colorScheme.error,
-                                        fontWeight = FontWeight.SemiBold
+                                        style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
                             }
@@ -257,17 +257,17 @@ fun TransactionDetailsPage(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.spacedBy(Dimens.sm)
                                 ) {
-                                    Text(
+                                    /*Text(
                                         text = "\uD83E\uDD16",
                                         style = MaterialTheme.typography.displayLarge
-                                    )
+                                    )*/
                                     Text(
-                                        text = "AI inicirana transakcija",
+                                        text = "Nema artikla",
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = "Ova transakcija je automatski generirana i nema artikala.",
+                                        text = "Ova transakcija nema označenih artikala.",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

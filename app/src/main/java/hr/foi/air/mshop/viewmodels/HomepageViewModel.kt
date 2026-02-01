@@ -1,5 +1,9 @@
 package hr.foi.air.mshop.viewmodels
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.Article
@@ -35,6 +39,20 @@ class HomepageViewModel(
     val selectedArticles: StateFlow<Map<Int, Int>> = _selectedArticles.asStateFlow()
     val chargeAmountUIState: StateFlow<ChargeAmountUIState> = _chargeAmountUIState.asStateFlow()
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _confirmedAmount = MutableStateFlow<Double?>(null)
+    val confirmedAmount: StateFlow<Double?> = _confirmedAmount.asStateFlow()
+
+    fun confirmAmountFromText() {
+        val amount = _chargeAmountUIState.value.text
+            .replace("€", "")
+            .replace(".", "")
+            .replace(",", ".")
+            .trim()
+            .toDoubleOrNull()
+
+        _confirmedAmount.value = amount
+    }
 
     val filteredArticles: StateFlow<List<Article>> = _searchQuery
         .combine(articleRepository.getAllArticles()) { query, articles ->
@@ -118,6 +136,10 @@ class HomepageViewModel(
         _chargeAmountUIState.value = _chargeAmountUIState.value.copy(
             text = "${currentTotalPrice.toHrCurrency()} €"
         )
+    }
+
+    fun hasSelectedItems(): Boolean {
+        return  _selectedArticles.value.isNotEmpty()
     }
 
     fun buildTransaction(): Transaction? {
