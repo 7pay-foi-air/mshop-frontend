@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.theme.Dimens
 
 @Composable
 fun StyledButton(
@@ -24,8 +24,8 @@ fun StyledButton(
         enabled = enabled,
         modifier = modifier
             .fillMaxWidth()
-            .height(50.dp),
-        shape = RoundedCornerShape(16.dp),
+            .height(Dimens.fieldHeight),
+        shape = RoundedCornerShape(Dimens.radiusInput),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,

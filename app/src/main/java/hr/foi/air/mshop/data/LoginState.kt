@@ -7,4 +7,7 @@ sealed class LoginState {
     object Loading : LoginState()
     data class Success(val response: LoginResponse) : LoginState()
     data class Error(val message: String) : LoginState()
+    data class FirstLoginRequired(val recoveryToken: String) : LoginState()
+
+    data class AccountLocked(val message: String) : LoginState()
 }

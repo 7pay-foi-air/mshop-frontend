@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import hr.foi.air.mshop.core.models.User
 import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.ws.repository.UserRepo
 import hr.foi.air.ws.models.userManagement.AddUserRequest
@@ -141,25 +142,26 @@ class AddUserViewModel(
         uiState = uiState.copy(successMessage = null, errorMessage = null)
     }
 
-    fun addUser() {
+    fun addUser(context: android.content.Context) {
         if (!uiState.isFormValid) return
 
         viewModelScope.launch {
             uiState = uiState.copy(loading = true, successMessage = null, errorMessage = null)
 
-            val request = AddUserRequest(
+            val userToCreate = User(
+                firstName = uiState.firstName.trim(),
+                lastName = uiState.lastName.trim(),
+                username = uiState.username.trim(),
                 address = uiState.address.trim(),
-                date_of_birth = uiState.dobBackend,
                 email = uiState.email.trim(),
-                first_name = uiState.firstName.trim(),
-                is_admin = uiState.isAdmin,
-                last_name = uiState.lastName.trim(),
-                organisation_uuid = SessionManager.currentOrgId.toString(),
-                phone_number = uiState.phoneNum.trim(),
-                username = uiState.username.trim()
+                phoneNum = uiState.phoneNum.trim(),
+                role = if (uiState.isAdmin == true) "admin" else "cashier",
+                dateOfBirthMillis = uiState.dateOfBirthMillis,
+                uuidOrganisation = SessionManager.currentOrgId.toString(),
+                isActive = true
             )
 
-            val result = repo.addUser(request)
+            val result = repo.addUser(userToCreate, context)
 
             uiState = if (result.isSuccess) {
                 uiState.copy(loading = false, successMessage = result.getOrNull())

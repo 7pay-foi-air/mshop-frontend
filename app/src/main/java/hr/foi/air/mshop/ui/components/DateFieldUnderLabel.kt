@@ -6,8 +6,7 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.theme.MShopTextField
 
 @Composable
 fun DateFieldUnderLabel(
@@ -30,13 +29,8 @@ fun DateFieldUnderLabel(
         },
         modifier = modifier.fillMaxWidth(),
         isError = isError,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
-            focusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f),
-            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
-            cursorColor = MaterialTheme.colorScheme.primary
-        ),
+        shape = MShopTextField.shape,
+        colors = MShopTextField.colors(),
         supportingText = {
             val hasError = isError && !errorText.isNullOrBlank()
             Text(

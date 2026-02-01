@@ -1,7 +1,6 @@
 package hr.foi.air.mshop.ui.components.textFields
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -10,7 +9,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.theme.MShopTextField
 
 @Composable
 fun UnderLabelPasswordField(
@@ -30,6 +28,7 @@ fun UnderLabelPasswordField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String = "Input",
+    errorMessage: String? = null,
 ) {
     var visible by remember { mutableStateOf(false) }
     OutlinedTextField(
@@ -37,10 +36,11 @@ fun UnderLabelPasswordField(
         onValueChange = onValueChange,
         placeholder = { Text(placeholder) },
         singleLine = true,
+        isError = errorMessage != null,
         visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        modifier = modifier.fillMaxWidth(),
+        shape = MShopTextField.shape,
         trailingIcon = {
             IconButton(onClick = { visible = !visible }) {
                 Icon(
@@ -49,19 +49,21 @@ fun UnderLabelPasswordField(
                 )
             }
         },
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
-            focusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f),
-            unfocusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f),
-            cursorColor = MaterialTheme.colorScheme.primary
-        ),
+        colors = MShopTextField.colors(),
         supportingText = {
-            Text(
-                text = caption,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            } else {
+                Text(
+                    text = caption,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     )
 }

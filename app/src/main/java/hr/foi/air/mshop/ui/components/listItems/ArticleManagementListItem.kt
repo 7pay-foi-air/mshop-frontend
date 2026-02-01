@@ -27,7 +27,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import hr.foi.air.mshop.R
 import hr.foi.air.mshop.core.models.Article
+import hr.foi.air.mshop.ui.theme.Dimens
+import androidx.compose.foundation.shape.RoundedCornerShape
 
+import hr.foi.air.mshop.utils.toHrCurrency
 
 @Composable
 fun ArticleManagementListItem(
@@ -42,10 +45,10 @@ fun ArticleManagementListItem(
         leadingContent = {
             Box(
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(Dimens.listThumb)
                     .background(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        shape = MaterialTheme.shapes.small
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(Dimens.radiusInput)
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -68,29 +71,38 @@ fun ArticleManagementListItem(
                     text = article.articleName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "€${String.format("%.2f", article.price)}",
+                    text = "${article.price.toHrCurrency()} €",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Normal
                 )
             }
         },
         trailingContent = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                IconButton(onClick = onEditClicked) {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimens.xs)
+            ) {
+                IconButton(
+                    onClick = onEditClicked,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Uredi artikal",
+                        modifier = Modifier.size(22.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = onDeleteClicked) {
+                IconButton(onClick = onDeleteClicked,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Obriši artikal",
+                        modifier = Modifier.size(22.dp),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }

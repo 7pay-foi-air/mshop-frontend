@@ -16,5 +16,8 @@ data class LoginResponse(
     val role: String?,
 
     @SerializedName("error")
-    val error: String?
+    val error: String?,
+
+    @SerializedName("recovery_token")
+    val recoveryToken: String? = null
 )

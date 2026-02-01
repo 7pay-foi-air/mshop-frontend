@@ -1,9 +1,12 @@
 package hr.foi.air.mshop.ui.components
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import hr.foi.air.mshop.ui.theme.Dimens
 
 @Composable
 fun DialogMessage(
@@ -11,14 +14,17 @@ fun DialogMessage(
     title: String,
     message: String,
     confirmText: String,
-    dismissText: String,
+    dismissText: String? = null,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit = {}
 ) {
     if (!visible) return
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(Dimens.radiusCard),
+        tonalElevation = Dimens.elevationMed,
         title = { Text(text = title) },
         text = { Text(text = message) },
         confirmButton = {
@@ -27,8 +33,10 @@ fun DialogMessage(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = dismissText)
+            if (!dismissText.isNullOrEmpty()) {
+                TextButton(onClick = onDismiss) {
+                    Text(text = dismissText)
+                }
             }
         }
     )

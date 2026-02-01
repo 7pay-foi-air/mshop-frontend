@@ -1,6 +1,9 @@
 package hr.foi.air.mshop.viewmodels.LLM
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import hr.foi.air.mshop.languagemodels.ILanguageModel
 import hr.foi.air.mshop.languagemodels.LLMResult
@@ -12,6 +15,22 @@ class AssistantViewModel(
 
     var lastIntent: LLMResult? = null
         private set
+
+    var activeConversationId by mutableStateOf<Long?>(null)
+        private set
+
+    fun selectConversation(id: Long?) {
+        activeConversationId = id
+    }
+
+    private var sessionUserId: String? = null
+
+    fun resetIfUserChanged(newUserId: String?) {
+        if (newUserId != sessionUserId) {
+            sessionUserId = newUserId
+            selectConversation(null)
+        }
+    }
 
     suspend fun processMessage(message: String): Pair<String, LLMResult> {
         return try {

@@ -44,14 +44,17 @@ class ArticleFormViewModel(
     val articleNameEmpty: Boolean get() = articleName.isBlank()
     val priceEmpty: Boolean get() = price.isBlank()
     val eanNotNumeric: Boolean get() = !eanEmpty && ean.toLongOrNull() == null
-    val priceNotNumeric: Boolean get() = !priceEmpty && price.toDoubleOrNull() == null
+    val priceNotNumeric: Boolean get() = !priceEmpty && parsePrice(price) == null
 
     val eanError: Boolean get() = eanVisited && (eanEmpty || eanNotNumeric)
     val nameError: Boolean get() = articleNameVisited && articleNameEmpty
     val priceError: Boolean get() = priceVisited && (priceEmpty || priceNotNumeric)
 
     val isFormValid: Boolean
-        get() = ean.isNotBlank() && articleName.isNotBlank() && price.isNotBlank() && price.toDoubleOrNull() != null
+        get() = ean.isNotBlank() &&
+                articleName.isNotBlank() &&
+                price.isNotBlank() &&
+                parsePrice(price) != null
 
     fun initializeState(article: Article?) {
         articleToEdit = article
@@ -59,11 +62,18 @@ class ArticleFormViewModel(
             ean = article.ean
             articleName = article.articleName
             description = article.description ?: ""
-            price = article.price.toString()
+            price = article.price.toString().replace(".", ",")
             imageUrl = article.imageUrl
             imageUri = article.imageUri?.let { Uri.parse(it) }
             imagePath = article.imageUrl?.substringAfterLast('/') ?: ""
         }
+    }
+
+    private fun parsePrice(text: String): Double? {
+        return text
+            .trim()
+            .replace(",", ".")
+            .toDoubleOrNull()
     }
 
     fun onImageSelected(uri: Uri) {
@@ -79,7 +89,7 @@ class ArticleFormViewModel(
             ean = ean.trim(),
             articleName = articleName.trim(),
             description = description.trim(),
-            price = price.toDouble(),
+            price = parsePrice(price)!!,
             currency = articleToEdit?.currency ?: "EUR",
             imageUrl = imageUrl,
             imageUri = imageUri?.toString(),

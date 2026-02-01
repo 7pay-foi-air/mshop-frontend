@@ -15,9 +15,12 @@ object SessionManager {
         private set
     var accessToken: String? by mutableStateOf(null)
         private set
+    var refreshToken: String? by mutableStateOf(null)
+        private set
 
-    fun startSession(token: String?) {
+    fun startSession(token: String?, refresh: String? = null) {
         accessToken = token
+        refreshToken = refresh
         currentUserId = JWTHelper.getUserIdFromToken(token)
         currentUserRole = JWTHelper.getRoleFromToken(token)
         currentOrgId = JWTHelper.getOrgUuidFromToken(token)
@@ -28,5 +31,6 @@ object SessionManager {
         currentUserRole = null
         currentOrgId = null
         accessToken = null
+        refreshToken = null
     }
 }

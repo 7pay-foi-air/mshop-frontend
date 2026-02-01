@@ -6,6 +6,7 @@ import hr.foi.air.mshop.core.models.Article
 import hr.foi.air.mshop.core.models.Transaction
 import hr.foi.air.mshop.core.models.TransactionItem
 import hr.foi.air.mshop.core.repository.IArticleRepository
+import hr.foi.air.mshop.utils.toHrCurrency
 import hr.foi.air.ws.repository.ArticleRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ChargeAmountUIState(
-    val text: String = "0,00€",
+    val text: String = "0,00",
     val isFocused: Boolean = false,
     val wasVisited: Boolean = false
 ){
@@ -34,6 +35,20 @@ class HomepageViewModel(
     val selectedArticles: StateFlow<Map<Int, Int>> = _selectedArticles.asStateFlow()
     val chargeAmountUIState: StateFlow<ChargeAmountUIState> = _chargeAmountUIState.asStateFlow()
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _confirmedAmount = MutableStateFlow<Double?>(null)
+    val confirmedAmount: StateFlow<Double?> = _confirmedAmount.asStateFlow()
+
+    fun confirmAmountFromText() {
+        val amount = _chargeAmountUIState.value.text
+            .replace("€", "")
+            .replace(".", "")
+            .replace(",", ".")
+            .trim()
+            .toDoubleOrNull()
+
+        _confirmedAmount.value = amount
+    }
 
     val filteredArticles: StateFlow<List<Article>> = _searchQuery
         .combine(articleRepository.getAllArticles()) { query, articles ->
@@ -115,8 +130,12 @@ class HomepageViewModel(
             (article?.price ?: 0.0) * quantity
         }
         _chargeAmountUIState.value = _chargeAmountUIState.value.copy(
-            text = String.format("%.2f€", currentTotalPrice)
+            text = "${currentTotalPrice.toHrCurrency()}"
         )
+    }
+
+    fun hasSelectedItems(): Boolean {
+        return  _selectedArticles.value.isNotEmpty()
     }
 
     fun buildTransaction(): Transaction? {

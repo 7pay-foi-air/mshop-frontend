@@ -10,13 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import hr.foi.air.mshop.ui.theme.Dimens
 
 @Composable
 fun NextArrow(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    size: Dp = 56.dp,
+    size: Dp = Dimens.iconLg,
     tint: Color = MaterialTheme.colorScheme.primary,
     contentDescription: String = "Nastavi"
 ) {
