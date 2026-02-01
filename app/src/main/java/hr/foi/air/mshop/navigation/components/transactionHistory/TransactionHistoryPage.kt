@@ -396,7 +396,6 @@ fun TransactionHistoryPage(
         topBar = {
             Column(modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 0.dp)
             ) {
                 Text(
                     text = "mShop",
@@ -407,26 +406,24 @@ fun TransactionHistoryPage(
                         .padding(top = Dimens.lg, bottom = Dimens.sm)
                 )
 
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = Dimens.md)
+                        .padding(horizontal = Dimens.screenPadding)
+                        .padding(bottom = Dimens.md),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Spacer(modifier = Modifier.size(48.dp))
+
                     Text(
                         text = "Povijest transakcija",
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.align(Alignment.Center),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f)
                     )
 
-                    IconButton(
-                        onClick = { openFilters() },
-                        modifier = Modifier.align(Alignment.CenterEnd)
-                    ) {
-                        Icon(
-                            Icons.Default.FilterList,
-                            contentDescription = "Filter"
-                        )
+                    IconButton(onClick = { openFilters() }) {
+                        Icon(Icons.Default.FilterList, contentDescription = "Filter")
                     }
                 }
 

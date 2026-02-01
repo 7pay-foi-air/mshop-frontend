@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -112,9 +113,9 @@ fun ArticleFormPage(
 
         Text(
             text = if (viewModel.isEditMode) "Ažuriranje artikla" else "Dodavanje novog artikla",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(bottom = Dimens.xl),
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
         )
 
         UnderLabelTextField(

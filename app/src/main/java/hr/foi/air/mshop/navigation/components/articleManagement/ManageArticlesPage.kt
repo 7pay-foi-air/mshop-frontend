@@ -83,8 +83,8 @@ fun ManageArticlesPage(
         Text(
             text = "Upravljanje artiklima",
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = Dimens.lg)
+            modifier = Modifier.padding(bottom = Dimens.xl),
+            textAlign = TextAlign.Center
         )
 
         Row(
