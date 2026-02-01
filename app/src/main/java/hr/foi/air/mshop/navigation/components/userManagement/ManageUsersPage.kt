@@ -88,8 +88,8 @@ fun ManageUsersPage(
             IconButton(
                 onClick = { navController.navigate(AppRoutes.ADD_USER) },
                 modifier = Modifier
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f))
+                    .clip(RoundedCornerShape(Dimens.md))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,

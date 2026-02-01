@@ -10,6 +10,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -90,7 +91,10 @@ fun PaymentHistoryListItem(
                     }
                 }
             },
-            modifier = Modifier.height(Dimens.historyRowHeight)
+            modifier = Modifier.height(Dimens.historyRowHeight),
+            colors = ListItemDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         )
     }
 }

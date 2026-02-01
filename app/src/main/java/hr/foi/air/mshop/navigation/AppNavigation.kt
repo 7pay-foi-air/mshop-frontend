@@ -27,6 +27,7 @@ import hr.foi.air.mshop.navigation.components.userManagement.ManageUsersPage
 import hr.foi.air.mshop.navigation.components.RegistrationOrganizationPage
 import hr.foi.air.mshop.navigation.components.login.FirstLoginPassword
 import hr.foi.air.mshop.navigation.components.login.FirstLoginRecoveryToken
+import hr.foi.air.mshop.navigation.components.login.FirstLoginSecurityQuestions
 import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionDetailsPage
 import hr.foi.air.mshop.navigation.components.transactionHistory.TransactionHistoryPage
 import hr.foi.air.mshop.navigation.components.userManagement.EditUserPage
@@ -49,6 +50,7 @@ object AppRoutes {
     const val LOGIN_PASSWORD = "logPassword"
     const val RECOVER_PASSWORD = "recoverPassword"
     const val FIRST_LOGIN_PASSWORD = "firstLoginPassword"
+    const val FIRST_LOGIN_SECURITY_QUESTIONS = "firstLoginSecQuestions"
     const val FIRST_LOGIN_RECOVERY = "firstLoginRecovery"
 
     // HOME
@@ -79,7 +81,14 @@ object AppRoutes {
 }
 
 // Used for routes where no icons appear in the top left corner
-val authRoutes = setOf(AppRoutes.LOGIN_USERNAME, AppRoutes.LOGIN_PASSWORD, AppRoutes.FIRST_LOGIN_PASSWORD, AppRoutes.FIRST_LOGIN_RECOVERY, AppRoutes.RECOVER_PASSWORD)
+val authRoutes = setOf(
+    AppRoutes.LOGIN_USERNAME,
+    AppRoutes.LOGIN_PASSWORD,
+    AppRoutes.FIRST_LOGIN_PASSWORD,
+    AppRoutes.FIRST_LOGIN_SECURITY_QUESTIONS,
+    AppRoutes.FIRST_LOGIN_RECOVERY,
+    AppRoutes.RECOVER_PASSWORD
+)
 
 val drawerItems: List<DrawerItem>
     get(){
@@ -166,6 +175,11 @@ fun AppNavHost(
                         navController.navigate(AppRoutes.FIRST_LOGIN_PASSWORD) {
                             popUpTo(AppRoutes.LOGIN_USERNAME) { inclusive = true }
                         }
+                    },
+                    onAccountLocked = {
+                        navController.navigate(AppRoutes.RECOVER_PASSWORD) {
+                            popUpTo(AppRoutes.LOGIN_PASSWORD) { inclusive = false }
+                        }
                     }
                 )
             }
@@ -193,6 +207,21 @@ fun AppNavHost(
                 FirstLoginRecoveryToken(
                     viewModel = loginViewModel,
                     onFinish = {
+                        navController.navigate(AppRoutes.FIRST_LOGIN_SECURITY_QUESTIONS) {
+                            popUpTo(AppRoutes.FIRST_LOGIN_RECOVERY) { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable(AppRoutes.FIRST_LOGIN_SECURITY_QUESTIONS) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(AppRoutes.LOGIN_GRAPH)
+                }
+                val loginViewModel: LoginViewModel = viewModel(parentEntry)
+
+                FirstLoginSecurityQuestions(
+                    viewModel = loginViewModel,
+                    onNext = {
                         navController.navigate(AppRoutes.HOME) {
                             popUpTo(AppRoutes.LOGIN_GRAPH) { inclusive = true }
                         }
@@ -223,7 +252,11 @@ fun AppNavHost(
             Homepage(navController)
         }
         composable(AppRoutes.ADD_USER) {
-            AddUserPage()
+            AddUserPage(
+                onUserAdded = {
+                    navController.popBackStack()
+                }
+            )
         }
         composable(AppRoutes.EDIT_USER) { entry ->
             val graphEntry = remember(entry) {
