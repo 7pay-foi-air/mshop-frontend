@@ -5,7 +5,6 @@ import hr.foi.air.mshop.core.room.entity.ConversationEntity
 import hr.foi.air.mshop.core.room.entity.MessageEntity
 import hr.foi.air.mshop.core.room.entity.Sender
 
-
 class LlmChatRepository(private val dao: LLmChatDao) {
 
     suspend fun createConversation(userId: String): Long =  dao.insertConversation(ConversationEntity(userId = userId))

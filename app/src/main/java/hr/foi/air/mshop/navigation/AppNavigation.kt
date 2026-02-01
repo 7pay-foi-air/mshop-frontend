@@ -42,7 +42,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import hr.foi.air.mshop.navigation.graphs.paymentGraph
 
-
 object AppRoutes {
     // LOGIN
     const val LOGIN_GRAPH = "login"

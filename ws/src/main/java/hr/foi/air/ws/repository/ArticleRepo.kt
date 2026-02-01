@@ -110,7 +110,7 @@ class ArticleRepo : IArticleRepository {
             val currencyBody = (article.currency.ifBlank { "EUR" })
                 .toRequestBody("text/plain".toMediaType())
 
-            // mapiramo ean -> sku
+            // ean -> sku
             val skuBody = article.ean
                 .toRequestBody("text/plain".toMediaType())
 
@@ -118,7 +118,6 @@ class ArticleRepo : IArticleRepository {
                 .toString()
                 .toRequestBody("text/plain".toMediaType())
 
-            // slika je opcionalna
             val imagePart = article.imageUri?.let { uriStr ->
                 buildImagePart(uriStr, context)
             }
@@ -155,7 +154,7 @@ class ArticleRepo : IArticleRepository {
                 description = article.description?.trim().orEmpty(),
                 price = article.price,
                 currency = article.currency.ifBlank { "EUR" },
-                sku = article.ean.trim().ifBlank { null },     // ean šaljem kao sku
+                sku = article.ean.trim().ifBlank { null },
                 stockQuantity = article.stockQuantity.takeIf { it > 0 } ?: 1
             )
 

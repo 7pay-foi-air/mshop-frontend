@@ -5,19 +5,15 @@ import androidx.room.Insert
 import androidx.room.Query
 import hr.foi.air.mshop.core.room.entity.ConversationEntity
 import hr.foi.air.mshop.core.room.entity.MessageEntity
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LLmChatDao {
-
-    // Conversations
     @Insert
     suspend fun insertConversation(c: ConversationEntity): Long
 
     @Query("DELETE FROM conversations WHERE id = :cid")
     suspend fun deleteConversation(cid: Long)
 
-    // Messages
     @Insert
     suspend fun insertMessage(m: MessageEntity): Long
 

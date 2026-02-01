@@ -7,7 +7,7 @@ data class UpdateUserAsAdminRequest(
     val email: String,
     val address: String,
     val phone_number: String,
-    val date_of_birth: String?, // String "yyyy-MM-dd"
+    val date_of_birth: String?,
     val role: String,
     val is_active: Boolean
 )

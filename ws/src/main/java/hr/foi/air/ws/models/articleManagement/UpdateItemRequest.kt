@@ -7,7 +7,7 @@ data class UpdateItemRequest(
     val description: String,
     val price: Double,
     val currency: String,
-    val sku: String?,   // nullable
+    val sku: String?,
     @SerializedName("stock_quantity")
     val stockQuantity: Int
 )

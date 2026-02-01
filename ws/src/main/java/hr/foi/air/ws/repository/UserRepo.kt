@@ -1,7 +1,6 @@
 package hr.foi.air.ws.repository
 
 import android.content.Context
-import android.util.Log
 import hr.foi.air.mshop.core.models.User
 import hr.foi.air.mshop.core.repository.IUserRepository
 import hr.foi.air.ws.NetworkService

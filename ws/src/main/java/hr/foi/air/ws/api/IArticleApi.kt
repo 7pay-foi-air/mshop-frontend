@@ -27,9 +27,9 @@ interface IArticleApi {
         @Part("description") description: RequestBody,
         @Part("price") price: RequestBody,
         @Part("currency") currency: RequestBody,
-        @Part("sku") sku: RequestBody?,                 // optional
+        @Part("sku") sku: RequestBody?,
         @Part("stock_quantity") stockQuantity: RequestBody,
-        @Part image: MultipartBody.Part?                // optional
+        @Part image: MultipartBody.Part?
     ): Response<CreateItemResponse>
 
     @Multipart

@@ -1,6 +1,5 @@
 package hr.foi.air.mshop.ui.components
 
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -20,7 +19,6 @@ import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.mshop.utils.userRoleToHrLabel
 import kotlinx.coroutines.launch
 
-
 data class DrawerItem(
     val icon: ImageVector,
     val title: String,
@@ -39,8 +37,6 @@ fun NavigationDrawer(
     content: @Composable (Modifier) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val layoutDirection = LocalLayoutDirection.current
-
 
     ModalNavigationDrawer(
         drawerState = drawerState,

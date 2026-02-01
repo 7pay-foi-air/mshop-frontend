@@ -6,10 +6,7 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import hr.foi.air.mshop.ui.theme.MShopTextField
-import hr.foi.air.mshop.ui.theme.MShopTheme
 
 @Composable
 fun DateFieldUnderLabel(
