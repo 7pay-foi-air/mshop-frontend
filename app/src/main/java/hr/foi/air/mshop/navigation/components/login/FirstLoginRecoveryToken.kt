@@ -1,6 +1,5 @@
 package hr.foi.air.mshop.navigation.components.login
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -122,7 +121,7 @@ fun FirstLoginRecoveryToken(
                 .align(Alignment.End)
                 .padding(end = 16.dp, bottom = 96.dp),
             size = Dimens.fab,
-            onClick = { viewModel.saveRecoveryToken(context, onFinish) }
+            onClick = { viewModel.onProceedToSecurityQuestions(onFinish) }
         )
     }
 

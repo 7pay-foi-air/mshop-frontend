@@ -25,6 +25,15 @@ class LoginViewModel : ViewModel() {
     var newPassword by mutableStateOf("")
     var confirmNewPassword by mutableStateOf("")
 
+    var securityQuestion1 by mutableStateOf("Koje je ime Vašeg prvog ljubimca?")
+    var securityAnswer1 by mutableStateOf("")
+
+    var securityQuestion2 by mutableStateOf("U kojem gradu ste rođeni?")
+    var securityAnswer2 by mutableStateOf("")
+
+    var securityQuestion3 by mutableStateOf("Koja je bila marka Vašeg prvog automobila?")
+    var securityAnswer3 by mutableStateOf("")
+
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
     val loginState: StateFlow<LoginState> = _loginState
 
@@ -105,26 +114,27 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun onProceedToRecovery(onSuccess: () -> Unit) {
+    fun onProceedToRecoveryToken(onSuccess: () -> Unit) {
         if (newPassword.isBlank() || confirmNewPassword.isBlank()) {
-            viewModelScope.launch {
-                _toastMessage.emit("Popunite sva polja.")
-            }
+            viewModelScope.launch { _toastMessage.emit("Popunite sva polja.") }
         } else if (newPassword != confirmNewPassword) {
-            viewModelScope.launch {
-                _toastMessage.emit("Lozinke se ne podudaraju.")
-            }
+            viewModelScope.launch { _toastMessage.emit("Lozinke se ne podudaraju.") }
         } else {
-            Log.d("LoginViewModel", "Stored recoveryToken variable: ${recoveryToken}")
             onSuccess()
         }
     }
 
-    fun saveRecoveryToken(context: android.content.Context, onComplete: () -> Unit) {
+    fun onProceedToSecurityQuestions(onSuccess: () -> Unit) {
         if (recoveryTokenLocation.isBlank()) {
-            viewModelScope.launch {
-                _toastMessage.emit("Molimo unesite gdje ste spremili kod.")
-            }
+            viewModelScope.launch { _toastMessage.emit("Molimo unesite gdje ste spremili kod.") }
+        } else {
+            onSuccess()
+        }
+    }
+
+    fun saveFinalAccountSetup(context: android.content.Context, onComplete: () -> Unit) {
+        if (securityAnswer1.isBlank() || securityAnswer2.isBlank() || securityAnswer3.isBlank()) {
+            viewModelScope.launch { _toastMessage.emit("Molimo odgovorite na sva sigurnosna pitanja.") }
             return
         }
 
@@ -137,7 +147,7 @@ class LoginViewModel : ViewModel() {
                 )
 
                 val response = repository.changePassword(changeReq)
-                if (response.isSuccessful){
+                if (response.isSuccessful) {
                     val data = "Storage Location: $recoveryTokenLocation"
                     context.openFileOutput("recovery_info.txt", android.content.Context.MODE_PRIVATE).use {
                         it.write(data.toByteArray())
@@ -146,8 +156,7 @@ class LoginViewModel : ViewModel() {
                     onComplete()
                 } else {
                     _loginState.value = LoginState.Idle
-                    val errorMsg = response.message() ?: "Greška pri promjeni lozinke."
-                    _toastMessage.emit(errorMsg)
+                    _toastMessage.emit(response.message() ?: "Greška pri spremanju.")
                 }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Idle
