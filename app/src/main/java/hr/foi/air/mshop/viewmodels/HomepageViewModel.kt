@@ -1,9 +1,5 @@
 package hr.foi.air.mshop.viewmodels
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.core.models.Article
@@ -21,7 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ChargeAmountUIState(
-    val text: String = "0,00€",
+    val text: String = "0,00",
     val isFocused: Boolean = false,
     val wasVisited: Boolean = false
 ){
@@ -134,7 +130,7 @@ class HomepageViewModel(
             (article?.price ?: 0.0) * quantity
         }
         _chargeAmountUIState.value = _chargeAmountUIState.value.copy(
-            text = "${currentTotalPrice.toHrCurrency()} €"
+            text = "${currentTotalPrice.toHrCurrency()}"
         )
     }
 

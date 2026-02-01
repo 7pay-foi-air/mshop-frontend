@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -79,8 +78,9 @@ fun ProductListItem(
         },
         trailingContent = {
             Column(
-                horizontalAlignment = Alignment.End
-                //horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxHeight()
             ) {
                 QuantitySelector(
                     quantity = quantity,
@@ -89,8 +89,11 @@ fun ProductListItem(
                 )
 
                 if (showRemoveButton && onRemove != null) {
-                    Spacer(modifier = Modifier.height(Dimens.sm))
-                    IconButton(onClick = onRemove) {
+                    Spacer(modifier = Modifier.height(Dimens.xs))
+                    IconButton(
+                        onClick = onRemove,
+                        modifier = Modifier.size(40.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Ukloni iz košarice",

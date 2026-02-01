@@ -65,9 +65,12 @@ fun Homepage(
                 horizontalArrangement = Arrangement.spacedBy(Dimens.sm)
             ) {
                 UnderLabelTextField(
-                    value = chargeAmountState.text,
-                    placeholder = "00,00€",
-                    onValueChange = { homepageViewModel.onChargeAmountChange(it) },
+                    value = if (chargeAmountState.text == "0,00") "" else "${chargeAmountState.text}€",
+                    placeholder = "0,00€",
+                    onValueChange = { newValue ->
+                        val cleanValue = newValue.replace("€", "")
+                        homepageViewModel.onChargeAmountChange(cleanValue)
+                    },
                     caption = "Iznos",
                     modifier = Modifier
                         .weight(1f)
@@ -75,7 +78,7 @@ fun Homepage(
                             homepageViewModel.onChargeAmountFocusChange(focusState.isFocused)
                         },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default,
+                    keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
                     isError = chargeAmountState.errorMessage != null,
                     errorText = chargeAmountState.errorMessage,
                 )
