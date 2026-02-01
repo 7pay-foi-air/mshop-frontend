@@ -95,6 +95,7 @@ fun createAssistantIntentHandler(
     when (intentObj) {
         AssistantIntent.VIEW_TRANSACTIONS -> {
             navController.navigate(AppRoutes.TRANSACTION_HISTORY)
+            onCloseChatDialog()
         }
 
         AssistantIntent.VIEW_TRANSACTIONS_LAST -> {
@@ -112,8 +113,10 @@ fun createAssistantIntentHandler(
                     navController.navigate(
                         "transaction_history?from=${Uri.encode(startDate)}&to=${Uri.encode(endDate)}"
                     )
+                    onCloseChatDialog()
                 } else {
                     navController.navigate(AppRoutes.TRANSACTION_HISTORY)
+                    onCloseChatDialog()
                 }
             }
         }
@@ -133,22 +136,27 @@ fun createAssistantIntentHandler(
                     navController.navigate(
                         "transaction_history?from=${Uri.encode(startDate)}&to=${Uri.encode(endDate)}"
                     )
+                    onCloseChatDialog()
                 } else {
                     navController.navigate(AppRoutes.TRANSACTION_HISTORY)
+                    onCloseChatDialog()
                 }
             }
         }
 
         AssistantIntent.MANAGE_USERS -> {
             navController.navigate(AppRoutes.MANAGE_USERS)
+            onCloseChatDialog()
         }
 
         AssistantIntent.MANAGE_ITEMS -> {
             navController.navigate(AppRoutes.MANAGE_ARTICLES)
+            onCloseChatDialog()
         }
 
         AssistantIntent.EDIT_PROFILE -> {
             navController.navigate(AppRoutes.PROFILE_USER)
+            onCloseChatDialog()
         }
 
 
@@ -157,6 +165,7 @@ fun createAssistantIntentHandler(
             val amount = amountStr.replace(",", ".").toDoubleOrNull() ?: 0.0
             val formattedAmount = String.format("%.2f€", amount)
             navController.navigate("payment?amount=${Uri.encode(formattedAmount)}&assistant=true")
+            onCloseChatDialog()
         }
 
         AssistantIntent.LOGOUT -> {

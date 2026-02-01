@@ -847,64 +847,87 @@ fun LlmChatDialog(
                         } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(vertical = 6.dp)
+                                contentPadding = PaddingValues(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 items(historyItems, key = { it.conversationId }) { item ->
-                                    ListItem(
-                                        headlineContent = {
-                                            Text(
-                                                text = item.lastText.orEmpty(),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        },
-                                        supportingContent = {
-                                            Text(
-                                                text = item.lastAt?.toHrRelativeShort()
-                                                    ?: "Nepoznato vrijeme"
-                                            )
-                                        },
-                                        trailingContent = {
+
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                isMessagesLoading = true
+                                                assistantViewModel.selectConversation(item.conversationId)
+
+                                                userInput = ""
+                                                messages.clear()
+                                                showHistory = false
+                                            },
+                                        shape = RoundedCornerShape(16.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                        ),
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+
+                                            // TEXT
+                                            Column(
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Text(
+                                                    text = item.lastText.orEmpty(),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    fontWeight = FontWeight.SemiBold
+                                                )
+
+                                                Spacer(Modifier.height(4.dp))
+
+                                                Text(
+                                                    text = item.lastAt?.toHrRelativeShort()
+                                                        ?: "Nepoznato vrijeme",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+
+                                            // DELETE
                                             IconButton(
                                                 enabled = !isSending,
                                                 onClick = {
-                                                    val uid = SessionManager.currentUserId
-                                                        ?: return@IconButton
+                                                    val uid = SessionManager.currentUserId ?: return@IconButton
 
                                                     scope.launch(Dispatchers.IO) {
-                                                        chatRepo.deleteConversation(item.conversationId) // dodaj u repo/dao
+                                                        chatRepo.deleteConversation(item.conversationId)
 
                                                         withContext(Dispatchers.Main) {
-
                                                             if (assistantViewModel.activeConversationId == item.conversationId) {
-                                                                assistantViewModel.selectConversation(
-                                                                    null
-                                                                )
+                                                                assistantViewModel.selectConversation(null)
                                                                 messages.clear()
                                                             }
 
-                                                            historyItems =
-                                                                historyItems.filterNot { it.conversationId == item.conversationId }
+                                                            historyItems = historyItems.filterNot {
+                                                                it.conversationId == item.conversationId
+                                                            }
                                                         }
                                                     }
                                                 }
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Outlined.Delete,
-                                                    contentDescription = "Obriši razgovor"
+                                                    contentDescription = "Obriši razgovor",
+                                                    tint = MaterialTheme.colorScheme.secondary
                                                 )
                                             }
-                                        },
-                                        modifier = Modifier.clickable {
-                                            isMessagesLoading = true
-                                            assistantViewModel.selectConversation(item.conversationId)
-
-                                            userInput = ""
-                                            messages.clear()
-                                            showHistory = false
                                         }
-                                    )
-                                    HorizontalDivider()
+                                    }
                                 }
                             }
                         }

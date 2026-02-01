@@ -223,7 +223,11 @@ fun AppNavHost(
             Homepage(navController)
         }
         composable(AppRoutes.ADD_USER) {
-            AddUserPage()
+            AddUserPage(
+                onUserAdded = {
+                    navController.popBackStack()
+                }
+            )
         }
         composable(AppRoutes.EDIT_USER) { entry ->
             val graphEntry = remember(entry) {

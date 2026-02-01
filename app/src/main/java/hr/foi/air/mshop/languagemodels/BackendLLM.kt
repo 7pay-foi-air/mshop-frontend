@@ -22,10 +22,10 @@ class BackendLLM : ILanguageModel {
     override suspend fun getResponseAsync(userPrompt: String): String {
         try {
             val completePrompt =
-                "${SystemPrompt.prompt}\n\"$userPrompt\"\n[END OF REAL USER PROMPT]"
+                "[START OF REAL USER PROMPT]\n\"$userPrompt\"\n[END OF REAL USER PROMPT]"
 
             val request = PromptRequest(prompt = completePrompt)
-            Log.d("LLM", "Šaljem prompt: \"$completePrompt\"")
+            Log.d("LLM", completePrompt)
 
             val response = llmApi.getResponseAsync(request)
 
