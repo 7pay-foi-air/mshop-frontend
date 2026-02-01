@@ -19,6 +19,7 @@ import hr.foi.air.mshop.ui.components.DateFieldUnderLabel
 import hr.foi.air.mshop.ui.components.buttons.StyledButton
 import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.mshop.ui.theme.MShopSheetDefaults
 import hr.foi.air.mshop.viewmodels.userManagement.AddUserViewModel
 import hr.foi.air.mshop.viewmodels.userManagement.FocusedField
 
@@ -42,14 +43,11 @@ fun AddUserPage(
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.onDatePickerDismissed() }) { Text("Odustani") }
-            }
+            },
+            colors = MShopSheetDefaults.datePickerColors()
         ) { DatePicker(
             state = dateState,
-            colors = DatePickerDefaults.colors(
-                selectedDayContainerColor = MaterialTheme.colorScheme.primary,
-                selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
-                todayDateBorderColor = MaterialTheme.colorScheme.primary
-            )
+            colors = MShopSheetDefaults.datePickerColors()
         )
         }
     }

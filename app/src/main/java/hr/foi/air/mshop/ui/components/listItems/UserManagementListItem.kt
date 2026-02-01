@@ -3,6 +3,7 @@ package hr.foi.air.mshop.ui.components.listItems
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -50,21 +51,25 @@ fun UserManagementListItem(
             Row(horizontalArrangement = Arrangement.spacedBy(Dimens.sm)) {
                 IconButton(
                     onClick = onEditClicked,
-                    enabled = canModerate
+                    enabled = canModerate,
+                    modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Uredi korisnicke podatke",
+                        modifier = Modifier.size(20.dp),
                         tint = if (canModerate) MaterialTheme.colorScheme.primary else Color.Gray
                     )
                 }
                 IconButton(
                     onClick = onDeleteClicked,
-                    enabled = canModerate
+                    enabled = canModerate, 
+                    modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Obriši korisnika",
+                        modifier = Modifier.size(20.dp),
                         tint = if (canModerate) MaterialTheme.colorScheme.primary else Color.Gray
                     )
                 }

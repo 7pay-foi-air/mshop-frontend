@@ -24,6 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import hr.foi.air.mshop.data.LoginState
 import hr.foi.air.mshop.utils.AppMessageManager
 import hr.foi.air.mshop.utils.AppMessageType
@@ -52,21 +54,25 @@ fun FirstLoginRecoveryToken(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = Dimens.screenHPadding, vertical = Dimens.screenVPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(Dimens.xl))
+        Spacer(modifier = Modifier.height(Dimens.xxxl))
 
         Text(
             text = "mShop",
-            style = MaterialTheme.typography.displayLarge,
+            style = MaterialTheme.typography.displayLarge.copy(
+                fontSize = 48.sp,
+                lineHeight = 52.sp
+            ),
             modifier = Modifier.padding(top = Dimens.lg, bottom = Dimens.lg)
         )
 
         Text(
             text = "Kod za oporavak",
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(bottom = Dimens.sm)
+            modifier = Modifier.padding(bottom = Dimens.xxl)
         )
 
         Text(
@@ -82,7 +88,6 @@ fun FirstLoginRecoveryToken(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // token box
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -115,7 +120,7 @@ fun FirstLoginRecoveryToken(
         NextArrow(
             modifier = Modifier
                 .align(Alignment.End)
-                .padding(bottom = Dimens.xl),
+                .padding(end = 16.dp, bottom = 96.dp),
             size = Dimens.fab,
             onClick = { viewModel.saveRecoveryToken(context, onFinish) }
         )
@@ -125,6 +130,7 @@ fun FirstLoginRecoveryToken(
         FullScreenLoadingIndicator()
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

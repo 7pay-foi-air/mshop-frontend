@@ -72,7 +72,7 @@ fun ArticleManagementListItem(
                     text = article.articleName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
@@ -83,18 +83,27 @@ fun ArticleManagementListItem(
             }
         },
         trailingContent = {
-            Row(horizontalArrangement = Arrangement.spacedBy(Dimens.sm)) {
-                IconButton(onClick = onEditClicked) {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Dimens.xs)
+            ) {
+                IconButton(
+                    onClick = onEditClicked,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Uredi artikal",
+                        modifier = Modifier.size(22.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = onDeleteClicked) {
+                IconButton(onClick = onDeleteClicked,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Obriši artikal",
+                        modifier = Modifier.size(22.dp),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }

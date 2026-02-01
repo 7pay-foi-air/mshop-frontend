@@ -308,7 +308,8 @@ fun TransactionDetailsPage(
 
                 if (openRefundSheet) {
                     ModalBottomSheet(
-                        onDismissRequest = { openRefundSheet = false }
+                        onDismissRequest = { openRefundSheet = false },
+                        containerColor = MaterialTheme.colorScheme.surface
                     ) {
                         Column(
                             modifier = Modifier

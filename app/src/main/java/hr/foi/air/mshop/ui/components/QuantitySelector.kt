@@ -2,6 +2,7 @@ package hr.foi.air.mshop.ui.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
@@ -19,10 +20,10 @@ fun QuantitySelector(
     quantity: Int,
     onIncrement: () -> Unit,
     onDecrement: () -> Unit,
-    showQuantityLabel: Boolean = true // option for hiding the quantity label
+    showQuantityLabel: Boolean = true
 ){
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onDecrement) {
+        IconButton(onClick = onDecrement, modifier = Modifier.size(36.dp)) {
             Icon(imageVector = Icons.Default.Remove, contentDescription = "Smanji količinu")
         }
 
@@ -34,7 +35,9 @@ fun QuantitySelector(
             )
         }
 
-        IconButton(onClick = onIncrement) {
+        IconButton(
+            onClick = onIncrement,
+            modifier = Modifier.size(36.dp)) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "Povećaj količinu")
         }
     }
