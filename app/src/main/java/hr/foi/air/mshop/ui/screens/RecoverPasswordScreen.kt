@@ -37,7 +37,8 @@ import hr.foi.air.mshop.viewmodels.userManagement.RecoverPasswordViewModel
 fun RecoverPasswordScreen(
     viewModel: RecoverPasswordViewModel = viewModel(),
     loginViewModel: LoginViewModel = viewModel(),
-    initialUsername: String = ""
+    initialUsername: String = "",
+    onNavigateBack: () -> Unit
 ) {
     val changePasswordResult by viewModel.changePasswordResult.collectAsState()
 
@@ -45,13 +46,13 @@ fun RecoverPasswordScreen(
 
     if (viewModel.showDialog) {
         DialogMessage(
-            title = viewModel.dialogTitle,
-            message = viewModel.dialogMessage,
-            onDismiss = { viewModel.showDialog = false },
+            title = viewModel.dialogTitle,message = viewModel.dialogMessage,
             visible = viewModel.showDialog,
             confirmText = "U redu",
-            dismissText = "Izađi",
-            onConfirm = { viewModel.showDialog = false }
+            onConfirm = {
+                viewModel.showDialog = false
+                onNavigateBack()
+            }
         )
     }
 

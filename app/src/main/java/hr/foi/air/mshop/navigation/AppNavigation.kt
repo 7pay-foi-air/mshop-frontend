@@ -236,7 +236,10 @@ fun AppNavHost(
 
                 RecoverPasswordScreen(
                     viewModel = viewModel(),
-                    initialUsername = loginViewModel.username
+                    initialUsername = loginViewModel.username,
+                    onNavigateBack = {
+                        navController.popBackStack(AppRoutes.LOGIN_USERNAME, inclusive = false)
+                    }
                 )
             }
         }
