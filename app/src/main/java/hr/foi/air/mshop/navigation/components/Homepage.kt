@@ -19,6 +19,8 @@ import hr.foi.air.mshop.ui.components.textFields.UnderLabelTextField
 import hr.foi.air.mshop.ui.screens.CartScreen
 import hr.foi.air.mshop.ui.screens.SaleScreen
 import hr.foi.air.mshop.ui.theme.Dimens
+import hr.foi.air.mshop.utils.AppMessageManager
+import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.mshop.viewmodels.HomepageViewModel
 
 @Composable
@@ -85,7 +87,27 @@ fun Homepage(
                     )
                 }
 
-                IconButton(onClick = { navController.navigate("payment") }) {
+                IconButton(onClick = {
+                    fun isGreaterThanZero(input: String): Boolean {
+                        val number = input
+                            .replace("€", "")
+                            .replace(".", "")
+                            .replace(",", ".")
+                            .trim()
+                            .toDoubleOrNull()
+
+                        return number != null && number > 0.0
+                    }
+
+                    if(isGreaterThanZero(homepageViewModel.chargeAmountUIState.value.text))
+                    {
+                        homepageViewModel.confirmAmountFromText()
+                        navController.navigate("payment")
+                    }
+                    else{
+                        AppMessageManager.show("Iznos more biti veći od nule!",AppMessageType.ERROR)
+                    }
+                }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                         contentDescription = "Nastavi"

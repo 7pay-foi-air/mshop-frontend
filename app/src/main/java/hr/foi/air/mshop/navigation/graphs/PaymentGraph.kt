@@ -55,6 +55,8 @@ fun NavGraphBuilder.paymentGraph(navController: NavHostController) {
         val assistantFromArgumentsString = backStackEntry.arguments?.getString("assistant")
         val assistantFromArguments = assistantFromArgumentsString?.toBooleanStrictOrNull() ?: false
 
+        val confirmedAmount =  homepageViewModel.confirmedAmount.collectAsState().value ?: 0.0
+
         val finalTotalAmount: Double =
             if (assistantFromArguments && amountFromArguments != null) {
                 amountFromArguments
@@ -75,19 +77,47 @@ fun NavGraphBuilder.paymentGraph(navController: NavHostController) {
         PaymentPage(
             totalAmount = finalTotalAmount,
             onPay = { cardData -> // cardData se ne salje na backend
+
                 if (!assistantFromArguments) {
-                    val transaction = homepageViewModel.buildTransaction()
 
-                    if (transaction != null) {
+                    if(homepageViewModel.hasSelectedItems()){
+                        val transaction = homepageViewModel.buildTransaction()
+
+                        if (transaction != null) {
+                            navController.navigate(AppRoutes.PAYMENT_PROCESSING)
+
+                            paymentViewModel.processPayment(
+                                transaction = transaction,
+                                onSuccess = { transactionId ->
+                                    navController.navigate("${AppRoutes.PAYMENT_DONE}/$transactionId") {
+                                        popUpTo(AppRoutes.PAYMENT_PROCESSING) { inclusive = true }
+                                    }
+                                    homepageViewModel.clearSelection()
+                                },
+                                onError = { errorMsg ->
+                                    navController.popBackStack()
+                                    AppMessageManager.show("Dogodila se greška!", AppMessageType.ERROR)
+                                }
+                            )
+                        }
+                    }
+                    else{
+                        val transaction = Transaction(
+                            description = "Kupnja u mShopu",
+                            items = emptyList(),
+                            totalAmount = confirmedAmount,
+                            currency = "EUR"
+                        )
+
+                        Log.d("AppNavHost", "transaction: $transaction")
+
                         navController.navigate(AppRoutes.PAYMENT_PROCESSING)
-
                         paymentViewModel.processPayment(
                             transaction = transaction,
                             onSuccess = { transactionId ->
                                 navController.navigate("${AppRoutes.PAYMENT_DONE}/$transactionId") {
                                     popUpTo(AppRoutes.PAYMENT_PROCESSING) { inclusive = true }
                                 }
-                                homepageViewModel.clearSelection()
                             },
                             onError = { errorMsg ->
                                 navController.popBackStack()
@@ -95,7 +125,8 @@ fun NavGraphBuilder.paymentGraph(navController: NavHostController) {
                             }
                         )
                     }
-                } else if (amountFromArguments != null) {
+                }
+                else if (amountFromArguments != null) {
 
                     val amount = amountFromArguments
                         .replace("€", "")
