@@ -186,7 +186,7 @@ fun ArticleFormPage(
             placeholder = "",
             isError = false,
             errorText = null,
-            enabled = false, // ostavljam kako si imala (dizajn-only)
+            enabled = false,
             trailingIcon = {
                 IconButton(onClick = { viewModel.showImagePicker() }) {
                     Icon(
