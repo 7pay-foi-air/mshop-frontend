@@ -1,5 +1,6 @@
 package hr.foi.air.mshop.viewmodels
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.data.LoginState
 import hr.foi.air.ws.models.login.ChangePasswordRequest
+import hr.foi.air.ws.models.login.RecoveryCodeLocationRequest
 import hr.foi.air.ws.repository.LoginRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +41,9 @@ class LoginViewModel : ViewModel() {
 
     private val _toastMessage = MutableStateFlow("")
     val toastMessage = _toastMessage.asSharedFlow()
+
+    var newPasswordError by mutableStateOf<String?>(null)
+    var confirmPasswordError by mutableStateOf<String?>(null)
 
     var showForgottenPasswordDialog by mutableStateOf(false)
         private set
@@ -98,10 +103,11 @@ class LoginViewModel : ViewModel() {
 
     fun resetState() {
         _loginState.value = LoginState.Idle
+
         newPassword = ""
         confirmNewPassword = ""
-        recoveryToken = ""
-        recoveryTokenLocation = ""
+        newPasswordError = null
+        confirmPasswordError = null
     }
 
     fun onProceedToPassword(onSuccess: () -> Unit) {
@@ -114,12 +120,22 @@ class LoginViewModel : ViewModel() {
         }
     }
 
+    private fun validatePassword(password: String): String? {
+        if (password.length < 10) return "Lozinka mora imati barem 10 znakova."
+        val hasLetter = password.any { it.isLetter() }
+        val hasDigit = password.any { it.isDigit() }
+        if (!hasLetter || !hasDigit) return "Lozinka mora sadržavati slova i brojeve."
+        return null
+    }
+
     fun onProceedToRecoveryToken(onSuccess: () -> Unit) {
-        if (newPassword.isBlank() || confirmNewPassword.isBlank()) {
-            viewModelScope.launch { _toastMessage.emit("Popunite sva polja.") }
-        } else if (newPassword != confirmNewPassword) {
-            viewModelScope.launch { _toastMessage.emit("Lozinke se ne podudaraju.") }
-        } else {
+        newPasswordError = validatePassword(newPassword)
+        confirmPasswordError = when {
+            confirmNewPassword.isBlank() -> "Molimo ponovite lozinku."
+            newPassword != confirmNewPassword -> "Lozinke se ne podudaraju."
+            else -> null
+        }
+        if (newPasswordError == null && confirmPasswordError == null) {
             onSuccess()
         }
     }
@@ -132,7 +148,7 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun saveFinalAccountSetup(context: android.content.Context, onComplete: () -> Unit) {
+    fun saveFinalAccountSetup(context: Context, onComplete: () -> Unit) {
         if (securityAnswer1.isBlank() || securityAnswer2.isBlank() || securityAnswer3.isBlank()) {
             viewModelScope.launch { _toastMessage.emit("Molimo odgovorite na sva sigurnosna pitanja.") }
             return
@@ -141,22 +157,34 @@ class LoginViewModel : ViewModel() {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
             try {
-                val changeReq = ChangePasswordRequest(
+                val request = RecoveryCodeLocationRequest(
+                    username = username,
+                    answer1 = securityAnswer1.trim().lowercase(),
+                    answer2 = securityAnswer2.trim().lowercase(),
+                    answer3 = securityAnswer3.trim().lowercase(),
+                    recoveryCodeLocation = recoveryTokenLocation.trim()
+                )
+
+                val passChangeReq = ChangePasswordRequest(
                     newPassword = newPassword,
                     recoveryToken = recoveryToken
                 )
 
-                val response = repository.changePassword(changeReq)
-                if (response.isSuccessful) {
-                    val data = "Storage Location: $recoveryTokenLocation"
-                    context.openFileOutput("recovery_info.txt", android.content.Context.MODE_PRIVATE).use {
-                        it.write(data.toByteArray())
+                val passResponse = repository.changePassword(passChangeReq)
+
+                if (passResponse.isSuccessful) {
+                    val securityResponse = repository.saveSecurityQuestions(request)
+
+                    if (securityResponse.isSuccessful) {
+                        resetState()
+                        onComplete()
+                    } else {
+                        _loginState.value = LoginState.Idle
+                        _toastMessage.emit("Lozinka spremljena, ali greška kod sigurnosnih pitanja.")
                     }
-                    resetState()
-                    onComplete()
                 } else {
                     _loginState.value = LoginState.Idle
-                    _toastMessage.emit(response.message() ?: "Greška pri spremanju.")
+                    _toastMessage.emit(passResponse.message() ?: "Greška pri promjeni lozinke.")
                 }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Idle

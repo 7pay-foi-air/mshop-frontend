@@ -83,8 +83,12 @@ fun FirstLoginPassword(
             UnderLabelPasswordField(
                 caption = "Nova lozinka",
                 value = viewModel.newPassword,
-                onValueChange = { viewModel.newPassword = it },
-                placeholder = ""
+                onValueChange = {
+                    viewModel.newPassword = it
+                    viewModel.newPasswordError = null
+                },
+                placeholder = "",
+                errorMessage = viewModel.newPasswordError
             )
 
             Spacer(modifier = Modifier.height(Dimens.xl))
@@ -92,8 +96,12 @@ fun FirstLoginPassword(
             UnderLabelPasswordField(
                 caption = "Ponovite lozinku",
                 value = viewModel.confirmNewPassword,
-                onValueChange = { viewModel.confirmNewPassword = it },
-                placeholder = ""
+                onValueChange = {
+                    viewModel.confirmNewPassword = it
+                    viewModel.confirmPasswordError = null
+                },
+                placeholder = "",
+                errorMessage = viewModel.confirmPasswordError
             )
         }
 

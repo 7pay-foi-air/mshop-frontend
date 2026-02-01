@@ -5,6 +5,7 @@ import hr.foi.air.ws.models.login.ChangePasswordRequest
 import hr.foi.air.ws.models.userManagement.AddUserRequest
 import hr.foi.air.ws.models.login.LoginRequest
 import hr.foi.air.ws.models.login.LoginResponse
+import hr.foi.air.ws.models.login.RecoveryCodeLocationRequest
 import hr.foi.air.ws.models.tokenRefresh.RefreshRequest
 import hr.foi.air.ws.models.tokenRefresh.RefreshResponse
 import hr.foi.air.ws.models.userManagement.AllUsersResponse
@@ -65,5 +66,10 @@ interface IAccountApi {
     @POST("password/reset")
     suspend fun changePassword(
         @Body request: RecoverPasswordRequest
+    ): Response<MessageResponse>
+
+    @POST("security/questions")
+    suspend fun saveSecurityQuestions(
+        @Body request: RecoveryCodeLocationRequest
     ): Response<MessageResponse>
 }

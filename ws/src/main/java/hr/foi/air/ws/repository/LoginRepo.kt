@@ -5,6 +5,7 @@ import hr.foi.air.ws.data.SessionManager
 import hr.foi.air.ws.models.login.ChangePasswordRequest
 import hr.foi.air.ws.models.login.LoginRequest
 import hr.foi.air.ws.models.login.LoginResponse
+import hr.foi.air.ws.models.login.RecoveryCodeLocationRequest
 import retrofit2.Response
 
 class LoginRepo {
@@ -27,6 +28,9 @@ class LoginRepo {
 
     suspend fun changePassword(request: ChangePasswordRequest) =
         api.changePassword(request)
+
+    suspend fun saveSecurityQuestions(request: RecoveryCodeLocationRequest) =
+        api.saveSecurityQuestions(request)
 
     fun logout() {
         SessionManager.endSession()
