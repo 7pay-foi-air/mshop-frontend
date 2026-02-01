@@ -72,7 +72,13 @@ enum class AssistantIntent(
         defaultUserFriendlyMessage = "Pokrenuo sam proces odjave 🚪"
     ),
     WANTS_INFO("WANTS_INFO", defaultUserFriendlyMessage = null),
-    RECOVERY_HINT_GET("RECOVERY_HINT_GET", defaultUserFriendlyMessage = null),
+    RECOVERY_HINT_GET(
+        "RECOVERY_HINT_GET",
+        defaultUserFriendlyMessage = null,
+        requiresLogin = true,
+        requiresLoginMessage = "Kako biste vidjeli lokaciju Vašeg koda za oporavak, morate unijeti vaše korisničko ime u zaslonu za prijavu -> otići na Zaboravili ste lozinku? -> otići na Zaboravili ste kod za oporavak? te odgovoriti na 3 sigurnosna pitanja sa vlastitim odgovorima. 😊"
+
+    ),
     UNKNOWN("UNKNOWN", defaultUserFriendlyMessage = "Nažalost nisam u potpunosti razumio Vaš zahtjev. 😅"),
     ERROR("LLM_ERROR", defaultUserFriendlyMessage = "❌ Greška u vezi s AI servisom.\nProvjerite vezu i pokušajte ponovno.")
     ;

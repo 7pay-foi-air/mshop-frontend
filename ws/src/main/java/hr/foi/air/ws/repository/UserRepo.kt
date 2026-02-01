@@ -233,4 +233,24 @@ class UserRepo : IUserRepository {
             "Dogodila se greška"
         }
     }
+
+    suspend fun getRecoveryLocation(): Result<String> {
+        return try {
+            val res = api.getRecoveryCodeLocationForUser()
+
+            if (res.isSuccessful) {
+                val location = res.body()?.recoveryCodeLocation
+                if (!location.isNullOrBlank()) {
+                    Result.success(location)
+                } else {
+                    Result.failure(Exception("Recovery lokacija nije postavljena."))
+                }
+            } else {
+                val msg = extractErrorMessage(res.errorBody()?.string())
+                Result.failure(Exception(msg))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
