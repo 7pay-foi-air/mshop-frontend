@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import hr.foi.air.mshop.data.LoginState
 import hr.foi.air.ws.models.login.ChangePasswordRequest
-import hr.foi.air.ws.models.login.RecoveryCodeLocationRequest
+import hr.foi.air.ws.models.login.SetRecoveryCodeLocationRequest
 import hr.foi.air.ws.repository.LoginRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -157,7 +157,7 @@ class LoginViewModel : ViewModel() {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
             try {
-                val request = RecoveryCodeLocationRequest(
+                val request = SetRecoveryCodeLocationRequest(
                     username = username,
                     answer1 = securityAnswer1.trim().lowercase(),
                     answer2 = securityAnswer2.trim().lowercase(),

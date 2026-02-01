@@ -33,7 +33,8 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun FirstLoginSecurityQuestions(
     onNext: () -> Unit,
-    viewModel: LoginViewModel
+    viewModel: LoginViewModel,
+    manualAction: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -102,7 +103,10 @@ fun FirstLoginSecurityQuestions(
                 .align(Alignment.End)
                 .padding(end = 16.dp, bottom = 48.dp),
             size = Dimens.fab,
-            onClick = { viewModel.saveFinalAccountSetup(context, onComplete = onNext) }
+            onClick = {
+                if (manualAction != null) manualAction()
+                else viewModel.saveFinalAccountSetup(context, onComplete = onNext)
+            }
         )
     }
 }

@@ -2,7 +2,7 @@ package hr.foi.air.ws.models.login
 
 import com.google.gson.annotations.SerializedName
 
-data class RecoveryCodeLocationRequest(
+data class SetRecoveryCodeLocationRequest(
     val username: String,
     val answer1: String,
     val answer2: String,
