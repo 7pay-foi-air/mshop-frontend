@@ -14,9 +14,9 @@ fun DialogMessage(
     title: String,
     message: String,
     confirmText: String,
-    dismissText: String,
+    dismissText: String? = null,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit = {}
 ) {
     if (!visible) return
 
@@ -33,8 +33,10 @@ fun DialogMessage(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = dismissText)
+            if (!dismissText.isNullOrEmpty()) {
+                TextButton(onClick = onDismiss) {
+                    Text(text = dismissText)
+                }
             }
         }
     )
