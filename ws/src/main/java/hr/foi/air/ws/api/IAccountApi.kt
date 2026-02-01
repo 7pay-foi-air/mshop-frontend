@@ -2,9 +2,12 @@ package hr.foi.air.ws.api
 
 import hr.foi.air.ws.models.MessageResponse
 import hr.foi.air.ws.models.login.ChangePasswordRequest
+import hr.foi.air.ws.models.login.GetRecoveryCodeLocationRequest
+import hr.foi.air.ws.models.login.GetRecoveryCodeLocationResponse
 import hr.foi.air.ws.models.userManagement.AddUserRequest
 import hr.foi.air.ws.models.login.LoginRequest
 import hr.foi.air.ws.models.login.LoginResponse
+import hr.foi.air.ws.models.login.SetRecoveryCodeLocationRequest
 import hr.foi.air.ws.models.tokenRefresh.RefreshRequest
 import hr.foi.air.ws.models.tokenRefresh.RefreshResponse
 import hr.foi.air.ws.models.userManagement.AllUsersResponse
@@ -66,4 +69,14 @@ interface IAccountApi {
     suspend fun changePassword(
         @Body request: RecoverPasswordRequest
     ): Response<MessageResponse>
+
+    @POST("security/questions")
+    suspend fun setRecoveryCodeLocation(
+        @Body request: SetRecoveryCodeLocationRequest
+    ): Response<MessageResponse>
+
+    @POST("security/questions/verify")
+    suspend fun getRecoveryCodeLocation(
+        @Body request: GetRecoveryCodeLocationRequest
+    ): Response<GetRecoveryCodeLocationResponse>
 }

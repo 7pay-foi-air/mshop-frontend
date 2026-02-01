@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,21 +23,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import hr.foi.air.mshop.ui.components.buttons.NextArrow
+import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.utils.AppMessageManager
 import hr.foi.air.mshop.utils.AppMessageType
-import hr.foi.air.mshop.ui.components.buttons.NextArrow
-import hr.foi.air.mshop.ui.components.textFields.UnderLabelPasswordField
-import hr.foi.air.mshop.ui.theme.Dimens
 import hr.foi.air.mshop.viewmodels.LoginViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun FirstLoginPassword(
+fun FirstLoginSecurityQuestions(
     onNext: () -> Unit,
-    viewModel: LoginViewModel
+    viewModel: LoginViewModel,
+    manualAction: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
-
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collectLatest { message ->
             if (message.isNotBlank()) {
@@ -47,7 +49,8 @@ fun FirstLoginPassword(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = Dimens.screenHPadding, vertical = Dimens.screenVPadding),
+            .padding(horizontal = Dimens.screenHPadding, vertical = Dimens.screenVPadding)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(Dimens.xxxl))
@@ -62,7 +65,7 @@ fun FirstLoginPassword(
         )
 
         Text(
-            text = "Prva prijava",
+            text = "Sigurnosna pitanja",
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(bottom = Dimens.xxl)
         )
@@ -71,54 +74,68 @@ fun FirstLoginPassword(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(Dimens.xl),
+            horizontalAlignment = Alignment.Start
         ) {
-            Text(
-                text = "Postavite novu lozinku",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(bottom = Dimens.xxl)
+            SecurityQuestionItem(
+                question = viewModel.securityQuestion1,
+                answer = viewModel.securityAnswer1,
+                onAnswerChange = { viewModel.securityAnswer1 = it }
             )
 
-            UnderLabelPasswordField(
-                caption = "Nova lozinka",
-                value = viewModel.newPassword,
-                onValueChange = {
-                    viewModel.newPassword = it
-                    viewModel.newPasswordError = null
-                },
-                placeholder = "",
-                errorMessage = viewModel.newPasswordError
+            SecurityQuestionItem(
+                question = viewModel.securityQuestion2,
+                answer = viewModel.securityAnswer2,
+                onAnswerChange = { viewModel.securityAnswer2 = it }
             )
 
-            Spacer(modifier = Modifier.height(Dimens.xl))
-
-            UnderLabelPasswordField(
-                caption = "Ponovite lozinku",
-                value = viewModel.confirmNewPassword,
-                onValueChange = {
-                    viewModel.confirmNewPassword = it
-                    viewModel.confirmPasswordError = null
-                },
-                placeholder = "",
-                errorMessage = viewModel.confirmPasswordError
+            SecurityQuestionItem(
+                question = viewModel.securityQuestion3,
+                answer = viewModel.securityAnswer3,
+                onAnswerChange = { viewModel.securityAnswer3 = it }
             )
         }
+
+        Spacer(modifier = Modifier.height(Dimens.xxl))
 
         NextArrow(
             modifier = Modifier
                 .align(Alignment.End)
-                .padding(end = 16.dp, bottom = 96.dp),
+                .padding(end = 16.dp, bottom = 48.dp),
             size = Dimens.fab,
-            onClick = { viewModel.onProceedToRecoveryToken(onSuccess = onNext) }
+            onClick = {
+                if (manualAction != null) manualAction()
+                else viewModel.saveFinalAccountSetup(context, onComplete = onNext)
+            }
         )
     }
 }
 
+@Composable
+fun SecurityQuestionItem(
+    question: String,
+    answer: String,
+    onAnswerChange: (String) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = question,
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        OutlinedTextField(
+            value = answer,
+            onValueChange = onAnswerChange,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            placeholder = { Text("Vaš odgovor") }
+        )
+    }
+}
 
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true)
 @Composable
-fun FirstLoginPasswordPreview() {
-    FirstLoginPassword(onNext = {}, viewModel = LoginViewModel())
+fun FirstLoginSecurityQuestionsPreview() {
+    FirstLoginSecurityQuestions(onNext = {}, viewModel = LoginViewModel())
 }
