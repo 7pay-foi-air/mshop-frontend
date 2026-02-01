@@ -52,10 +52,10 @@ class RecoverPasswordViewModel : ViewModel() {
 
             result.onSuccess { location ->
                 recoveryLocation = location
-                step = 4 // Move to the display screen
+                step = 4
             }.onFailure { error ->
-                dialogTitle = "Greška"
-                dialogMessage = error.message ?: "Došlo je do pogreške pri dohvaćanju lokacije."
+                dialogTitle = "Greška pri provjeri"
+                dialogMessage = error.message ?: "Nepoznata pogreška."
                 showDialog = true
             }
         }

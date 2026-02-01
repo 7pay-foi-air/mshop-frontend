@@ -48,13 +48,19 @@ class LoginRepo {
                 if (body.valid && !body.recoveryCodeLocation.isNullOrBlank()) {
                     Result.success(body.recoveryCodeLocation)
                 } else {
-                    Result.failure(Exception("Odgovori nisu točni."))
+                    Result.failure(Exception("Odgovori nisu točni. (Greška: 401)"))
                 }
             } else {
-                Result.failure(Exception("Greška na poslužitelju: ${response.code()}"))
+                val message = when (response.code()) {
+                    400 -> "Neispravan zahtjev."
+                    401 -> "Netočni odgovori na sigurnosna pitanja."
+                    404 -> "Korisnik nije pronađen."
+                    else -> "Došlo je do pogreške na poslužitelju."
+                }
+                Result.failure(Exception("$message (Status kod: ${response.code()})"))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Greška u komunikaciji: ${e.localizedMessage}"))
         }
     }
 
