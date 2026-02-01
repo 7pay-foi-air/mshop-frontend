@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -395,7 +396,7 @@ fun TransactionHistoryPage(
         topBar = {
             Column(modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
+                .padding(top = 0.dp)
             ) {
                 Text(
                     text = "mShop",
@@ -403,24 +404,31 @@ fun TransactionHistoryPage(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = Dimens.sm, bottom = Dimens.xs)
+                        .padding(top = Dimens.lg, bottom = Dimens.sm)
                 )
 
-                CenterAlignedTopAppBar(
-                    modifier = Modifier.height(48.dp),
-                    title = {
-                        Text(
-                            text = "Povijest transakcija",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = Dimens.md)
+                ) {
+                    Text(
+                        text = "Povijest transakcija",
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.align(Alignment.Center),
+                        textAlign = TextAlign.Center
+                    )
+
+                    IconButton(
+                        onClick = { openFilters() },
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    ) {
+                        Icon(
+                            Icons.Default.FilterList,
+                            contentDescription = "Filter"
                         )
-                    },
-                    actions = {
-                        IconButton(onClick = { openFilters() }) {
-                            Icon(Icons.Default.FilterList, contentDescription = "Filter")
-                        }
                     }
-                )
+                }
 
                 TabRow(selectedTabIndex = selectedTabIndex) {
                     tabTitles.forEachIndexed { index, title ->

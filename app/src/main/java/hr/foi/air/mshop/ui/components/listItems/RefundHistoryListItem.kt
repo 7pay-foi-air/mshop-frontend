@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ListItemDefaults
 
 @Composable
 fun RefundHistoryListItem(
@@ -81,7 +82,10 @@ fun RefundHistoryListItem(
                     )
                 }
             },
-            modifier = Modifier.height(Dimens.historyRowHeight)
+            modifier = Modifier.height(Dimens.historyRowHeight),
+            colors = ListItemDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         )
     }
 }

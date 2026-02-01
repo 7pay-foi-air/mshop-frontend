@@ -53,7 +53,7 @@ enum class AssistantIntent(
         "EDIT_PROFILE",
         requiresLogin = true,
         requiresLoginMessage = "Morate biti prijavljeni kako biste mogli uređivati svoj korisnički račun. ⚠️",
-        defaultUserFriendlyMessage = "Prebacio sam Vas na stranicu za uređivativanje svog korisničkog račun. 📦"
+        defaultUserFriendlyMessage = "Prebacio sam Vas na stranicu za uređivativanje svog korisničkog računa. 🧑‍💼"
     ),
 
 
