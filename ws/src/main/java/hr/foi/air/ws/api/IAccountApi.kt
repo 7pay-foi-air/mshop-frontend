@@ -1,6 +1,7 @@
 package hr.foi.air.ws.api
 
 import hr.foi.air.ws.models.MessageResponse
+import hr.foi.air.ws.models.articleManagement.AllArticlesResponse
 import hr.foi.air.ws.models.login.ChangePasswordRequest
 import hr.foi.air.ws.models.login.GetRecoveryCodeLocationRequest
 import hr.foi.air.ws.models.login.GetRecoveryCodeLocationResponse
@@ -12,6 +13,7 @@ import hr.foi.air.ws.models.tokenRefresh.RefreshRequest
 import hr.foi.air.ws.models.tokenRefresh.RefreshResponse
 import hr.foi.air.ws.models.userManagement.AllUsersResponse
 import hr.foi.air.ws.models.userManagement.RecoverPasswordRequest
+import hr.foi.air.ws.models.userManagement.RecoveryTokenResponse
 import hr.foi.air.ws.models.userManagement.UpdateMyProfileRequest
 import hr.foi.air.ws.models.userManagement.UpdateUserAsAdminRequest
 import retrofit2.Call
@@ -79,4 +81,8 @@ interface IAccountApi {
     suspend fun getRecoveryCodeLocation(
         @Body request: GetRecoveryCodeLocationRequest
     ): Response<GetRecoveryCodeLocationResponse>
+
+    @GET("recovery/location")
+    suspend fun getRecoveryCodeLocationForUser(
+    ): Response<RecoveryTokenResponse>
 }

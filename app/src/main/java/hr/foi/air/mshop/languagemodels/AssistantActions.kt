@@ -8,6 +8,10 @@ import hr.foi.air.mshop.navigation.AppRoutes
 import hr.foi.air.mshop.utils.AppMessageManager
 import hr.foi.air.mshop.utils.AppMessageType
 import hr.foi.air.ws.data.SessionManager
+import hr.foi.air.ws.repository.RepositoryProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int
@@ -43,22 +47,6 @@ fun userFriendlyMessageForIntent(
         AssistantIntent.WANTS_INFO -> {
             val msg = params?.get("message")?.jsonPrimitive?.contentOrNull
             msg ?: "Dogodila se greška, molim Vas pokušajte ponovo."
-        }
-        AssistantIntent.RECOVERY_HINT_GET -> {
-            context?.let { ctx ->
-                val locationOrNull = try {
-                    ctx.openFileInput("recovery_info.txt").bufferedReader().use { reader ->
-                        reader.readText().let { raw ->
-                            val prefix = "Storage Location: "
-                            val cleaned = if (raw.startsWith(prefix)) raw.removePrefix(prefix).trimStart() else raw.trim()
-                            if (cleaned.isNotEmpty()) cleaned else null
-                        }
-                    }
-                } catch (e: Exception) {
-                    null
-                }
-                locationOrNull?.let { "Lokacija Vašeg koda za oporavak:\n$it" }
-            } ?: intentObj.defaultUserFriendlyMessage ?: "Nema informacije o lokaciji koda."
         }
         else -> {
             intentObj.defaultUserFriendlyMessage ?: "Pokrenuo sam proces... ⚙️"

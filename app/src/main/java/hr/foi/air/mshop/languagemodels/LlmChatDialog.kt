@@ -58,6 +58,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
@@ -237,9 +238,20 @@ fun LlmChatDialog(
         intentObj: AssistantIntent,
         params: JsonObject?,
     ): Pair<String, suspend (JsonObject) -> String>? {
-        if (intentObj != AssistantIntent.VIEW_TRANSACTIONS_LAST && intentObj != AssistantIntent.VIEW_TRANSACTIONS_RANGE) return null
-        val metric = params?.get("metric")?.jsonPrimitive?.contentOrNull ?: return null
+        if (intentObj != AssistantIntent.VIEW_TRANSACTIONS_LAST && intentObj != AssistantIntent.VIEW_TRANSACTIONS_RANGE && intentObj != AssistantIntent.RECOVERY_HINT_GET) return null
 
+        if (intentObj == AssistantIntent.RECOVERY_HINT_GET) {
+            return Pair("Dohvaćam lokaciju Vašeg koda za oporavak...") { _ ->
+                delay(500)
+                val result = userRepo.getRecoveryLocation()
+                result.fold(
+                    onSuccess = { location -> "Lokacija Vašeg koda za oporavak: \n$location" },
+                    onFailure = { "Dogodila se greška prilikom dohvata lokacije koda za oporavak. ❌" }
+                )
+            }
+        }
+
+        val metric = params?.get("metric")?.jsonPrimitive?.contentOrNull ?: return null
         val needsMailSending  = params["sendMail"]?.jsonPrimitive?.booleanOrNull
 
         return when (metric.uppercase()) {
@@ -497,10 +509,9 @@ fun LlmChatDialog(
 
                         try {
 
-                            val finalText =
-                                withContext(Dispatchers.IO) {
-                                    handler(result.params!!)
-                                }
+                            val safeParams = result.params ?: buildJsonObject { }
+                            val finalText = withContext(Dispatchers.IO) { handler(safeParams) }
+
                             if (!isDialogOpen) return@launch
                             val idx2 = messages.indexOfFirst { it.id == loadingId }
                             if (idx2 != -1) {
